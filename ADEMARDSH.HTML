@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Calendário Interativo Anual</title>
+
+<!-- Importa a fonte estilo videogame do Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --cor-principal: #b71c1c;
+    --cor-fundo: #fafafa;
+    --cor-texto: #333;
+    --cor-calendario-fundo: #fff8f6;
+    --cor-feriado: #800000; /* Vermelho Bordô */
+    --cor-fundo-feriado: #ffcdd2; /* Vermelho claro para o fundo */
+  }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    background: var(--cor-fundo );
+    color: var(--cor-texto);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* --- ESTILO DA TELA DE SPLASH (VIDEOGAME) --- */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000; }
+    50% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+  }
+
+  #splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.5s ease-in forwards;
+    pointer-events: auto;
+    overflow: hidden;
+  }
+
+  #splash-screen::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    background-image:
+      linear-gradient(rgba(255,0,0,0.07) 1px, transparent 1px),
+      linear-gradient(to right, rgba(255,0,0,0.07) 1px, transparent 1px);
+    background-size: 1.5rem 1.5rem;
+    opacity: 0.3;
+  }
+
+  .splash-text {
+    position: relative;
+    color: #FF0000;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 2.5vw;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.6;
+    padding: 20px;
+    text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;
+    animation: pulse 2s infinite;
+  }
+
+  #splash-screen.fade-out {
+    animation: fadeOut 0.5s ease-out forwards;
+    pointer-events: none;
+  }
+  /* --- FIM DO ESTILO SPLASH --- */
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--cor-principal);
+    color: white;
+    padding: 10px 15px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-size: 1.2rem;
+    margin: 0;
+    flex: 1;
+    text-align: center;
+  }
+
+  .btn {
+    background: white;
+    color: var(--cor-principal);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 0 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  .btn:hover {
+    background: #f5f5f5;
+  }
+
+  .calendar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+
+  .calendar {
+    display: none;
+    width: 100%;
+    max-width: 1200px;
+    border-collapse: collapse;
+    background: var(--cor-calendario-fundo);
+    font-size: 12px;
+    table-layout: fixed;
+  }
+
+  .calendar.active {
+    display: table;
+  }
+
+  .calendar th {
+    background: var(--cor-principal);
+    color: white;
+    padding: 8px;
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+
+  .calendar td {
+    height: 120px;
+    border: 1px solid var(--cor-principal);
+    vertical-align: top;
+    padding: 4px;
+    position: relative;
+    background: var(--cor-calendario-fundo);
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .calendar td span {
+    color: var(--cor-principal);
+    font-weight: bold;
+    font-size: 1rem;
+  }
+
+  /* --- ESTILOS DE FERIADO NO CALENDÁRIO --- */
+  .calendar td.feriado-fundo {
+    background-color: var(--cor-fundo-feriado);
+  }
+  .calendar td.feriado span {
+    color: var(--cor-feriado);
+  }
+  .calendar td.feriado .preview {
+    color: var(--cor-feriado);
+    font-weight: bold;
+  }
+
+  .preview {
+    font-size: 0.75rem;
+    color: var(--cor-texto);
+    margin-top: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 15px 0;
+  }
+
+  .nav button {
+    font-size: 1.5rem;
+    border: none;
+    background: none;
+    color: var(--cor-principal);
+    cursor: pointer;
+    padding: 6px 12px;
+  }
+
+  .full-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    z-index: 1000;
+    box-sizing: border-box;
+    flex-direction: column;
+  }
+
+  .full-screen.active {
+    display: flex;
+  }
+  
+  .full-screen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f1f1f1;
+  }
+
+  .full-screen-header h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .full-screen textarea {
+    flex: 1;
+    width: 100%;
+    font-size: 1rem;
+    padding: 15px;
+    border: none;
+    border-radius: 0;
+    resize: none;
+    box-sizing: border-box;
+    line-height: 1.6;
+  }
+  
+  /* --- ESTILOS DE FERIADO NA TELA DE EDIÇÃO --- */
+  .full-screen.editor-feriado textarea {
+      background-color: var(--cor-fundo-feriado);
+  }
+  .full-screen textarea.texto-feriado {
+      color: var(--cor-feriado);
+      font-weight: bold;
+  }
+
+  .ok-btn {
+    background: var(--cor-principal);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  @media print {
+    header, .nav, .btn, .full-screen, #splash-screen { display: none !important; }
+    .calendar { display: table !important; width: 100%; }
+    body { background: #fff; }
+    .calendar td { height: auto; }
+    .preview { -webkit-line-clamp: unset; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TELA DE SPLASH -->
+<div id="splash-screen">
+  <div class="splash-text">
+    DASHBOARD VIEWER  
+BY SOUSA, R.G.M
+  </div>
+</div>
+
+<header>
+  <div class="header-buttons">
+    <button class="btn" onclick="generatePDF()">Gerar PDF do Mês</button>
+  </div>
+  <h1 id="tituloMes"></h1>
+  <div class="header-buttons">
+    <button class="btn" onclick="printCurrentMonth()">Imprimir Mês</button>
+  </div>
+</header>
+
+<div class="nav">
+  <button onclick="prevMonth()" aria-label="Mês anterior">←</button>
+  <button onclick="nextMonth()" aria-label="Próximo mês">→</button>
+</div>
+
+<div class="calendar-container" id="calendarContainer"></div>
+
+<!-- Tela inteira para edição -->
+<div class="full-screen" id="fullScreenEditor">
+  <div class="full-screen-header">
+    <h2 id="fullScreenTitle"></h2>
+    <button class="ok-btn" onclick="closeFullScreen()">OK</button>
+  </div>
+  <textarea id="fullScreenText" placeholder="Digite sua anotação aqui..."></textarea>
+</div>
+
+<!-- Bibliotecas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', ( ) => {
+  const coresMes = ["#b71c1c","#880e4f","#4a148c","#311b92","#1a237e","#0d47a1","#006064","#004d40","#1b5e20","#827717","#f57f17","#e65100"];
+  const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const diasSemana = ["D","S","T","Q","Q","S","S"];
+  
+  const feriadosFixos = {
+    '0-1': 'Confraternização Universal', '3-21': 'Tiradentes', '4-1': 'Dia do Trabalho',
+    '6-9': 'Revolução Constitucionalista (SP)', '8-7': 'Independência do Brasil',
+    '9-12': 'Nossa Senhora Aparecida', '10-2': 'Finados', '10-15': 'Proclamação da República',
+    '11-25': 'Natal'
+  };
+
+  let anoAtual = new Date().getFullYear();
+  let mesAtual = new Date().getMonth();
+  let editingKey = null;
+  let todosFeriados = {};
+
+  const calendarContainer = document.getElementById('calendarContainer');
+  const tituloMes = document.getElementById('tituloMes');
+  const fullScreenEditor = document.getElementById('fullScreenEditor');
+  const fullScreenText = document.getElementById('fullScreenText');
+  const fullScreenTitle = document.getElementById('fullScreenTitle');
+
+  function getFeriadosMoveis(ano) {
+      const pascoa = (a => {
+          const f = Math.floor, c = a % 19, g = f(a / 100), h = (g - f(g / 4) - f((8 * g + 13) / 25) + 19 * c + 15) % 30, i = h - f(h / 28) * (1 - f(h / 28) * f(29 / (h + 1)) * f((21 - c) / 11)), j = (a + f(a / 4) + i + 2 - g + f(g / 4)) % 7, l = i - j, m = 3 + f((l + 40) / 44), n = l + 28 - 31 * f(m / 4);
+          return new Date(a, m - 1, n);
+      })(ano);
+      const sextaSanta = new Date(pascoa.getTime() - 2 * 24 * 60 * 60 * 1000);
+      const carnaval = new Date(pascoa.getTime() - 47 * 24 * 60 * 60 * 1000);
+      return {
+          [`${carnaval.getMonth()}-${carnaval.getDate()}`]: 'Carnaval',
+          [`${sextaSanta.getMonth()}-${sextaSanta.getDate()}`]: 'Sexta-feira Santa'
+      };
+  }
+
+  function prepararFeriadosDoAno(ano) {
+      const feriadosMoveis = getFeriadosMoveis(ano);
+      todosFeriados = { ...feriadosFixos, ...feriadosMoveis };
+  }
+
+  function criarCalendarios() {
+    prepararFeriadosDoAno(anoAtual);
+    calendarContainer.innerHTML = '';
+    for (let m = 0; m < 12; m++) {
+      const tabela = document.createElement('table');
+      tabela.className = 'calendar';
+      tabela.id = `calendar-${m}`;
+      tabela.style.setProperty('--cor-principal', coresMes[m]);
+
+      const thead = document.createElement('thead');
+      thead.innerHTML = `<tr>${diasSemana.map(d => `<th>${d}</th>`).join('')}</tr>`;
+      tabela.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      const primeiroDia = new Date(anoAtual, m, 1);
+      const ultimoDia = new Date(anoAtual, m + 1, 0).getDate();
+      
+      let linha = document.createElement('tr');
+      for (let i = 0; i < primeiroDia.getDay(); i++) {
+        linha.appendChild(document.createElement('td'));
+      }
+
+      for (let dia = 1; dia <= ultimoDia; dia++) {
+        if (linha.children.length === 7) {
+          tbody.appendChild(linha);
+          linha = document.createElement('tr');
+        }
+        const celula = document.createElement('td');
+        const span = document.createElement('span');
+        span.textContent = dia;
+        celula.appendChild(span);
+
+        const chave = `${anoAtual}-${m}-${dia}`;
+        const chaveFeriado = `${m}-${dia}`;
+        
+        const preview = document.createElement('div');
+        preview.className = 'preview';
+        
+        let textoSalvo = localStorage.getItem(chave);
+        
+        if (todosFeriados[chaveFeriado]) {
+          celula.classList.add('feriado', 'feriado-fundo');
+          preview.textContent = textoSalvo === null ? todosFeriados[chaveFeriado] : textoSalvo;
+        } else {
+          preview.textContent = textoSalvo || '';
+        }
+        
+        celula.appendChild(preview);
+        celula.addEventListener('click', () => openFullScreen(chave, dia, m, anoAtual));
+        linha.appendChild(celula);
+      }
+
+      while (linha.children.length > 0 && linha.children.length < 7) {
+        linha.appendChild(document.createElement('td'));
+      }
+      tbody.appendChild(linha);
+      tabela.appendChild(tbody);
+      calendarContainer.appendChild(tabela);
+    }
+    atualizarExibicaoMes();
+  }
+
+  function atualizarExibicaoMes() {
+    document.querySelectorAll('.calendar').forEach((cal, index) => {
+      cal.classList.toggle('active', index === mesAtual);
+    });
+    tituloMes.textContent = `${meses[mesAtual]} ${anoAtual}`;
+  }
+
+  window.prevMonth = () => {
+    if (mesAtual === 0) {
+      mesAtual = 11;
+      anoAtual--;
+      criarCalendarios();
+    } else {
+      mesAtual--;
+      atualizarExibicaoMes();
+    }
+  };
+
+  window.nextMonth = () => {
+    if (mesAtual === 11) {
+      mesAtual = 0;
+      anoAtual++;
+      criarCalendarios();
+    } else {
+      mesAtual++;
+      atualizarExibicaoMes();
+    }
+  };
+
+  window.printCurrentMonth = () => window.print();
+
+  window.openFullScreen = (chave, dia, mes, ano) => {
+    editingKey = chave;
+    fullScreenTitle.textContent = `Anotação de ${dia} de ${meses[mes]} de ${ano}`;
+    
+    const textoSalvo = localStorage.getItem(chave);
+    const chaveFeriado = `${mes}-${dia}`;
+    
+    // Adiciona ou remove as classes de feriado para o editor
+    if (todosFeriados[chaveFeriado]) {
+        fullScreenEditor.classList.add('editor-feriado');
+        fullScreenText.classList.add('texto-feriado');
+    } else {
+        fullScreenEditor.classList.remove('editor-feriado');
+        fullScreenText.classList.remove('texto-feriado');
+    }
+
+    if (todosFeriados[chaveFeriado] && textoSalvo === null) {
+        fullScreenText.value = '';
+    } else {
+        fullScreenText.value = textoSalvo || '';
+    }
+    
+    fullScreenEditor.classList.add('active');
+    fullScreenText.focus();
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeFullScreen = () => {
+    if (editingKey) {
+      const novoTexto = fullScreenText.value;
+      localStorage.setItem(editingKey, novoTexto);
+      atualizarPreview(editingKey, novoTexto);
+    }
+    editingKey = null;
+    fullScreenEditor.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+  
+  function atualizarPreview(chave, texto) {
+      const [ano, mes, dia] = chave.split('-');
+      const tabela = document.getElementById(`calendar-${mes}`);
+      if (!tabela) return;
+      const celulas = tabela.querySelectorAll('td');
+      let diaAtual = 1;
+      for(const celula of celulas) {
+          if (celula.querySelector('span')) {
+              if (diaAtual == dia) {
+                  const previewDiv = celula.querySelector('.preview');
+                  if (previewDiv) {
+                      const chaveFeriado = `${mes}-${dia}`;
+                      if (todosFeriados[chaveFeriado] && !texto) {
+                          previewDiv.textContent = todosFeriados[chaveFeriado];
+                      } else {
+                          previewDiv.textContent = texto;
+                      }
+                  }
+                  break;
+              }
+              diaAtual++;
+          }
+      }
+  }
+
+  window.generatePDF = async () => {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+    const mesIndex = mesAtual;
+    const tabela = document.getElementById(`calendar-${mesIndex}`);
+    
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 30;
+
+    pdf.setFontSize(18);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(`${meses[mesIndex]} ${anoAtual}`, pageWidth / 2, margin + 10, { align: 'center' });
+
+    const canvas = await html2canvas(tabela, { scale: 2, useCORS: true });
+    const imgData = canvas.toDataURL('image/png');
+    const contentWidth = pageWidth - margin * 2;
+    const imgProps = pdf.getImageProperties(imgData);
+    const calendarHeight = (imgProps.height * contentWidth) / imgProps.width;
+    let calendarBottomY = margin + 30 + calendarHeight;
+    
+    if (calendarHeight > pageHeight * 0.6) {
+        const newHeight = pageHeight * 0.6;
+        calendarBottomY = margin + 30 + newHeight;
+        pdf.addImage(imgData, 'PNG', margin, margin + 30, contentWidth, newHeight);
+    } else {
+        pdf.addImage(imgData, 'PNG', margin, margin + 30, contentWidth, calendarHeight);
+    }
+
+    pdf.setDrawColor(200);
+    pdf.line(margin, calendarBottomY + 10, pageWidth - margin, calendarBottomY + 10);
+
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Anotações do Mês', margin, calendarBottomY + 30);
+    
+    let cursorY = calendarBottomY + 45;
+    const ultimoDia = new Date(anoAtual, mesIndex + 1, 0).getDate();
+    
+    for (let dia = 1; dia <= ultimoDia; dia++) {
+      if (cursorY > pageHeight - margin) {
+          pdf.addPage();
+          cursorY = margin;
+          pdf.setFontSize(14);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text(`Anotações de ${meses[mesIndex]} ${anoAtual} (continuação)`, pageWidth / 2, cursorY, { align: 'center' });
+          cursorY += 25;
+      }
+
+      const chave = `${anoAtual}-${mesIndex}-${dia}`;
+      const chaveFeriado = `${mesIndex}-${dia}`;
+      const textoAnotacao = localStorage.getItem(chave);
+      const nomeFeriado = todosFeriados[chaveFeriado];
+
+      if (textoAnotacao || nomeFeriado) {
+        let textoFinal = textoAnotacao;
+        if (nomeFeriado && !textoAnotacao) {
+          textoFinal = nomeFeriado;
+        } else if (nomeFeriado && textoAnotacao) {
+          textoFinal = `${nomeFeriado}: ${textoAnotacao}`;
+        }
+
+        if (nomeFeriado) {
+          pdf.setTextColor(128, 0, 0);
+          pdf.setFont('helvetica', 'bold');
+        } else {
+          pdf.setTextColor(0, 0, 0);
+          pdf.setFont('helvetica', 'normal');
+        }
+        
+        pdf.setFontSize(10);
+        const textoFormatado = pdf.splitTextToSize(`- Dia ${dia}: ${textoFinal}`, pageWidth - margin * 2 - 10);
+        pdf.text(textoFormatado, margin + 5, cursorY);
+        cursorY += (textoFormatado.length * 10) + 5;
+      }
+    }
+
+    pdf.setFontSize(10);
+    pdf.setTextColor(150);
+    pdf.text('by SOUSA r.g.m', pageWidth / 2, pageHeight - 15, { align: 'center' });
+
+    pdf.save(`Relatorio_${meses[mesIndex]}_${anoAtual}.pdf`);
+  };
+
+  // --- LÓGICA PARA ESCONDER O SPLASH ---
+  const splash = document.getElementById('splash-screen');
+  setTimeout(() => {
+    splash.classList.add('fade-out');
+  }, 2500); 
+
+  setTimeout(() => {
+    splash.style.display = 'none';
+  }, 3000);
+
+  // Inicialização do calendário
+  criarCalendarios();
+});
+</script>
+</body>
+</html>
