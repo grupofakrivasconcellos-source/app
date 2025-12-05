@@ -1,628 +1,276 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Calendário Interativo Anual</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agenda Interativa — DASHBOARD VIEWER</title>
 
-<!-- Importa a fonte estilo videogame do Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
-  :root {
-    --cor-principal: #b71c1c;
-    --cor-fundo: #fafafa;
-    --cor-texto: #333;
-    --cor-calendario-fundo: #fff8f6;
-    --cor-feriado: #800000; /* Vermelho Bordô */
-    --cor-fundo-feriado: #ffcdd2; /* Vermelho claro para o fundo */
-  }
+:root{
+  --cor-fundo:#fafafa;
+  --cor-texto:#222;
+  --card-bg:#fff;
+  --accent:#b71c1c;
+  --weekend-bg:#fff0f0;
+  --line-color:rgba(0,0,0,0.12);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--cor-fundo);color:var(--cor-texto);-webkit-font-smoothing:antialiased}
 
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    background: var(--cor-fundo );
-    color: var(--cor-texto);
-    -webkit-tap-highlight-color: transparent;
-  }
+/* SPLASH */
+#splash-screen{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:9999}
+#splash-screen::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,0,0,0.07) 1px, transparent 1px),linear-gradient(to right, rgba(255,0,0,0.07) 1px, transparent 1px);background-size:1.5rem 1.5rem;opacity:.35}
+.splash-text{position:relative;color:#ff0000;font-family:'Press Start 2P',cursive;font-size:22px;text-align:center;padding:20px;text-shadow:0 0 6px #ff0000,0 0 12px #ff0000}
+.fade-out{animation:fadeOut .35s ease-out forwards}
+@keyframes fadeOut{to{opacity:0;visibility:hidden}}
 
-  /* --- ESTILO DA TELA DE SPLASH (VIDEOGAME) --- */
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
+/* HEADER */
+header{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;color:#fff;background:var(--accent)}
+.controls{display:flex;gap:8px;align-items:center}
+.btn{background:#fff;color:var(--accent);border:none;padding:8px 12px;border-radius:6px;font-weight:700;cursor:pointer}
+.btn:active{transform:translateY(1px)}
+.range-label{font-weight:700;cursor:pointer;user-select:none}
 
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
+/* CONTAINER */
+.container{max-width:1200px;margin:18px auto;padding:0 12px}
+.week {display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.col {display:flex;flex-direction:column;gap:12px}
+.day-card{background:var(--card-bg);border-radius:8px;padding:10px;border:1px solid rgba(0,0,0,.06);display:flex;flex-direction:column;min-height:120px;transition:transform .12s ease,box-shadow .12s ease;overflow:hidden;cursor:pointer}
+.day-card.today{transform:scale(1.04);box-shadow:0 8px 28px rgba(0,0,0,.12)}
+.day-card.weekend{background:var(--weekend-bg);border-color:rgba(255,0,0,0.12)}
+.day-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.day-head .date{font-weight:800}
+.note{flex:1;overflow:auto;font-size:0.95rem;white-space:pre-wrap;padding-right:6px}
+.empty{color:#777;font-style:italic}
 
-  @keyframes pulse {
-    0%, 100% { text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000; }
-    50% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
-  }
+/* MONTH */
+.month-modal{display:none;position:fixed;inset:24px;background:#fff;box-shadow:0 16px 48px rgba(0,0,0,.28);border-radius:10px;padding:12px;overflow:auto;z-index:5000;pointer-events:auto}
+.month-modal.active{display:block}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.month-cell{background:var(--card-bg);border-radius:6px;padding:8px;min-height:84px;border:1px solid rgba(0,0,0,.04);cursor:pointer;display:flex;flex-direction:column}
+.month-cell.feriado{background:#fff0f0}
+.month-cell.weekend{background:var(--weekend-bg)}
+.month-cell .num{font-weight:700;color:var(--accent)}
 
-  #splash-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    animation: fadeIn 0.5s ease-in forwards;
-    pointer-events: auto;
-    overflow: hidden;
-  }
+/* EDITOR */
+.editor-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;z-index:12000;padding:16px}
+.editor-overlay.active{display:flex}
+.editor{background:#fff;width:100%;max-width:820px;border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+.editor .head{padding:10px;background:#f6f6f6;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.editor .head .tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.editor .headline { font-weight:700 }
+.editor .content{padding:12px 16px;min-height:360px;overflow:auto;background-image:repeating-linear-gradient(to bottom,transparent 0px,transparent 23px,var(--line-color) 23px,var(--line-color) 24px);line-height:24px;font-size:15px;white-space:pre-wrap;outline:none}
+.editor .footer{padding:10px 12px;display:flex;justify-content:flex-end;gap:8px}
+.color-btn{width:28px;height:28px;border-radius:4px;border:1px solid rgba(0,0,0,.08);cursor:pointer}
 
-  #splash-screen::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    background-image:
-      linear-gradient(rgba(255,0,0,0.07) 1px, transparent 1px),
-      linear-gradient(to right, rgba(255,0,0,0.07) 1px, transparent 1px);
-    background-size: 1.5rem 1.5rem;
-    opacity: 0.3;
-  }
-
-  .splash-text {
-    position: relative;
-    color: #FF0000;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 2.5vw;
-    font-weight: bold;
-    text-align: center;
-    line-height: 1.6;
-    padding: 20px;
-    text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;
-    animation: pulse 2s infinite;
-  }
-
-  #splash-screen.fade-out {
-    animation: fadeOut 0.5s ease-out forwards;
-    pointer-events: none;
-  }
-  /* --- FIM DO ESTILO SPLASH --- */
-
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--cor-principal);
-    color: white;
-    padding: 10px 15px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  header h1 {
-    font-size: 1.2rem;
-    margin: 0;
-    flex: 1;
-    text-align: center;
-  }
-
-  .btn {
-    background: white;
-    color: var(--cor-principal);
-    border: none;
-    border-radius: 6px;
-    padding: 8px 12px;
-    margin: 0 4px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 0.9rem;
-    white-space: nowrap;
-  }
-  .btn:hover {
-    background: #f5f5f5;
-  }
-
-  .calendar-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-  }
-
-  .calendar {
-    display: none;
-    width: 100%;
-    max-width: 1200px;
-    border-collapse: collapse;
-    background: var(--cor-calendario-fundo);
-    font-size: 12px;
-    table-layout: fixed;
-  }
-
-  .calendar.active {
-    display: table;
-  }
-
-  .calendar th {
-    background: var(--cor-principal);
-    color: white;
-    padding: 8px;
-    font-weight: 600;
-    font-size: 0.8rem;
-  }
-
-  .calendar td {
-    height: 120px;
-    border: 1px solid var(--cor-principal);
-    vertical-align: top;
-    padding: 4px;
-    position: relative;
-    background: var(--cor-calendario-fundo);
-    cursor: pointer;
-    overflow: hidden;
-  }
-
-  .calendar td span {
-    color: var(--cor-principal);
-    font-weight: bold;
-    font-size: 1rem;
-  }
-
-  /* --- ESTILOS DE FERIADO NO CALENDÁRIO --- */
-  .calendar td.feriado-fundo {
-    background-color: var(--cor-fundo-feriado);
-  }
-  .calendar td.feriado span {
-    color: var(--cor-feriado);
-  }
-  .calendar td.feriado .preview {
-    color: var(--cor-feriado);
-    font-weight: bold;
-  }
-
-  .preview {
-    font-size: 0.75rem;
-    color: var(--cor-texto);
-    margin-top: 4px;
-    display: -webkit-box;
-    -webkit-line-clamp: 5;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-  }
-
-  .nav {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 15px 0;
-  }
-
-  .nav button {
-    font-size: 1.5rem;
-    border: none;
-    background: none;
-    color: var(--cor-principal);
-    cursor: pointer;
-    padding: 6px 12px;
-  }
-
-  .full-screen {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #fff;
-    z-index: 1000;
-    box-sizing: border-box;
-    flex-direction: column;
-  }
-
-  .full-screen.active {
-    display: flex;
-  }
-  
-  .full-screen-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
-    background-color: #f1f1f1;
-  }
-
-  .full-screen-header h2 {
-    margin: 0;
-    font-size: 1.1rem;
-  }
-
-  .full-screen textarea {
-    flex: 1;
-    width: 100%;
-    font-size: 1rem;
-    padding: 15px;
-    border: none;
-    border-radius: 0;
-    resize: none;
-    box-sizing: border-box;
-    line-height: 1.6;
-  }
-  
-  /* --- ESTILOS DE FERIADO NA TELA DE EDIÇÃO --- */
-  .full-screen.editor-feriado textarea {
-      background-color: var(--cor-fundo-feriado);
-  }
-  .full-screen textarea.texto-feriado {
-      color: var(--cor-feriado);
-      font-weight: bold;
-  }
-
-  .ok-btn {
-    background: var(--cor-principal);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-
-  @media print {
-    header, .nav, .btn, .full-screen, #splash-screen { display: none !important; }
-    .calendar { display: table !important; width: 100%; }
-    body { background: #fff; }
-    .calendar td { height: auto; }
-    .preview { -webkit-line-clamp: unset; max-height: none; }
-  }
+footer{text-align:center;padding:12px;color:#666}
+@media (max-width:900px){ .week{grid-template-columns:1fr} }
+@media print{header,.btn,#splash-screen,.editor-overlay{display:none!important} .month-modal{display:none!important} .week{display:block}}
 </style>
 </head>
 <body>
 
-<!-- TELA DE SPLASH -->
-<div id="splash-screen">
-  <div class="splash-text">
-    DASHBOARD VIEWER  
-BY SOUSA, R.G.M
-  </div>
-</div>
 
-<header>
-  <div class="header-buttons">
-    <button class="btn" onclick="generatePDF()">Gerar PDF do Mês</button>
+<header id="topbar">
+  <div class="controls">
+    <button class="btn" id="prevBtn">◀</button>
+    <button class="btn" id="nextBtn">▶</button>
+    <button class="btn" id="todayBtn">Hoje</button>
   </div>
-  <h1 id="tituloMes"></h1>
-  <div class="header-buttons">
-    <button class="btn" onclick="printCurrentMonth()">Imprimir Mês</button>
+  <div class="range-label" id="rangeLabel">Semana</div>
+  <div class="controls">
+    <button class="btn" id="pdfBtn">PDF Semana</button>
+    <button class="btn" id="printBtn">Imprimir Semana</button>
   </div>
 </header>
 
-<div class="nav">
-  <button onclick="prevMonth()" aria-label="Mês anterior">←</button>
-  <button onclick="nextMonth()" aria-label="Próximo mês">→</button>
-</div>
+<main class="container">
+  <section class="week" id="weekContainer"></section>
+</main>
 
-<div class="calendar-container" id="calendarContainer"></div>
-
-<!-- Tela inteira para edição -->
-<div class="full-screen" id="fullScreenEditor">
-  <div class="full-screen-header">
-    <h2 id="fullScreenTitle"></h2>
-    <button class="ok-btn" onclick="closeFullScreen()">OK</button>
+<div class="month-modal" id="monthModal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <button class="btn" id="closeMonth">Fechar</button>
+    <div id="monthLabel" style="font-weight:800"></div>
+    <div style="display:flex; gap:6px">
+      <button class="btn" id="exportMonth">Exportar Mês</button>
+      <button class="btn" id="monthPdfBtn">PDF Mês</button>
+      <button class="btn" id="monthPrintBtn">Imprimir Mês</button>
+    </div>
   </div>
-  <textarea id="fullScreenText" placeholder="Digite sua anotação aqui..."></textarea>
+  <div class="month-grid" id="monthGrid"></div>
 </div>
 
-<!-- Bibliotecas -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<div class="editor-overlay" id="editorOverlay">
+  <div class="editor" onclick="event.stopPropagation()">
+    <div class="head">
+      <div>
+        <div class="headline" id="editorTitle">Anotação</div>
+        <div style="font-size:12px;color:#666">Selecione texto para colorir</div>
+      </div>
+      <div class="tools" id="colorTools"></div>
+    </div>
+    <div id="editorContent" class="content" contenteditable="true"></div>
+    <div class="footer">
+      <label><input type="checkbox" id="clearIfEmpty"> Remover se vazio</label>
+      <button class="btn" id="clearFormatBtn">Limpar</button>
+      <button class="btn" id="saveBtn">Salvar</button>
+      <button class="btn" id="cancelBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<footer>by SOUSA r.g.m</footer>
 
 <script>
-document.addEventListener('DOMContentLoaded', ( ) => {
-  const coresMes = ["#b71c1c","#880e4f","#4a148c","#311b92","#1a237e","#0d47a1","#006064","#004d40","#1b5e20","#827717","#f57f17","#e65100"];
-  const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-  const diasSemana = ["D","S","T","Q","Q","S","S"];
-  
-  const feriadosFixos = {
-    '0-1': 'Confraternização Universal', '3-21': 'Tiradentes', '4-1': 'Dia do Trabalho',
-    '6-9': 'Revolução Constitucionalista (SP)', '8-7': 'Independência do Brasil',
-    '9-12': 'Nossa Senhora Aparecida', '10-2': 'Finados', '10-15': 'Proclamação da República',
-    '11-25': 'Natal'
-  };
+(function(){
+const monthColors=["#b71c1c","#880e4f","#4a148c","#311b92","#1a237e","#0d47a1","#006064","#004d40","#1b5e20","#827717","#f57f17","#e65100","#d84315","#6a1b9a","#283593","#1a237e","#00acc1","#43a047","#ff8f00","#f06292"];
+const meses=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const weekContainer=document.getElementById('weekContainer');
+const rangeLabel=document.getElementById('rangeLabel');
+const topbar=document.getElementById('topbar');
+const monthModal=document.getElementById('monthModal');
+const monthGrid=document.getElementById('monthGrid');
+const monthLabel=document.getElementById('monthLabel');
+const editorOverlay=document.getElementById('editorOverlay');
+const editorContent=document.getElementById('editorContent');
+const editorTitle=document.getElementById('editorTitle');
+const colorTools=document.getElementById('colorTools');
 
-  let anoAtual = new Date().getFullYear();
-  let mesAtual = new Date().getMonth();
-  let editingKey = null;
-  let todosFeriados = {};
+let pointer=startOfWeek(new Date());
+let editingKey=null;
 
-  const calendarContainer = document.getElementById('calendarContainer');
-  const tituloMes = document.getElementById('tituloMes');
-  const fullScreenEditor = document.getElementById('fullScreenEditor');
-  const fullScreenText = document.getElementById('fullScreenText');
-  const fullScreenTitle = document.getElementById('fullScreenTitle');
+const feriadosFixos={'0-1':'Confraternização Universal','3-21':'Tiradentes','4-1':'Dia do Trabalho','8-7':'Independência do Brasil','9-12':'Nossa Senhora Aparecida','10-2':'Finados','10-15':'Proclamação da República','11-25':'Natal'};
+function getFeriadosMoveis(ano){const f=Math.floor,c=ano%19,g=f(ano/100),h=(g-f(g/4)-f((8*g+13)/25)+19*c+15)%30,i=h-f(h/28)*(1-f(h/28)*f(29/(h+1))*f((21-c)/11)),j=(ano+f(ano/4)+i+2-g+f(g/4))%7,l=i-j,m=3+f((l+40)/44),n=l+28-31*f(m/4);const pascoa=new Date(ano,m-1,n);const sexta=new Date(pascoa.getTime()-2*24*60*60*1000);const carnaval=new Date(pascoa.getTime()-47*24*60*60*1000);const map={};map[`${carnaval.getMonth()}-${carnaval.getDate()}`]='Carnaval';map[`${sexta.getMonth()}-${sexta.getDate()}`]='Sexta-feira Santa';return map;}
+function prepareFeriados(ano){return {...feriadosFixos,...getFeriadosMoveis(ano)}}
 
-  function getFeriadosMoveis(ano) {
-      const pascoa = (a => {
-          const f = Math.floor, c = a % 19, g = f(a / 100), h = (g - f(g / 4) - f((8 * g + 13) / 25) + 19 * c + 15) % 30, i = h - f(h / 28) * (1 - f(h / 28) * f(29 / (h + 1)) * f((21 - c) / 11)), j = (a + f(a / 4) + i + 2 - g + f(g / 4)) % 7, l = i - j, m = 3 + f((l + 40) / 44), n = l + 28 - 31 * f(m / 4);
-          return new Date(a, m - 1, n);
-      })(ano);
-      const sextaSanta = new Date(pascoa.getTime() - 2 * 24 * 60 * 60 * 1000);
-      const carnaval = new Date(pascoa.getTime() - 47 * 24 * 60 * 60 * 1000);
-      return {
-          [`${carnaval.getMonth()}-${carnaval.getDate()}`]: 'Carnaval',
-          [`${sextaSanta.getMonth()}-${sextaSanta.getDate()}`]: 'Sexta-feira Santa'
-      };
-  }
+function startOfWeek(d){const dt=new Date(d.getFullYear(),d.getMonth(),d.getDate());const day=dt.getDay();const diff=day===0?-6:1-day;dt.setDate(dt.getDate()+diff);return dt;}
+function toKey(d){return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;}
+function formatShort(d){return `${d.getDate()} ${meses[d.getMonth()]}`;}
+function formatDay(d){return `${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()]} ${d.getDate()}`;}
 
-  function prepararFeriadosDoAno(ano) {
-      const feriadosMoveis = getFeriadosMoveis(ano);
-      todosFeriados = { ...feriadosFixos, ...feriadosMoveis };
-  }
+function hideSplash(){const splash=document.getElementById('splash-screen');if(!splash){renderWeek();return;}splash.classList.add('fade-out');setTimeout(()=>{if(splash.parentNode)splash.parentNode.removeChild(splash);renderWeek();},400);}
+document.addEventListener('DOMContentLoaded',()=>setTimeout(hideSplash,3000));
 
-  function criarCalendarios() {
-    prepararFeriadosDoAno(anoAtual);
-    calendarContainer.innerHTML = '';
-    for (let m = 0; m < 12; m++) {
-      const tabela = document.createElement('table');
-      tabela.className = 'calendar';
-      tabela.id = `calendar-${m}`;
-      tabela.style.setProperty('--cor-principal', coresMes[m]);
-
-      const thead = document.createElement('thead');
-      thead.innerHTML = `<tr>${diasSemana.map(d => `<th>${d}</th>`).join('')}</tr>`;
-      tabela.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-      const primeiroDia = new Date(anoAtual, m, 1);
-      const ultimoDia = new Date(anoAtual, m + 1, 0).getDate();
-      
-      let linha = document.createElement('tr');
-      for (let i = 0; i < primeiroDia.getDay(); i++) {
-        linha.appendChild(document.createElement('td'));
-      }
-
-      for (let dia = 1; dia <= ultimoDia; dia++) {
-        if (linha.children.length === 7) {
-          tbody.appendChild(linha);
-          linha = document.createElement('tr');
-        }
-        const celula = document.createElement('td');
-        const span = document.createElement('span');
-        span.textContent = dia;
-        celula.appendChild(span);
-
-        const chave = `${anoAtual}-${m}-${dia}`;
-        const chaveFeriado = `${m}-${dia}`;
-        
-        const preview = document.createElement('div');
-        preview.className = 'preview';
-        
-        let textoSalvo = localStorage.getItem(chave);
-        
-        if (todosFeriados[chaveFeriado]) {
-          celula.classList.add('feriado', 'feriado-fundo');
-          preview.textContent = textoSalvo === null ? todosFeriados[chaveFeriado] : textoSalvo;
-        } else {
-          preview.textContent = textoSalvo || '';
-        }
-        
-        celula.appendChild(preview);
-        celula.addEventListener('click', () => openFullScreen(chave, dia, m, anoAtual));
-        linha.appendChild(celula);
-      }
-
-      while (linha.children.length > 0 && linha.children.length < 7) {
-        linha.appendChild(document.createElement('td'));
-      }
-      tbody.appendChild(linha);
-      tabela.appendChild(tbody);
-      calendarContainer.appendChild(tabela);
-    }
-    atualizarExibicaoMes();
-  }
-
-  function atualizarExibicaoMes() {
-    document.querySelectorAll('.calendar').forEach((cal, index) => {
-      cal.classList.toggle('active', index === mesAtual);
-    });
-    tituloMes.textContent = `${meses[mesAtual]} ${anoAtual}`;
-  }
-
-  window.prevMonth = () => {
-    if (mesAtual === 0) {
-      mesAtual = 11;
-      anoAtual--;
-      criarCalendarios();
-    } else {
-      mesAtual--;
-      atualizarExibicaoMes();
-    }
-  };
-
-  window.nextMonth = () => {
-    if (mesAtual === 11) {
-      mesAtual = 0;
-      anoAtual++;
-      criarCalendarios();
-    } else {
-      mesAtual++;
-      atualizarExibicaoMes();
-    }
-  };
-
-  window.printCurrentMonth = () => window.print();
-
-  window.openFullScreen = (chave, dia, mes, ano) => {
-    editingKey = chave;
-    fullScreenTitle.textContent = `Anotação de ${dia} de ${meses[mes]} de ${ano}`;
-    
-    const textoSalvo = localStorage.getItem(chave);
-    const chaveFeriado = `${mes}-${dia}`;
-    
-    // Adiciona ou remove as classes de feriado para o editor
-    if (todosFeriados[chaveFeriado]) {
-        fullScreenEditor.classList.add('editor-feriado');
-        fullScreenText.classList.add('texto-feriado');
-    } else {
-        fullScreenEditor.classList.remove('editor-feriado');
-        fullScreenText.classList.remove('texto-feriado');
-    }
-
-    if (todosFeriados[chaveFeriado] && textoSalvo === null) {
-        fullScreenText.value = '';
-    } else {
-        fullScreenText.value = textoSalvo || '';
-    }
-    
-    fullScreenEditor.classList.add('active');
-    fullScreenText.focus();
-    document.body.style.overflow = 'hidden';
-  };
-
-  window.closeFullScreen = () => {
-    if (editingKey) {
-      const novoTexto = fullScreenText.value;
-      localStorage.setItem(editingKey, novoTexto);
-      atualizarPreview(editingKey, novoTexto);
-    }
-    editingKey = null;
-    fullScreenEditor.classList.remove('active');
-    document.body.style.overflow = '';
-  };
-  
-  function atualizarPreview(chave, texto) {
-      const [ano, mes, dia] = chave.split('-');
-      const tabela = document.getElementById(`calendar-${mes}`);
-      if (!tabela) return;
-      const celulas = tabela.querySelectorAll('td');
-      let diaAtual = 1;
-      for(const celula of celulas) {
-          if (celula.querySelector('span')) {
-              if (diaAtual == dia) {
-                  const previewDiv = celula.querySelector('.preview');
-                  if (previewDiv) {
-                      const chaveFeriado = `${mes}-${dia}`;
-                      if (todosFeriados[chaveFeriado] && !texto) {
-                          previewDiv.textContent = todosFeriados[chaveFeriado];
-                      } else {
-                          previewDiv.textContent = texto;
-                      }
-                  }
-                  break;
-              }
-              diaAtual++;
-          }
-      }
-  }
-
-  window.generatePDF = async () => {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
-
-    const mesIndex = mesAtual;
-    const tabela = document.getElementById(`calendar-${mesIndex}`);
-    
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const margin = 30;
-
-    pdf.setFontSize(18);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(`${meses[mesIndex]} ${anoAtual}`, pageWidth / 2, margin + 10, { align: 'center' });
-
-    const canvas = await html2canvas(tabela, { scale: 2, useCORS: true });
-    const imgData = canvas.toDataURL('image/png');
-    const contentWidth = pageWidth - margin * 2;
-    const imgProps = pdf.getImageProperties(imgData);
-    const calendarHeight = (imgProps.height * contentWidth) / imgProps.width;
-    let calendarBottomY = margin + 30 + calendarHeight;
-    
-    if (calendarHeight > pageHeight * 0.6) {
-        const newHeight = pageHeight * 0.6;
-        calendarBottomY = margin + 30 + newHeight;
-        pdf.addImage(imgData, 'PNG', margin, margin + 30, contentWidth, newHeight);
-    } else {
-        pdf.addImage(imgData, 'PNG', margin, margin + 30, contentWidth, calendarHeight);
-    }
-
-    pdf.setDrawColor(200);
-    pdf.line(margin, calendarBottomY + 10, pageWidth - margin, calendarBottomY + 10);
-
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Anotações do Mês', margin, calendarBottomY + 30);
-    
-    let cursorY = calendarBottomY + 45;
-    const ultimoDia = new Date(anoAtual, mesIndex + 1, 0).getDate();
-    
-    for (let dia = 1; dia <= ultimoDia; dia++) {
-      if (cursorY > pageHeight - margin) {
-          pdf.addPage();
-          cursorY = margin;
-          pdf.setFontSize(14);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(`Anotações de ${meses[mesIndex]} ${anoAtual} (continuação)`, pageWidth / 2, cursorY, { align: 'center' });
-          cursorY += 25;
-      }
-
-      const chave = `${anoAtual}-${mesIndex}-${dia}`;
-      const chaveFeriado = `${mesIndex}-${dia}`;
-      const textoAnotacao = localStorage.getItem(chave);
-      const nomeFeriado = todosFeriados[chaveFeriado];
-
-      if (textoAnotacao || nomeFeriado) {
-        let textoFinal = textoAnotacao;
-        if (nomeFeriado && !textoAnotacao) {
-          textoFinal = nomeFeriado;
-        } else if (nomeFeriado && textoAnotacao) {
-          textoFinal = `${nomeFeriado}: ${textoAnotacao}`;
-        }
-
-        if (nomeFeriado) {
-          pdf.setTextColor(128, 0, 0);
-          pdf.setFont('helvetica', 'bold');
-        } else {
-          pdf.setTextColor(0, 0, 0);
-          pdf.setFont('helvetica', 'normal');
-        }
-        
-        pdf.setFontSize(10);
-        const textoFormatado = pdf.splitTextToSize(`- Dia ${dia}: ${textoFinal}`, pageWidth - margin * 2 - 10);
-        pdf.text(textoFormatado, margin + 5, cursorY);
-        cursorY += (textoFormatado.length * 10) + 5;
-      }
-    }
-
-    pdf.setFontSize(10);
-    pdf.setTextColor(150);
-    pdf.text('by SOUSA r.g.m', pageWidth / 2, pageHeight - 15, { align: 'center' });
-
-    pdf.save(`Relatorio_${meses[mesIndex]}_${anoAtual}.pdf`);
-  };
-
-  // --- LÓGICA PARA ESCONDER O SPLASH ---
-  const splash = document.getElementById('splash-screen');
-  setTimeout(() => {
-    splash.classList.add('fade-out');
-  }, 2500); 
-
-  setTimeout(() => {
-    splash.style.display = 'none';
-  }, 3000);
-
-  // Inicialização do calendário
-  criarCalendarios();
+// CRIAR 20 CORES
+const editorColors=["#fff176","#c8e6c9","#bbdefb","#f8bbd0","#d1c4e9","#b2dfdb","#ffe0b2","#ffccbc","#c5cae9","#f0f4c3","#ffcdd2","#dcedc8","#b3e5fc","#f3e5f5","#ffecb3","#d7ccc8","#c8e6c9","#b2dfdb","#ffe0b2","#f06292"];
+editorColors.forEach(c=>{
+  const btn=document.createElement('button');
+  btn.className='color-btn';
+  btn.style.background=c;
+  btn.dataset.color=c;
+  btn.title=c;
+  btn.onclick=()=>document.execCommand('backColor',false,c);
+  colorTools.appendChild(btn);
 });
+
+document.getElementById('clearFormatBtn').onclick=()=>{document.execCommand('removeFormat',false,null);document.execCommand('backColor',false,'transparent');};
+document.getElementById('cancelBtn').onclick=()=>editorOverlay.classList.remove('active');
+document.getElementById('saveBtn').onclick=()=>{
+  const val=editorContent.innerHTML.trim();
+  if(document.getElementById('clearIfEmpty').checked && !val) localStorage.removeItem(editingKey);
+  else localStorage.setItem(editingKey,val);
+  editorOverlay.classList.remove('active'); renderWeek();
+};
+
+// WEEK RENDER
+function renderWeek(){
+  weekContainer.innerHTML='';
+  const feriados=prepareFeriados(pointer.getFullYear());
+  const monthIdx=pointer.getMonth();
+  document.documentElement.style.setProperty('--accent',monthColors[monthIdx]);
+  topbar.style.background=monthColors[monthIdx];
+  const colA=document.createElement('div'); colA.className='col';
+  const colB=document.createElement('div'); colB.className='col';
+  for(let i=0;i<7;i++){
+    const d=new Date(pointer); d.setDate(d.getDate()+i);
+    const card=document.createElement('article'); card.className='day-card';
+    if(new Date().toDateString()===d.toDateString()) card.classList.add('today');
+    if(d.getDay()===0||d.getDay()===6) card.classList.add('weekend');
+    card.addEventListener('click',()=>openEditor(d));
+    const head=document.createElement('div'); head.className='day-head';
+    const title=document.createElement('div'); title.className='date'; title.textContent=formatDay(d);
+    const btn=document.createElement('button'); btn.className='btn'; btn.textContent='Editar'; btn.onclick=()=>openEditor(d);
+    head.appendChild(title); head.appendChild(btn);
+    const note=document.createElement('div'); note.className='note';
+    const key=toKey(d); const saved=localStorage.getItem(key);
+    const ferKey=`${d.getMonth()}-${d.getDate()}`; const feriado=feriados[ferKey];
+    if(saved) note.innerHTML=saved;
+    else if(feriado){note.textContent=feriado; note.style.fontWeight='700'; note.style.color='var(--accent)';}
+    else note.innerHTML='<div class="empty">Sem anotações</div>';
+    card.appendChild(head); card.appendChild(note);
+    (i<4? colA: colB).appendChild(card);
+  }
+  weekContainer.appendChild(colA); weekContainer.appendChild(colB);
+  const end=new Date(pointer); end.setDate(end.getDate()+6);
+  rangeLabel.textContent=`${formatShort(pointer)} — ${formatShort(end)}`;
+}
+
+// NAVIGATION
+document.getElementById('prevBtn').onclick=()=>{pointer.setDate(pointer.getDate()-7);renderWeek();}
+document.getElementById('nextBtn').onclick=()=>{pointer.setDate(pointer.getDate()+7);renderWeek();}
+document.getElementById('todayBtn').onclick=()=>{pointer=startOfWeek(new Date());renderWeek();}
+
+// EDITOR
+function openEditor(d){editingKey=toKey(d);editorContent.innerHTML=localStorage.getItem(editingKey)||'';editorTitle.textContent=`Anotação ${formatDay(d)}`;editorOverlay.classList.add('active');editorContent.focus();}
+
+// MONTH VIEW
+rangeLabel.onclick=()=>openMonthModal(pointer.getFullYear(),pointer.getMonth());
+function openMonthModal(ano,mes){
+  monthLabel.textContent=`${meses[mes]} ${ano}`; monthGrid.innerHTML='';
+  const feriados=prepareFeriados(ano); const daysInMonth=new Date(ano,mes+1,0).getDate();
+  for(let d=1;d<=daysInMonth;d++){
+    const dt=new Date(ano,mes,d); const cell=document.createElement('div'); cell.className='month-cell';
+    if(dt.getDay()===0||dt.getDay()===6) cell.classList.add('weekend');
+    const ferKey=`${dt.getMonth()}-${dt.getDate()}`; if(feriados[ferKey]) cell.classList.add('feriado');
+    cell.innerHTML=`<div class="num">${d}</div><div>${localStorage.getItem(toKey(dt))||''}</div>`;
+    cell.onclick=()=>openEditor(dt);
+    monthGrid.appendChild(cell);
+  }
+  monthModal.classList.add('active');
+}
+document.getElementById('closeMonth').onclick=()=>monthModal.classList.remove('active');
+
+// PDF / PRINT
+document.getElementById('pdfBtn').onclick=()=>exportPDF(weekContainer,'Agenda_Semana');
+document.getElementById('printBtn').onclick=()=>window.print();
+document.getElementById('monthPdfBtn').onclick=()=>exportPDF(monthGrid,'Agenda_Mes');
+document.getElementById('monthPrintBtn').onclick=()=>{
+  const w=window.open('','_blank'); w.document.write(monthGrid.outerHTML); w.document.close(); w.focus(); w.print();
+};
+
+// EXPORT LIST MONTH
+document.getElementById('exportMonth').onclick=()=>{
+  let html=`<h2>Notas do Mês ${monthLabel.textContent}</h2>`;
+  Array.from(monthGrid.children).forEach(cell=>{
+    html+=`<p><b>${cell.querySelector('.num').textContent}:</b> ${cell.querySelector('div:nth-child(2)').innerHTML}</p>`;
+  });
+  const w=window.open('','_blank'); w.document.write(html); w.document.close(); w.focus(); w.print();
+}
+
+// PDF GENERATOR
+function exportPDF(el,title){
+  html2canvas(el,{scale:2}).then(canvas=>{
+    const { jsPDF }=window.jspdf; const pdf=new jsPDF('p','pt','a4');
+    const imgData=canvas.toDataURL('image/png');
+    const imgProps=pdf.getImageProperties(imgData);
+    const pdfWidth=pdf.internal.pageSize.getWidth();
+    const pdfHeight=(imgProps.height*pdfWidth)/imgProps.width;
+    pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+    pdf.save(`${title}.pdf`);
+  });
+}
+
+renderWeek();
+})();
 </script>
+
 </body>
 </html>
