@@ -3,50 +3,57 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Planner Semanal + Calendário Mensal</title>
+<title>Planner Final — Semanal + Mensal (Impressão com cores)</title>
+
+<!-- html2pdf (para exportação de PDF igual à impressão) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <style>
 :root{
   --accent:#b71c1c;
   --bg:#fafafa;
   --text:#000;
-  --page-margin:1.5cm;
+  --page-margin-cm:0.5;
   --card-gap:8px;
+  --page-turn-distance:40px;
+  --page-turn-duration:260ms; /* ajustar velocidade da animação */
+  --print-font-pt:10;
 }
 
-/* base */
+/* ---------- BASE ---------- */
 *{box-sizing:border-box}
+html,body{height:100%}
 body{margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10pt;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
 
-/* header */
-.header{display:flex;justify-content:space-between;align-items:center;background:var(--accent);color:#fff;padding:8px 12px}
-.header div{display:flex;align-items:center;gap:8px}
+/* ---------- HEADER ---------- */
+.header{display:flex;justify-content:space-between;align-items:center;background:var(--accent);color:#fff;padding:8px 12px;gap:12px}
+.header .left{display:flex;align-items:center;gap:8px}
+.header .center{font-weight:bold}
+.header .right{display:flex;align-items:center;gap:8px}
 .btn{background:#fff;color:var(--accent);border:none;padding:6px 10px;border-radius:4px;font-weight:bold;cursor:pointer}
-#monthLabel{font-weight:bold;cursor:pointer;user-select:none}
 
-/* container & layout 4/3 */
+/* ---------- CONTAINER & WEEK LAYOUT ---------- */
 .container{max-width:1200px;margin:10px auto;padding:10px}
-.week{display:flex;gap:var(--card-gap);align-items:flex-start}
+.week-wrapper{overflow:hidden}
+.week{display:flex;gap:var(--card-gap);align-items:flex-start;transition:transform var(--page-turn-duration) ease}
 .left-col{flex:4;display:flex;flex-direction:column;gap:var(--card-gap)}
 .right-col{flex:3;display:flex;flex-direction:column;gap:var(--card-gap)}
 .spiral{display:flex;flex-direction:column;justify-content:center;align-items:center;width:40px;gap:6px}
 .spiral .dot{width:8px;height:8px;border-radius:50%;background:#333;box-shadow:0 1px 1px rgba(0,0,0,0.2)}
 
-/* day card */
-.day-card{background:#fff;border:1px solid rgba(0,0,0,0.14);border-radius:8px;padding:8px;position:relative;display:flex;flex-direction:column;cursor:pointer;overflow:hidden}
-.day-card { aspect-ratio: 1 / 1; } /* keep square proportions */
+/* ---------- DAY CARD ---------- */
+.day-card{background:#fff;border:1px solid rgba(0,0,0,0.14);border-radius:8px;padding:8px;position:relative;display:flex;flex-direction:column;cursor:pointer;overflow:hidden;min-height:220px}
+.day-card { aspect-ratio: 1 / 1; }
 .day-card.weekend,.day-card.holiday{background:var(--accent);color:#fff}
 
-/* lines behind */
-.lines{
-  position:absolute;
-  left:0; right:0; top:0; bottom:0;
-  z-index:0;
+/* background lines visible on screen and print */
+.lines{position:absolute;left:0;right:0;top:0;bottom:0;z-index:0;
   background-image: repeating-linear-gradient(
     to bottom,
-    transparent 0px,
-    transparent 18px,
-    rgba(0,0,0,0.05) 18px,
-    rgba(0,0,0,0.05) 19px
+    rgba(0,0,0,0.06) 0px,
+    rgba(0,0,0,0.06) 1px,
+    transparent 1px,
+    transparent 20px
   );
   pointer-events:none;
 }
@@ -56,7 +63,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10pt;background:v
 .day-header{display:flex;justify-content:space-between;margin-bottom:6px;font-weight:bold}
 .note{flex:1;overflow:auto;padding-left:6px;font-size:10pt;z-index:2;background:transparent}
 
-/* editor */
+/* ---------- EDITOR ---------- */
 .editor-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;z-index:120;padding:20px}
 .editor-overlay.active{display:flex}
 .editor{background:#fff;padding:12px;border-radius:6px;width:100%;max-width:980px;display:flex;flex-direction:column;gap:8px;box-shadow:0 12px 40px rgba(0,0,0,0.35)}
@@ -95,11 +102,9 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10pt;background:v
   min-height:24px;line-height:22px;margin:0 0 4px 0;
   background:transparent;
 }
-.editor-lines .line::before{content:'';position:absolute;left:18px;top:8px;width:8px;height:8px;border-radius:50%;border:2px solid rgba(0,0,0,0.08);background:transparent}
-.line[contenteditable="true"]:focus{outline:none}
 .line-placeholder{color:#999}
 
-/* month modal */
+/* ---------- MONTH MODAL ---------- */
 .month-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;z-index:200;overflow:auto;padding:20px}
 .month-modal.active{display:flex}
 .month-box{background:#fff;padding:16px;border-radius:6px;max-width:95vw;max-height:95vh;overflow:auto}
@@ -109,15 +114,17 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10pt;background:v
 .cell-note{margin-top:6px;font-size:9pt;max-height:52px;overflow:hidden}
 .holiday-cell,.weekend-cell{background:var(--accent);color:#fff}
 
-/* print */
-@media print{
-  body{background:#fff}
-  .header,.btn{display:none}
-  .print-wrapper{padding:var(--page-margin);box-sizing:border-box}
-  @page{size:A4 portrait;margin:1.5cm}
+/* ---------- PRINT STYLE ADVICE (injected when printing) ----------
+   We also set -webkit-print-color-adjust to ensure background colors are printed.
+   The printing windows created by JS include this CSS.
+*/
+
+/* ---------- PAGE TURN ANIMATION (visual only) ---------- */
+.week.animating{
+  transition: transform var(--page-turn-duration) ease;
 }
 
-/* responsive */
+/* ---------- RESPONSIVE ---------- */
 @media (max-width:900px){
   .week{flex-direction:column}
   .left-col,.right-col{flex:unset}
@@ -126,30 +133,34 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10pt;background:v
 </style>
 </head>
 <body>
-  <div class="header">
-    <div>
-      <button class="btn" id="prev">◀ Semana</button>
-      <button class="btn" id="next">Semana ▶</button>
+  <div class="header" role="banner">
+    <div class="left">
+      <button class="btn" id="prevBtn">◀ Semana</button>
+      <button class="btn" id="nextBtn">Semana ▶</button>
     </div>
-    <div id="monthLabel">Janeiro 2025</div>
-    <div>
-      <button class="btn" id="preview">Preview</button>
-      <button class="btn" id="pdfA4">PDF A4</button>
-      <button class="btn" id="pdfA0">PDF A0</button>
-      <button class="btn" id="printA0Btn">Imprimir Mês A0</button>
+
+    <div class="center" id="monthLabel">Janeiro 2025</div>
+
+    <div class="right">
+      <button class="btn" id="openMonthBtn">Abrir Mês</button>
+      <button class="btn" id="printWeekBtn">Imprimir Semana</button>
+      <button class="btn" id="printMonthBtn">Imprimir Mês</button>
+      <button class="btn" id="exportPdfBtn">Exportar PDF</button>
     </div>
   </div>
 
   <main class="container">
-    <div class="week" id="weekRoot">
-      <div class="left-col" id="leftCol"></div>
-      <div class="spiral" id="spiral"></div>
-      <div class="right-col" id="rightCol"></div>
+    <div class="week-wrapper">
+      <div class="week" id="weekRoot" aria-live="polite">
+        <div class="left-col" id="leftCol"></div>
+        <div class="spiral" id="spiral"></div>
+        <div class="right-col" id="rightCol"></div>
+      </div>
     </div>
   </main>
 
   <!-- Editor -->
-  <div class="editor-overlay" id="editorOverlay">
+  <div class="editor-overlay" id="editorOverlay" aria-hidden="true">
     <div class="editor" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
       <div class="editorTitleRow">
         <div class="meta" id="editorTitle">Editar anotação</div>
@@ -172,71 +183,80 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10pt;background:v
     </div>
   </div>
 
-  <!-- Preview -->
-  <div class="preview-modal" id="previewModal"><div class="preview-box" id="previewBox"></div></div>
-
-  <!-- Month Calendar -->
-  <div class="month-modal" id="monthModal"><div class="month-box" id="monthBox"></div></div>
-
-  <!-- libs -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Month modal -->
+  <div class="month-modal" id="monthModal" aria-hidden="true"><div class="month-box" id="monthBox"></div></div>
 
 <script>
-(function(){
-/* ===== constants & refs ===== */
+/* =================== Planner JS =================== */
+/* Full feature set:
+   - week rendering with 4 left / spiral / 3 right
+   - editor per-day (lines, per-line editing, highlight colors)
+   - localStorage persistence by date key
+   - month modal generated dynamically (with basic holidays)
+   - print: weekly (A4 portrait single-column 7 blocks), monthly (A4 landscape), with colors preserved
+   - export PDF via html2pdf (preserves visuals)
+   - swipe navigation + page-turn animation
+*/
+
 const monthNames = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-const editorColors = ["#f44336","#e91e63","#9c27b0","#673ab7","#3f51b5","#2196f3","#03a9f4","#00bcd4","#009688","#4caf50","#8bc34a","#cddc39","#ffeb3b","#ffc107","#ff9800","#ff5722","#795548","#607d8b","#000000","#ffffff"];
+const editorColors = ["#f44336","#e91e63","#9c27b0","#673ab7","#3f51f5","#2196f3","#03a9f4","#00bcd4","#009688","#4caf50","#8bc34a","#cddc39","#ffeb3b","#ffc107","#ff9800","#ff5722","#795548","#607d8b","#000000","#ffffff"];
 
 const leftCol = document.getElementById('leftCol');
 const rightCol = document.getElementById('rightCol');
 const spiral = document.getElementById('spiral');
+const weekRoot = document.getElementById('weekRoot');
 const editorOverlay = document.getElementById('editorOverlay');
 const editorLines = document.getElementById('editorLines');
 const colorRow = document.getElementById('colorRow');
 const monthLabel = document.getElementById('monthLabel');
 const monthModal = document.getElementById('monthModal');
 const monthBox = document.getElementById('monthBox');
-const previewModal = document.getElementById('previewModal');
-const previewBox = document.getElementById('previewBox');
 
 let pointer = new Date();
 pointer = startOfWeek(pointer);
 let editKey = null;
 
-/* ===== build UI: spiral + color buttons ===== */
-for(let i=0;i<10;i++){
-  const d = document.createElement('div');
-  d.className = 'dot';
-  spiral.appendChild(d);
-}
+/* ---------- Build spiral and color palette ---------- */
+for(let i=0;i<10;i++){ const d = document.createElement('div'); d.className='dot'; spiral.appendChild(d); }
 editorColors.forEach(c=>{
   const b = document.createElement('button');
-  b.className = 'color-btn';
+  b.className='color-btn';
   b.style.background = c;
   b.title = c;
   b.onclick = ()=> applyColorToSelection(c);
   colorRow.appendChild(b);
 });
 const clearBtn = document.createElement('button');
-clearBtn.className = 'color-btn clear';
-clearBtn.textContent = '✕';
-clearBtn.title = 'Limpar marcação';
+clearBtn.className='color-btn clear';
+clearBtn.textContent='✕';
+clearBtn.title='Limpar marcação';
 clearBtn.onclick = ()=> removeColorFromSelection();
 colorRow.appendChild(clearBtn);
 
-/* ===== utilities ===== */
+/* ---------- Utilities ---------- */
 function keyOf(d){ return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }
 function startOfWeek(d){
   const t = new Date(d);
   const day = t.getDay();
-  const diff = (day === 0) ? -6 : 1 - day; // if sunday go back 6
+  const diff = (day === 0) ? -6 : 1 - day; // monday start
   t.setDate(t.getDate() + diff);
   t.setHours(0,0,0,0);
   return t;
 }
 
-/* feriados fixos + móveis */
+/* holidays (basic + movable) */
+function easterDate(y){
+  const f = Math.floor;
+  const G = y % 19;
+  const C = f(y/100);
+  const H = (C - f(C/4) - f((8*C+13)/25) + 19*G + 15) % 30;
+  const I = H - f(H/28) * (1 - f(29/(H+1)) * f((21-G)/11));
+  const J = (y + f(y/4) + I + 2 - C + f(C/4)) % 7;
+  const L = I - J;
+  const m = 3 + f((L + 40) / 44);
+  const d = L + 28 - 31 * f(m/4);
+  return new Date(y, m-1, d);
+}
 function prepareFeriados(year){
   const f = {
     '0-1':'Confraternização',
@@ -256,25 +276,13 @@ function prepareFeriados(year){
   f[`${corpus.getMonth()}-${corpus.getDate()}`] = 'Corpus Christi';
   return f;
 }
-function easterDate(y){
-  const f = Math.floor;
-  const G = y % 19;
-  const C = f(y/100);
-  const H = (C - f(C/4) - f((8*C+13)/25) + 19*G + 15) % 30;
-  const I = H - f(H/28) * (1 - f(29/(H+1)) * f((21-G)/11));
-  const J = (y + f(y/4) + I + 2 - C + f(C/4)) % 7;
-  const L = I - J;
-  const m = 3 + f((L + 40) / 44);
-  const d = L + 28 - 31 * f(m/4);
-  return new Date(y, m-1, d);
-}
 function isHolidayOrWeekend(d){
   const fer = prepareFeriados(d.getFullYear());
   const k = `${d.getMonth()}-${d.getDate()}`;
   return !!fer[k] || d.getDay() === 0 || d.getDay() === 6;
 }
 
-/* ===== render weekly (4 left/3 right) ===== */
+/* ---------- Render week (visual) ---------- */
 function renderWeek(){
   leftCol.innerHTML = '';
   rightCol.innerHTML = '';
@@ -304,8 +312,6 @@ function renderWeek(){
     if(saved){
       try{
         const obj = JSON.parse(saved);
-        // obj.text is stored as serialized lines
-        // display inside note as HTML; ensure background lines still visible
         note.innerHTML = obj.text || '';
       }catch(e){
         note.textContent = saved;
@@ -325,11 +331,10 @@ function renderWeek(){
   monthLabel.textContent = `${monthNames[pointer.getMonth()]} ${pointer.getFullYear()}`;
 }
 
-/* ===== editor (per-line) ===== */
+/* ---------- Editor (per-line) ---------- */
 function openEditor(d){
   editKey = keyOf(d);
   const editor = document.querySelector('.editor');
-
   if(isHolidayOrWeekend(d)){
     editor.classList.add('editing-weekend');
     editorLines.style.background = 'linear-gradient(90deg, rgba(183,28,28,0.02) 0%, rgba(255,255,255,0) 60%), repeating-linear-gradient(to bottom, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 24px)';
@@ -353,21 +358,24 @@ function openEditor(d){
   const dt = new Date(d);
   document.getElementById('editorTitle').textContent = `Editar anotação — ${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`;
   editorOverlay.classList.add('active');
+  editorOverlay.setAttribute('aria-hidden','false');
   setTimeout(()=> focusLastLine(), 60);
 }
 
-document.getElementById('closeBtn').onclick = ()=> { editorOverlay.classList.remove('active'); };
+document.getElementById('closeBtn').onclick = ()=> { editorOverlay.classList.remove('active'); editorOverlay.setAttribute('aria-hidden','true'); };
 document.getElementById('saveBtn').onclick = ()=> {
   const html = serializeLinesToHTML();
   if(!editKey) editKey = keyOf(pointer);
   localStorage.setItem(editKey, JSON.stringify({text: html}));
   editorOverlay.classList.remove('active');
+  editorOverlay.setAttribute('aria-hidden','true');
   renderWeek();
 };
 document.getElementById('deleteBtn').onclick = ()=> {
   if(!editKey) return;
   localStorage.removeItem(editKey);
   editorOverlay.classList.remove('active');
+  editorOverlay.setAttribute('aria-hidden','true');
   renderWeek();
 };
 
@@ -392,7 +400,6 @@ function loadLinesFromHTML(html){
   temp.innerHTML = html;
   const nodes = Array.from(temp.childNodes);
   if(nodes.length === 0){
-    // if html contained separators only
     editorLines.appendChild(createLine(html));
   } else {
     nodes.forEach(n=>{
@@ -413,7 +420,6 @@ function serializeLinesToHTML(){
   Array.from(editorLines.children).forEach(ch=>{
     arr.push(ch.innerHTML);
   });
-  // join with a small divider so we can reconstruct lines if needed
   return arr.join('<div></div>');
 }
 
@@ -443,7 +449,7 @@ function onLineFocus(e){
   }
 }
 
-/* selection color functions */
+/* color selection functions */
 function applyColorToSelection(color){
   const sel = window.getSelection();
   if(!sel || sel.rangeCount === 0) return;
@@ -468,7 +474,6 @@ function applyColorToSelection(color){
   sel.addRange(nr);
   editorLines.focus();
 }
-
 function removeColorFromSelection(){
   const sel = window.getSelection();
   if(!sel || sel.rangeCount === 0) return;
@@ -490,7 +495,6 @@ function removeColorFromSelection(){
   });
   range.insertNode(wrapper);
 }
-
 function isOrContains(container, node){
   while(node){
     if(node === container) return true;
@@ -499,7 +503,7 @@ function isOrContains(container, node){
   return false;
 }
 
-/* roll preview */
+/* roll preview for month cells */
 function enableRollOnPreview(el){
   if(!el) return;
   let startY=0, scrollStart=0, down=false;
@@ -519,193 +523,208 @@ function enableRollOnPreview(el){
   el.addEventListener('pointercancel', ()=> down=false);
 }
 
-/* swipe navigation touch/mouse */
+/* ---------- Swipe & mouse drag navigation (with page-turn animation) ---------- */
 let touchStartX=0, touchStartY=0;
 const swipeThreshold = 60;
 function onTouchStart(e){ const t = e.touches ? e.touches[0] : e; touchStartX = t.clientX; touchStartY = t.clientY; }
 function onTouchEnd(e){ const t = e.changedTouches ? e.changedTouches[0] : e; const dx = t.clientX - touchStartX; const dy = t.clientY - touchStartY;
   if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold){
-    if(monthModal.classList.contains('active')){
-      if(dx < 0) { pointer.setMonth(pointer.getMonth()+1); renderWeek(); monthLabel.textContent = `${monthNames[pointer.getMonth()]} ${pointer.getFullYear()}`; monthLabel.click(); }
-      else { pointer.setMonth(pointer.getMonth()-1); renderWeek(); monthLabel.textContent = `${monthNames[pointer.getMonth()]} ${pointer.getFullYear()}`; monthLabel.click(); }
-    } else {
-      if(dx < 0) { pointer.setDate(pointer.getDate()+7); pointer = startOfWeek(pointer); renderWeek(); }
-      else { pointer.setDate(pointer.getDate()-7); pointer = startOfWeek(pointer); renderWeek(); }
-    }
+    if(dx < 0) { goNextWeekWithAnimation(); }
+    else { goPrevWeekWithAnimation(); }
   }
 }
 document.addEventListener('touchstart', onTouchStart, {passive:true});
 document.addEventListener('touchend', onTouchEnd, {passive:true});
 
+// mouse drag
 let md=false, mx=0;
 document.addEventListener('mousedown', e=>{ md=true; mx=e.clientX; });
 document.addEventListener('mouseup', e=>{
   if(!md) return; md=false;
   const dx = e.clientX - mx;
   if(Math.abs(dx) > swipeThreshold){
-    if(monthModal.classList.contains('active')){
-      if(dx < 0){ pointer.setMonth(pointer.getMonth()+1); renderWeek(); monthLabel.click(); }
-      else { pointer.setMonth(pointer.getMonth()-1); renderWeek(); monthLabel.click(); }
-    } else {
-      if(dx < 0){ pointer.setDate(pointer.getDate()+7); pointer = startOfWeek(pointer); renderWeek(); }
-      else { pointer.setDate(pointer.getDate()-7); pointer = startOfWeek(pointer); renderWeek(); }
-    }
+    if(dx < 0) { goNextWeekWithAnimation(); }
+    else { goPrevWeekWithAnimation(); }
   }
 });
 
-/* ===== preview & PDF generation with fallback ===== */
-function exportPDF(element, title, page='a4', orientation='l', marginCm=1.5){
-  const clone = element.cloneNode(true);
-  // remove contenteditable attributes inside clone for cleaner render
-  clone.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
-  const wrapper = document.createElement('div');
-  wrapper.style.boxSizing = 'border-box';
-  wrapper.style.padding = marginCm + 'cm';
-  wrapper.style.background = '#fff';
-  wrapper.appendChild(clone);
-
-  return html2canvas(wrapper, { scale: 3, backgroundColor: '#ffffff', useCORS: true, logging: false }).then(canvas=>{
-    const imgData = canvas.toDataURL('image/png');
-    // try to create PDF
-    try{
-      const jspdf = window.jspdf;
-      const jsPDF = jspdf && jspdf.jsPDF ? jspdf.jsPDF : (window.jspdf && window.jspdf.jsPDF ? window.jspdf.jsPDF : null);
-      if(!jsPDF && window.jspdf && window.jspdf.jsPDF) {
-        // older shapes; try window.jspdf
-      }
-      if(!jsPDF && window.jspdf && typeof window.jspdf === 'function') {
-        // some builds expose differently
-      }
-      if(!jsPDF && window.jsPDF) {
-        // fallback
-      }
-      const { jsPDF: J } = window.jspdf || {};
-      const PDFLib = J || window.jsPDF || null;
-      if(!PDFLib) throw new Error('jsPDF não encontrado');
-      const pdf = new PDFLib({ orientation: orientation, unit: 'pt', format: page });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const marginPt = marginCm * 28.3464567;
-      const availW = pageWidth - marginPt * 2;
-      const availH = pageHeight - marginPt * 2;
-      const img = new Image();
-      img.onload = function(){
-        let renderW = availW;
-        let renderH = (img.height * renderW) / img.width;
-        if(renderH > availH){
-          renderH = availH;
-          renderW = (img.width * renderH) / img.height;
-        }
-        const x = (pageWidth - renderW) / 2;
-        const y = (pageHeight - renderH) / 2;
-        pdf.addImage(imgData, 'PNG', x, y, renderW, renderH);
-        pdf.save(`${title}.pdf`);
-      };
-      img.src = imgData;
-      return Promise.resolve(true);
-    }catch(err){
-      // fallback: open image in new tab or trigger download if blocked
-      const w = window.open('');
-      if(!w){
-        // try download
-        const a = document.createElement('a');
-        a.href = imgData;
-        a.download = `${title}.png`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        return Promise.resolve(false);
-      }
-      w.document.write(`<!doctype html><html><head><title>${title}</title></head><body style="margin:0"><img src="${imgData}" style="width:100%;height:auto"/></body></html>`);
-      w.document.close();
-      return Promise.resolve(false);
-    }
-  });
+/* page-turn helper */
+function animatePageTurn(direction, callback){
+  // direction: 1 -> left (next), -1 -> right (prev)
+  const distance = (direction === 1) ? -parseInt(getComputedStyle(document.documentElement).getPropertyValue('--page-turn-distance')) : parseInt(getComputedStyle(document.documentElement).getPropertyValue('--page-turn-distance'));
+  weekRoot.style.transition = `transform ${getComputedStyle(document.documentElement).getPropertyValue('--page-turn-duration')} ease`;
+  weekRoot.style.transform = `translateX(${distance}px)`;
+  setTimeout(()=> {
+    weekRoot.style.transform = `translateX(${-distance}px)`;
+    setTimeout(()=> {
+      weekRoot.style.transition = '';
+      weekRoot.style.transform = '';
+      if(typeof callback === 'function') callback();
+    }, parseInt(getComputedStyle(document.documentElement).getPropertyValue('--page-turn-duration')) + 20);
+  }, 80);
 }
+function goNextWeekWithAnimation(){
+  animatePageTurn(1, ()=>{ pointer.setDate(pointer.getDate()+7); pointer = startOfWeek(pointer); renderWeek(); });
+}
+function goPrevWeekWithAnimation(){
+  animatePageTurn(-1, ()=>{ pointer.setDate(pointer.getDate()-7); pointer = startOfWeek(pointer); renderWeek(); });
+}
+document.getElementById('nextBtn').addEventListener('click', ()=> goNextWeekWithAnimation());
+document.getElementById('prevBtn').addEventListener('click', ()=> goPrevWeekWithAnimation());
 
-/* export buttons */
-document.getElementById('pdfA4').onclick = ()=> {
-  exportPDF(document.querySelector('.week'), 'PlannerA4', 'a4', 'l', 1.5)
-    .catch(e=> alert('Erro ao gerar PDF A4: ' + (e.message||e)));
-};
-document.getElementById('pdfA0').onclick = ()=> {
-  exportPDF(document.querySelector('.week'), 'PlannerA0', 'a0', 'l', 1.5)
-    .catch(e=> alert('Erro ao gerar PDF A0: ' + (e.message||e)));
-};
+/* ---------- Printing & PDF export ----------
+   - buildPrintableWeekHTML/buildPrintableMonthHTML create a new HTML page with
+     styles that include -webkit-print-color-adjust: exact so backgrounds print.
+   - exportPDF() uses html2pdf to generate a PDF matching the printable layout.
+*/
 
-/* print month window (A4) with fallback */
-function printMonthWindow(table){
-  const w = window.open('', '_blank');
-  if(!w){
-    alert('Pop-up bloqueado. Habilite pop-ups ou use gerar PDF.');
-    return;
-  }
+/* helper: sanitize and wrap content for printing (keeps spans/colors) */
+function escapeHtmlForPrint(html){ return html; /* content already HTML; we trust localStorage content */ }
+
+/* Build printable week HTML */
+function buildPrintableWeekHTML(){
+  const margin = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--page-margin-cm')) || 0.5;
   const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#b71c1c';
-  const styles = `
+  const printPt = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--print-font-pt')) || 10;
+  const printPx = Math.round(printPt * 1.333);
+  const css = `
     <style>
-      body{margin:0;font-family:Arial,Helvetica,sans-serif}
-      .page{width:29.7cm;padding:1.5cm;box-sizing:border-box}
-      table{width:100%;border-collapse:collapse}
-      th,td{border:1px solid rgba(0,0,0,0.08);vertical-align:top;padding:8px;height:90px}
-      th{background:#111;color:#fff}
-      .weekend-cell,.holiday-cell{background:${accent};color:#fff}
-      .cell-note{font-size:9pt;max-height:52px;overflow:hidden}
+      @page { size: A4 portrait; margin: ${margin}cm; }
+      html,body{height:100%;margin:0;padding:0;font-family:Arial;}
+      *{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+      .wrap{box-sizing:border-box;padding:0;margin:0;width:100%;height:100vh; background:#fff;}
+      .day{border:1px solid rgba(0,0,0,0.12);margin-bottom:6px;padding:8px;height:calc((100vh - 6*6px)/7);overflow:hidden;position:relative;background:#fff}
+      .day .lines{position:absolute;inset:0;background-image:repeating-linear-gradient(to bottom, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 20px);pointer-events:none;z-index:1}
+      .header{font-weight:bold;margin-bottom:6px;position:relative;z-index:2}
+      .content{position:relative;z-index:2;font-size:${printPt}pt;line-height:1.05}
+      .content span{display:inline-block}
     </style>
   `;
-  try{
-    w.document.write(`<!doctype html><html><head><title>Imprimir Mês</title>${styles}</head><body><div class="page">${table.outerHTML}</div></body></html>`);
-    w.document.close();
-    setTimeout(()=> {
-      try { w.print(); } catch(e) { alert('Erro ao imprimir: ' + e.message); }
-    }, 600);
-  }catch(e){
-    // fallback: exportPDF
-    exportPDF(table, 'Calendario', 'a4', 'l', 1.5).catch(err=>{
-      alert('Erro ao preparar impressão/PDF: ' + (err.message||err));
-    });
+  let body = `<div class="wrap">`;
+  for(let i=0;i<7;i++){
+    const d = new Date(pointer);
+    d.setDate(d.getDate() + i);
+    const key = keyOf(d);
+    const saved = localStorage.getItem(key);
+    let html = '';
+    if(saved){
+      try{ html = JSON.parse(saved).text; }catch(e){ html = saved; }
+    }
+    body += `<div class="day"><div class="lines"></div><div class="header">${['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][d.getDay()]} ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}</div><div class="content">${html}</div></div>`;
   }
+  body += `</div>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Imprimir Semana</title>${css}</head><body>${body}</body></html>`;
 }
 
-/* print A0 (build month grid) */
-document.getElementById('printA0Btn').onclick = ()=>{
-  const year = pointer.getFullYear();
-  const month = pointer.getMonth();
+/* Build printable month HTML (single A4 landscape page, with title) */
+function buildPrintableMonthHTML(year,month){
+  const margin = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--page-margin-cm')) || 0.5;
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#b71c1c';
+  const printPt = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--print-font-pt')) || 10;
+  const css = `
+    <style>
+      @page { size: A4 landscape; margin: ${margin}cm; }
+      html,body{height:100%;margin:0;padding:0;font-family:Arial;}
+      *{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+      .page{padding:0;margin:0}
+      .title{font-weight:bold;text-align:center;margin-bottom:8px;font-size:18pt}
+      table{width:100%;border-collapse:collapse;font-family:Arial}
+      th,td{border:1px solid rgba(0,0,0,0.08);vertical-align:top;padding:6px;height:90px;overflow:hidden}
+      th{background:#111;color:#fff;padding:8px}
+      .cell-note{font-size:${printPt}pt;max-height:100px;overflow:hidden}
+      .weekend{background:${accent};color:#fff}
+    </style>
+  `;
   const start = getMonthStart(year, month);
   const fer = prepareFeriados(year);
-
-  let table = document.createElement('table');
-  table.className = 'month-grid';
-  const thead = document.createElement('thead');
-  const headerRow = document.createElement('tr');
-  ['Seg','Ter','Qua','Qui','Sex','Sab','Dom'].forEach(h=>{ const th = document.createElement('th'); th.textContent = h; headerRow.appendChild(th); });
-  thead.appendChild(headerRow);
-  table.appendChild(thead);
-
-  const tbody = document.createElement('tbody');
-  let row = document.createElement('tr');
+  let table = `<div class="title">${monthNames[month]} ${year}</div><table><thead><tr><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Dom</th></tr></thead><tbody>`;
   let iter = new Date(start);
   for(let i=0;i<42;i++){
-    const td = document.createElement('td');
-    const dnum = document.createElement('div'); dnum.className='day-num'; dnum.textContent = iter.getDate();
-    td.appendChild(dnum);
+    if(iter.getDay() === 1) table += '<tr>';
+    let classes = '';
     const fk = `${iter.getMonth()}-${iter.getDate()}`;
-    if(iter.getDay()===0 || iter.getDay()===6) td.classList.add('weekend-cell');
-    if(fer[fk]){ td.classList.add('holiday-cell'); const fl = document.createElement('div'); fl.style.fontSize='8pt'; fl.style.marginTop='4px'; fl.style.color='#fff'; fl.textContent = fer[fk]; td.appendChild(fl); }
-    const saved = localStorage.getItem(`${iter.getFullYear()}-${iter.getMonth()}-${iter.getDate()}`);
+    if(iter.getDay() === 0 || iter.getDay() === 6) classes = 'weekend';
+    table += `<td class="${classes}"><div><strong>${iter.getDate()}</strong></div>`;
+    const key = `${iter.getFullYear()}-${iter.getMonth()}-${iter.getDate()}`;
+    const saved = localStorage.getItem(key);
     if(saved){
-      try{ const obj = JSON.parse(saved); const preview = document.createElement('div'); preview.className='cell-note'; preview.innerHTML = obj.text; td.appendChild(preview); }
-      catch(e){ const preview = document.createElement('div'); preview.className='cell-note'; preview.textContent = saved; td.appendChild(preview); }
+      try{ table += `<div class="cell-note">${JSON.parse(saved).text}</div>`; } catch(e){ table += `<div class="cell-note">${saved}</div>`; }
     }
-    row.appendChild(td);
-    if((i+1)%7===0){ tbody.appendChild(row); row = document.createElement('tr'); }
+    if(fer[fk]) table += `<div style="font-size:9pt;color:${iter.getDay()===0||iter.getDay()===6? '#fff':'#000'}">${fer[fk]}</div>`;
+    table += `</td>`;
+    if(iter.getDay() === 0) table += '</tr>';
     iter.setDate(iter.getDate()+1);
   }
-  table.appendChild(tbody);
-  printMonthWindow(table);
-};
+  table += '</tbody></table>';
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Imprimir Mês</title>${css}</head><body><div class="page">${table}</div></body></html>`;
+}
 
-/* month modal */
-monthLabel.onclick = ()=>{
+/* open print window and call print */
+function openPrintWindow(html){
+  const w = window.open('', '_blank');
+  if(!w){ alert('Pop-up bloqueado. Habilite pop-ups para imprimir.'); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>{ try{ w.focus(); w.print(); } catch(e){ console.warn(e); } }, 400);
+}
+
+/* print buttons */
+document.getElementById('printWeekBtn').addEventListener('click', ()=> {
+  const html = buildPrintableWeekHTML();
+  openPrintWindow(html);
+});
+document.getElementById('printMonthBtn').addEventListener('click', ()=> {
+  const y = pointer.getFullYear();
+  const m = pointer.getMonth();
+  const html = buildPrintableMonthHTML(y,m);
+  openPrintWindow(html);
+});
+
+/* Export PDF using html2pdf for active printable layout */
+document.getElementById('exportPdfBtn').addEventListener('click', ()=>{
+  // detect whether user wants week or month: if month modal is open use month, else week
+  if(monthModal.classList.contains('active')){
+    const y = pointer.getFullYear(), m = pointer.getMonth();
+    const html = buildPrintableMonthHTML(y,m);
+    downloadHtmlAsPdf(html, `Calendario-${monthNames[m]}-${y}.pdf`, {landscape:true});
+  } else {
+    const html = buildPrintableWeekHTML();
+    downloadHtmlAsPdf(html, `Planner-Semana-${pointer.getFullYear()}-${pointer.getMonth()+1}-${pointer.getDate()}.pdf`, {landscape:false});
+  }
+});
+
+function downloadHtmlAsPdf(html, filename, opts){
+  // create offscreen element
+  const iframe = document.createElement('iframe');
+  iframe.style.position='fixed'; iframe.style.left='-9999px'; iframe.style.top='-9999px';
+  document.body.appendChild(iframe);
+  const doc = iframe.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
+  // wait for resources to render
+  setTimeout(()=>{
+    const element = doc.body;
+    const opt = {
+      margin:       [10,10,10,10],
+      filename:     filename,
+      image:        { type: 'jpeg', quality: 1 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: opts.landscape ? 'landscape' : 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save().then(()=> {
+      document.body.removeChild(iframe);
+    }).catch(err=>{
+      document.body.removeChild(iframe);
+      console.error('Erro exportar PDF', err);
+      alert('Erro ao gerar PDF: ' + (err.message || err));
+    });
+  }, 600);
+}
+
+/* ---------- Month modal dynamic generation ---------- */
+document.getElementById('openMonthBtn').addEventListener('click', ()=> {
   const year = pointer.getFullYear();
   const month = pointer.getMonth();
   const start = getMonthStart(year, month);
@@ -735,7 +754,7 @@ monthLabel.onclick = ()=>{
       catch(e){ const preview = document.createElement('div'); preview.className='cell-note'; preview.textContent = saved; td.appendChild(preview); }
     }
     td.style.cursor = 'pointer';
-    td.onclick = (e)=>{ e.stopPropagation(); openEditor(new Date(iter)); monthModal.classList.remove('active'); };
+    td.onclick = (e)=>{ e.stopPropagation(); openEditor(new Date(iter)); monthModal.classList.remove('active'); monthModal.setAttribute('aria-hidden','true'); };
     row.appendChild(td);
     if((i+1)%7===0){ tbody.appendChild(row); row = document.createElement('tr'); }
     iter.setDate(iter.getDate()+1);
@@ -756,31 +775,27 @@ monthLabel.onclick = ()=>{
   const controls = document.createElement('div');
   controls.style.display = 'flex';
   controls.style.gap = '8px';
-  const printBtn = document.createElement('button');
-  printBtn.className = 'btn';
-  printBtn.textContent = 'Imprimir Mês (A4)';
-  printBtn.onclick = ()=> exportPDF(table, 'Calendario-'+monthNames[month]+'-'+year, 'a4', 'l', 1.5);
-  controls.appendChild(printBtn);
-
-  const printA0 = document.createElement('button');
-  printA0.className = 'btn';
-  printA0.textContent = 'Imprimir Mês A0';
-  printA0.onclick = ()=> printMonthWindow(table);
-  controls.appendChild(printA0);
+  const info = document.createElement('div');
+  info.style.fontSize='12px';
+  info.textContent = 'Clique numa célula para editar. Use Exportar PDF para salvar o mês como PDF.';
+  controls.appendChild(info);
 
   const closeBtn = document.createElement('button');
   closeBtn.className = 'btn';
   closeBtn.textContent = 'Fechar';
-  closeBtn.onclick = ()=> monthModal.classList.remove('active');
+  closeBtn.onclick = ()=> { monthModal.classList.remove('active'); monthModal.setAttribute('aria-hidden','true'); };
   controls.appendChild(closeBtn);
 
   titleRow.appendChild(controls);
   monthBox.appendChild(titleRow);
   monthBox.appendChild(table);
   monthModal.classList.add('active');
-};
+  monthModal.setAttribute('aria-hidden','false');
+});
 
-/* month start always Monday */
+monthModal.addEventListener('click', ev => { if(ev.target === monthModal) { monthModal.classList.remove('active'); monthModal.setAttribute('aria-hidden','true'); } });
+
+/* ---------- Helpers for month start ---------- */
 function getMonthStart(year,month){
   const first = new Date(year,month,1);
   const day = first.getDay();
@@ -791,38 +806,14 @@ function getMonthStart(year,month){
   return start;
 }
 
-/* close month modal on backdrop click */
-monthModal.addEventListener('click', ev => { if(ev.target === monthModal) monthModal.classList.remove('active'); });
-
-/* preview button */
-document.getElementById('preview').onclick = ()=>{
-  previewModal.classList.add('active');
-  const target = document.querySelector('.week');
-  const clone = target.cloneNode(true);
-  const wrapper = document.createElement('div');
-  wrapper.style.padding = 'var(--page-margin)';
-  wrapper.style.background = '#fff';
-  wrapper.appendChild(clone);
-  previewBox.innerHTML = '';
-  previewBox.appendChild(wrapper);
-  html2canvas(wrapper, { scale: 3, backgroundColor: '#ffffff', useCORS: true, logging:false })
-    .then(canvas => {
-      previewBox.innerHTML = '';
-      previewBox.appendChild(canvas);
-    }).catch(err=>{
-      previewBox.innerHTML = '<div style="padding:20px;color:#f00">Erro ao gerar preview: '+(err.message||err)+'</div>';
-    });
-};
-previewModal.onclick = ()=> previewModal.classList.remove('active');
-
-/* navigation buttons */
-document.getElementById('prev').onclick = ()=>{ pointer.setDate(pointer.getDate()-7); pointer = startOfWeek(pointer); renderWeek(); };
-document.getElementById('next').onclick = ()=>{ pointer.setDate(pointer.getDate()+7); pointer = startOfWeek(pointer); renderWeek(); };
-
-/* initial render */
+/* ---------- init ---------- */
 renderWeek();
 
-})(); // IIFE end
+/* set print font CSS var */
+(function setPrintFontVar(){
+  const pt = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--print-font-pt')) || 10;
+  document.documentElement.style.setProperty('--print-font-pt', pt + 'pt');
+})();
 </script>
 </body>
 </html>
