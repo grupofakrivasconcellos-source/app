@@ -385,6 +385,30 @@ function openDayEdit(date) {
     var editDayInfo = document.getElementById('editDayInfo');
     var notebookLines = document.getElementById('notebookLines');
 
+    // Adicionar listener para salvamento automático
+    notebookLines.addEventListener('input', saveLineContent, true);
+    notebookLines.addEventListener('blur', saveLineContent, true);
+
+    var dayName = getDayName(date.getDay());
+    editDayInfo.textContent = dayName + ', ' + formatDate(date);
+    
+    if (!appState.days[appState.selectedDay]) {
+        appState.days[appState.selectedDay] = {
+            lines: Array(30).fill(null).map(function() { return { html: '' }; })
+        };
+    }
+    
+    var dayData = appState.days[appState.selectedDay];
+    notebookLines.innerHTML = '';
+
+    for (var i = 0; i < 30; i++) {
+        (function(index) {
+            var lineData = dayData.lines[index] || { html: '' };
+    appState.selectedDay = getDateString(date);
+    var dayEditView = document.getElementById('dayEditView');
+    var editDayInfo = document.getElementById('editDayInfo');
+    var notebookLines = document.getElementById('notebookLines');
+
     var dayName = getDayName(date.getDay());
     editDayInfo.textContent = dayName + ', ' + formatDate(date);
     
@@ -428,6 +452,11 @@ function openDayEdit(date) {
 }
 
 function closeDayEdit() {
+    // Remover listener de salvamento automático
+    var notebookLines = document.getElementById('notebookLines');
+    notebookLines.removeEventListener('input', saveLineContent, true);
+    notebookLines.removeEventListener('blur', saveLineContent, true);
+
     document.getElementById('dayEditView').style.display = 'none';
     if (appState.view === 'week') {
         renderWeekView();
@@ -440,11 +469,23 @@ function applyStyle(command, value = null) {
     // Garante que o comando seja aplicado ao elemento com foco
     document.execCommand(command, false, value);
     
-    // Salvar alterações na linha que está sendo editada
+    // O salvamento é feito automaticamente na função saveLineContent, mas para garantir que a formatação seja salva imediatamente após o comando execCommand:
     var activeEl = document.activeElement;
     if (activeEl && activeEl.classList.contains('notebook-line-editable')) {
+        saveLineContent({ target: activeEl });
+    }
+}
+
+function saveLineContent(e) {
+    var activeEl = e.target;
+    if (activeEl && activeEl.classList.contains('notebook-line-editable')) {
         var idx = parseInt(activeEl.getAttribute('data-index'));
+        
+        // Salvar o HTML para manter a formatação (cores, negrito, etc.)
         appState.days[appState.selectedDay].lines[idx].html = activeEl.innerHTML;
+        // Salvar o texto puro para uso em outras funções (como impressão)
+        appState.days[appState.selectedDay].lines[idx].text = activeEl.textContent;
+        
         saveDataToStorage();
     }
 }

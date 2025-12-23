@@ -300,12 +300,16 @@ body {
 .edit-header-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 5px; /* Reduzir o espaçamento entre os grupos de botões */
+    overflow-x: auto; /* Permitir rolagem horizontal se necessário */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px; /* Espaço para o indicador de rolagem */
 }
 
 .text-styles-inline {
     display: flex;
     gap: 4px;
+    flex-shrink: 0; /* Não permitir que os botões de estilo encolham */
 }
 
 .btn-style {
@@ -322,11 +326,10 @@ body {
 .color-buttons {
     display: flex;
     gap: 4px;
-    overflow-x: auto;
-    max-width: 200px;
     padding: 4px;
     background: rgba(255,255,255,0.1);
     border-radius: 8px;
+    flex-shrink: 0; /* Não permitir que a paleta encolha */
 }
 
 .color-btn {
