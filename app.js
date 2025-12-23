@@ -470,10 +470,6 @@ function renderColorPalette() {
             var selection = window.getSelection();
             if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
                 applyStyle('hiliteColor', color);
-                
-                // Aplicar cor de fonte de contraste
-                var contrastColor = getContrastColor(color);
-                applyStyle('foreColor', contrastColor);
             }
         });
         
@@ -482,30 +478,6 @@ function renderColorPalette() {
 }
 
 // ========== UTILITÁRIOS ==========
-
-// Função para converter HEX para RGB
-function hexToRgb(hex) {
-    var bigint = parseInt(hex.slice(1), 16);
-    var r = (bigint >> 16) & 255;
-    var g = (bigint >> 8) & 255;
-    var b = bigint & 255;
-    return [r, g, b];
-}
-
-// Função para calcular a cor de contraste (preto ou branco)
-function getContrastColor(hexColor) {
-    var rgb = hexToRgb(hexColor);
-    var r = rgb[0] / 255;
-    var g = rgb[1] / 255;
-    var b = rgb[2] / 255;
-
-    // Cálculo da Luminância Relativa (WCAG 2.0)
-    var L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-
-    // Usar um limiar de 0.5 para decidir entre preto e branco
-    return L > 0.5 ? '#000000' : '#FFFFFF';
-}
-
 function getDateString(date) {
     var y = date.getFullYear();
     var m = String(date.getMonth() + 1).padStart(2, '0');
