@@ -567,13 +567,18 @@ function printDayCustom() {
         '.print-lines { flex: 1; display: flex; flex-direction: column; margin: 0 10mm; height: calc(100% - 50px); }' +
         '.print-line { flex: 1; border-bottom: 1px solid ' + (isSpecial ? '#FF0000' : '#999') + '; display: flex; align-items: center; padding: 0; box-sizing: border-box; overflow: hidden; ' + (isSpecial ? 'color: #FF0000;' : '') + ' }' +
         '.print-line:last-child { border-bottom: none; }' +
-        '.print-line-content { font-size: 10mm; line-height: 1.2; white-space: normal; word-break: break-word; padding: 2mm 0; }' +
+        '.print-line-content { font-size: 14pt; line-height: 1.2; white-space: normal; word-break: break-word; padding: 2mm 0; }' +
         '@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }' +
         '</style></head><body>' +
         '<div class="print-header"><h1>' + dayName + ', ' + formatDate(date) + '</h1></div>' +
         '<div class="print-lines">' +
         linesToPrint.map(function(line, idx) { 
-            return '<div class="print-line"><div class="print-line-content"><b>' + (idx + 1) + '.</b> ' + (line.html || '') + '</div></div>'; 
+            var lineContent = line.html || '';
+            // Incluir o texto anotado (que pode estar em line.text ou line.html)
+            if (line.text && line.text.trim() !== '') {
+                lineContent = line.html || line.text; // Prioriza o HTML (com formatação)
+            }
+            return '<div class="print-line"><div class="print-line-content"><b>' + (idx + 1) + '.</b> ' + lineContent + '</div></div>'; 
         }).join('') +
         '</div></body></html>';
     
