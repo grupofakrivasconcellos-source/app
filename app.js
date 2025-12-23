@@ -465,7 +465,12 @@ function renderColorPalette() {
             appState.selectedColor = index;
             document.querySelectorAll('.color-btn').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
-            applyStyle('foreColor', color);
+            
+            // Aplicar cor de fundo (marcação) ao texto selecionado
+            var selection = window.getSelection();
+            if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
+                applyStyle('hiliteColor', color);
+            }
         });
         
         palette.appendChild(btn);
