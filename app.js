@@ -519,27 +519,76 @@ function renderColorPalette() {
 }
 
 // ========== UTILITÁRIOS ==========
-function getDateString(date) {
-    var y = date.getFullYear();
-    var m = String(date.getMonth() + 1).padStart(2, '0');
-    var d = String(date.getDate()).padStart(2, '0');
-    return y + '-' + m + '-' + d;
+
+function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
-function getDayName(dayIndex) {
-    var names = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
-    return names[dayIndex];
+function getContrastColor(hexColor) {
+    // Função para calcular a cor de contraste (preto ou branco)
+    var r = parseInt(hexColor.substr(1, 2), 16);
+    var g = parseInt(hexColor.substr(3, 2), 16);
+    var b = parseInt(hexColor.substr(5, 2), 16);
+    var brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#FFFFFF';
 }
 
-function formatDate(date) {
-    return date.toLocaleDateString('pt-BR');
+function renderLineWithColors(lineData) {
+    if (!lineData || !lineData.text) return '';
+    if (!lineData.spans || lineData.spans.length === 0) return escapeHtml(lineData.text);
+
+    var html = '';
+    var spans = lineData.spans.slice().sort(function(a, b) { return a.start - b.start; });
+
+    // Agrupar spans por posição para aplicar múltiplos estilos/cores
+    var points = [];
+    points.push(0);
+    points.push(lineData.text.length);
+    spans.forEach(function(s) {
+        points.push(s.start);
+        points.push(s.end);
+    });
+    points = Array.from(new Set(points)).sort(function(a, b) { return a - b; });
+
+    for (var i = 0; i < points.length - 1; i++) {
+        var start = points[i];
+        var end = points[i+1];
+        if (start >= lineData.text.length) break;
+        
+        var segmentText = lineData.text.substring(start, end);
+        var activeSpans = spans.filter(function(s) { return s.start <= start && s.end >= end; });
+        
+        if (activeSpans.length > 0) {
+            var styleAttr = '';
+            var colorSpan = activeSpans.find(function(s) { return s.color !== undefined; });
+            
+            // Lógica do Marca-Texto: Aplica background-color e cor de fonte de contraste
+            if (colorSpan) {
+                var color = COLORS[colorSpan.color];
+                styleAttr += 'background-color: ' + color + '; color: ' + getContrastColor(color) + '; padding: 1px 3px; border-radius: 2px;';
+            }
+            
+            var isBold = activeSpans.some(function(s) { return s.style === 'bold'; });
+            var isItalic = activeSpans.some(function(s) { return s.style === 'italic'; });
+            var isStrike = activeSpans.some(function(s) { return s.style === 'strike'; });
+            
+            if (isBold) styleAttr += ' font-weight: bold;';
+            if (isItalic) styleAttr += ' font-style: italic;';
+            if (isStrike) styleAttr += ' text-decoration: line-through;';
+            
+            html += '<span style="' + styleAttr + ' display: inline-block;">' + escapeHtml(segmentText) + '</span>';
+        } else {
+            html += escapeHtml(segmentText);
+        }
+    }
+    
+    return html;
 }
 
-function isHolidayDate(date) {
-    var m = String(date.getMonth() + 1).padStart(2, '0');
-    var d = String(date.getDate()).padStart(2, '0');
-    return FERIADOS_BRASIL.indexOf(m + '-' + d) !== -1;
-}
+
+function escapeHtml(
 
 // ========== IMPRESSÃO ==========
 function printWeek() {
