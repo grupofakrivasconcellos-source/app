@@ -323,8 +323,10 @@ body {
     display: flex;
     gap: 4px;
     overflow-x: auto;
-    max-width: 120px;
-    padding: 2px;
+    max-width: 200px;
+    padding: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
 }
 
 .color-btn {
