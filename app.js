@@ -617,7 +617,8 @@ function printDayCustom() {
             var lineContent = line.html || '';
             // Incluir o texto anotado (que pode estar em line.text ou line.html)
             if (line.text && line.text.trim() !== '') {
-                lineContent = line.html || line.text; // Prioriza o HTML (com formatação)
+                // Usar a função renderLineWithColors para garantir que a formatação (cores, marca-texto) seja aplicada
+                lineContent = renderLineWithColors(line);
             }
             return '<div class="print-line"><div class="print-line-content"><b>' + (idx + 1) + '.</b> ' + lineContent + '</div></div>'; 
         }).join('') +
