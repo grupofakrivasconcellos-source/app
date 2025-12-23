@@ -10,24 +10,8 @@
     <meta name="description" content="Planejador de Agenda Interativo">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
-    
-    <!-- Ícones para iOS -->
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3652/3652191.png">
-    
     <title>Planejador de Agenda Interativo</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Ajustes específicos para iPhone 17 e Dynamic Island */
-        :root {
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
-        }
-        
-        body {
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-        }
-    </style>
 </head>
 <body>
     <div id="app">
@@ -35,11 +19,11 @@
         <div id="mainView" class="main-view">
             <!-- Header -->
             <div class="header">
-                <button id="prevNav" class="btn-nav-arrow" aria-label="Anterior">‹</button>
+                <button id="prevNav" class="btn-nav-arrow">‹</button>
                 <div class="header-title">
                     <h1 id="headerTitle">Dez 2025</h1>
                 </div>
-                <button id="nextNav" class="btn-nav-arrow" aria-label="Próximo">›</button>
+                <button id="nextNav" class="btn-nav-arrow">›</button>
             </div>
 
             <!-- Controles de Visão -->
@@ -57,7 +41,7 @@
 
             <!-- Visão Mensal -->
             <div id="monthView" class="month-view" style="display: none;">
-                <div class="month-print-controls">
+                <div class="month-print-controls" style="padding: 10px; display: flex; gap: 10px; justify-content: center; background: #f8f9fa; border-bottom: 1px solid #ddd;">
                     <button id="printMonthA4" class="btn-print" style="background: #2d3748;">🖨️ Imprimir Mês A4</button>
                     <button id="printMonthPlotter" class="btn-print" style="background: #2d3748;">🖨️ Imprimir Mês Plotter</button>
                 </div>
@@ -72,22 +56,22 @@
                     <span id="editDayInfo" class="edit-day-info"></span>
                 </div>
                 <div class="edit-header-right">
-                    <div class="text-styles-inline">
-                        <button id="btnBold" class="btn-style" title="Negrito">B</button>
-                        <button id="btnItalic" class="btn-style" title="Itálico">I</button>
-                        <button id="btnStrike" class="btn-style" title="Riscado">S</button>
+                    <div class="text-styles-inline" style="display: flex; gap: 5px; margin-right: 10px;">
+                        <button id="btnBold" class="btn-style" title="Negrito" style="font-weight: bold; width: 32px; height: 32px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer;">B</button>
+                        <button id="btnItalic" class="btn-style" title="Itálico" style="font-style: italic; width: 32px; height: 32px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer;">I</button>
+                        <button id="btnStrike" class="btn-style" title="Riscado" style="text-decoration: line-through; width: 32px; height: 32px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer;">S</button>
                     </div>
                     <div class="color-palette-inline">
                         <div id="colorPalette" class="color-buttons"></div>
                     </div>
-                    <button id="printDay" class="btn btn-primary">🖨️</button>
-                    <button id="closeDayEdit" class="btn btn-secondary">✕</button>
+                    <button id="printDay" class="btn btn-primary">🖨️ Imprimir</button>
+                    <button id="closeDayEdit" class="btn btn-secondary">✕ Fechar</button>
                 </div>
             </div>
 
             <div class="edit-content">
                 <div class="notebook-container">
-                    <div id="notebookLines" class="notebook-lines" role="textbox" aria-multiline="true" contenteditable="true"></div>
+                    <div id="notebookLines" class="notebook-lines" role="textbox" aria-multiline="true"></div>
                 </div>
             </div>
         </div>

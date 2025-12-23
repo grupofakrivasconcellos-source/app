@@ -1,9 +1,9 @@
-// ========== CORES VIBRANTES (20 CORES) ==========
+// ========== CORES VIBRANTES ==========
 var COLORS = [
     '#000000', '#808080', '#FF0000', '#FF6B00', '#FFD700', '#00D000', '#00B8D4',
     '#0066FF', '#6600FF', '#FF00FF', '#FF1493', '#00FF7F',
     '#FF4500', '#1E90FF', '#DC143C', '#00CED1', '#FFB6C1',
-    '#32CD32', '#FF8C00', '#8B00FF'
+    '#32CD32', '#FF8C00', '#8B00FF', '#00FF00', '#FF69B4'
 ];
 
 var FERIADOS_BRASIL = [
@@ -19,7 +19,8 @@ var appState = {
     days: {},
     view: 'week',
     touchStartX: 0,
-    touchStartY: 0
+    touchStartY: 0,
+    savedSelection: null
 };
 
 // ========== INICIALIZAÇÃO ==========
@@ -83,7 +84,7 @@ function initializeEventListeners() {
 
     // Impressão
     document.getElementById('printDay').addEventListener('click', function() {
-        printDayCustom();
+        printDay();
     });
 
     document.getElementById('printWeekly').addEventListener('click', function() {
@@ -102,10 +103,10 @@ function initializeEventListeners() {
         printMonth('Plotter');
     });
 
-    // Estilos de Texto - Usar mousedown para manter a seleção
-    document.getElementById('btnBold').addEventListener('mousedown', function(e) { e.preventDefault(); applyStyle('bold'); });
-    document.getElementById('btnItalic').addEventListener('mousedown', function(e) { e.preventDefault(); applyStyle('italic'); });
-    document.getElementById('btnStrike').addEventListener('mousedown', function(e) { e.preventDefault(); applyStyle('strikethrough'); });
+    // Estilos de Texto
+    document.getElementById('btnBold').addEventListener('click', function() { applyTextStyle('bold'); });
+    document.getElementById('btnItalic').addEventListener('click', function() { applyTextStyle('italic'); });
+    document.getElementById('btnStrike').addEventListener('click', function() { applyTextStyle('strike'); });
 
     // Fechar edição
     var closeBtn = document.getElementById('closeDayEdit');
@@ -282,27 +283,20 @@ function createDayCardGrid(date) {
 
     var dayData = appState.days[dateStr] || { lines: [] };
     if (!dayData.lines || dayData.lines.length === 0) {
-        dayData.lines = Array(30).fill(null).map(function() { return { html: '' }; });
+        dayData.lines = Array(30).fill(null).map(function() { return { text: '', spans: [] }; });
     }
     
     for (var i = 0; i < 30; i++) {
-        var line = dayData.lines[i] || { html: '' };
+        var line = dayData.lines[i] || { text: '', spans: [] };
         var lineDiv = document.createElement('div');
         lineDiv.className = 'day-line-preview';
         
-        var lineNumSpan = document.createElement('span');
-        lineNumSpan.className = 'line-number-preview';
-        lineNumSpan.textContent = (i + 1) + '. ';
-        lineDiv.appendChild(lineNumSpan);
-
-        var lineContentSpan = document.createElement('span');
-        if (line && line.html && line.html.trim() !== '') {
-            lineContentSpan.innerHTML = line.html;
+        if (line && line.text && line.text.trim() !== '') {
+            lineDiv.innerHTML = renderLineWithColors(line);
         } else {
             lineDiv.classList.add('empty');
-            lineContentSpan.innerHTML = '&nbsp;';
+            lineDiv.innerHTML = '&nbsp;';
         }
-        lineDiv.appendChild(lineContentSpan);
         
         content.appendChild(lineDiv);
     }
@@ -343,24 +337,18 @@ function createMonthDayCell(date) {
         var notesContainer = document.createElement('div');
         notesContainer.className = 'month-day-notes';
         
-        var validLinesIndices = [];
-        dayData.lines.forEach(function(line, idx) {
-            if (line && line.html && line.html.trim() !== '') {
-                validLinesIndices.push(idx);
-            }
-        });
+        var validLines = dayData.lines.filter(function(line) { return line && line.text && line.text.trim() !== ''; });
         
-        if (validLinesIndices.length > 0) {
-            var maxLines = Math.min(3, validLinesIndices.length);
+        if (validLines.length > 0) {
+            var maxLines = Math.min(3, validLines.length);
             for (var i = 0; i < maxLines; i++) {
-                var idx = validLinesIndices[i];
                 var noteDiv = document.createElement('div');
                 noteDiv.className = 'month-note-line';
-                noteDiv.innerHTML = '<span class="line-number-preview">' + (idx + 1) + '. </span>' + dayData.lines[idx].html;
+                noteDiv.innerHTML = renderLineWithColors(validLines[i]);
                 notesContainer.appendChild(noteDiv);
             }
             
-            if (validLinesIndices.length > 3) {
+            if (validLines.length > 3) {
                 var moreDiv = document.createElement('div');
                 moreDiv.className = 'month-note-more';
                 moreDiv.textContent = '...';
@@ -385,16 +373,12 @@ function openDayEdit(date) {
     var editDayInfo = document.getElementById('editDayInfo');
     var notebookLines = document.getElementById('notebookLines');
 
-    // Adicionar listener para salvamento automático
-    notebookLines.addEventListener('input', saveLineContent, true);
-    notebookLines.addEventListener('blur', saveLineContent, true);
-
     var dayName = getDayName(date.getDay());
     editDayInfo.textContent = dayName + ', ' + formatDate(date);
     
     if (!appState.days[appState.selectedDay]) {
         appState.days[appState.selectedDay] = {
-            lines: Array(30).fill(null).map(function() { return { html: '' }; })
+            lines: Array(30).fill(null).map(function() { return { text: '', spans: [] }; })
         };
     }
     
@@ -403,27 +387,7 @@ function openDayEdit(date) {
 
     for (var i = 0; i < 30; i++) {
         (function(index) {
-            var lineData = dayData.lines[index] || { html: '' };
-    appState.selectedDay = getDateString(date);
-    var dayEditView = document.getElementById('dayEditView');
-    var editDayInfo = document.getElementById('editDayInfo');
-    var notebookLines = document.getElementById('notebookLines');
-
-    var dayName = getDayName(date.getDay());
-    editDayInfo.textContent = dayName + ', ' + formatDate(date);
-    
-    if (!appState.days[appState.selectedDay]) {
-        appState.days[appState.selectedDay] = {
-            lines: Array(30).fill(null).map(function() { return { html: '' }; })
-        };
-    }
-    
-    var dayData = appState.days[appState.selectedDay];
-    notebookLines.innerHTML = '';
-
-    for (var i = 0; i < 30; i++) {
-        (function(index) {
-            var lineData = dayData.lines[index] || { html: '' };
+            var lineData = dayData.lines[index] || { text: '', spans: [] };
             var lineWrapper = document.createElement('div');
             lineWrapper.className = 'notebook-line-wrapper';
 
@@ -435,10 +399,80 @@ function openDayEdit(date) {
             lineEditable.className = 'notebook-line-editable';
             lineEditable.contentEditable = true;
             lineEditable.setAttribute('data-index', index);
-            lineEditable.innerHTML = lineData.html || '';
+            
+            updateEditableContent(lineEditable, lineData);
 
-            lineEditable.addEventListener('input', function() {
-                lineData.html = lineEditable.innerHTML;
+            lineEditable.addEventListener('input', function(e) {
+                lineData.text = lineEditable.textContent;
+                if (lineData.spans) {
+                    lineData.spans = lineData.spans.filter(function(span) { return span.start < lineData.text.length; });
+                    lineData.spans.forEach(function(span) {
+                        if (span.end > lineData.text.length) span.end = lineData.text.length;
+                    });
+                }
+                saveDataToStorage();
+            });
+
+            lineEditable.addEventListener('focus', function() {
+                appState.selectedLineIndex = index;
+            });
+
+            // Evento para tecla Tab e Retorno
+            lineEditable.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab' || e.key === 'Enter') {
+                    e.preventDefault();
+                    // Mover para próxima linha
+                    var nextIndex = index + 1;
+                    if (nextIndex < 30) {
+                        var nextLine = notebookLines.querySelector('[data-index="' + nextIndex + '"]');
+                        if (nextLine) {
+                            nextLine.focus();
+                        }
+                    }
+                }
+            });
+
+            // Evento para colagem (paste)
+            lineEditable.addEventListener('paste', function(e) {
+                e.preventDefault();
+                var pastedText = e.clipboardData.getData('text/plain');
+                if (!pastedText) return;
+
+                var lines = pastedText.split(/\r?\n/);
+                var currentIndex = index;
+
+                for (var j = 0; j < lines.length && currentIndex < 30; j++) {
+                    var line = lines[j];
+                    var currentLine = dayData.lines[currentIndex];
+                    
+                    if (!currentLine) {
+                        currentLine = { text: '', spans: [] };
+                        dayData.lines[currentIndex] = currentLine;
+                    }
+
+                    // Se for a primeira linha, adicionar ao texto existente
+                    if (j === 0) {
+                        var selection = window.getSelection();
+                        var range = selection.getRangeAt(0);
+                        var offset = getTextPosition(lineEditable, range.startContainer, range.startOffset);
+                        currentLine.text = currentLine.text.substring(0, offset) + line + currentLine.text.substring(offset);
+                    } else {
+                        // Para as próximas linhas, colocar o texto completo
+                        currentLine.text = line;
+                        currentLine.spans = [];
+                    }
+                    
+                    currentIndex++;
+                }
+
+                // Atualizar a exibição
+                for (var k = index; k < Math.min(index + lines.length, 30); k++) {
+                    var editableElem = notebookLines.querySelector('[data-index="' + k + '"]');
+                    if (editableElem) {
+                        updateEditableContent(editableElem, dayData.lines[k]);
+                    }
+                }
+
                 saveDataToStorage();
             });
 
@@ -449,15 +483,19 @@ function openDayEdit(date) {
     }
 
     dayEditView.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    renderColorPalette();
+}
+
+function updateEditableContent(element, lineData) {
+    element.innerHTML = renderLineWithColors(lineData);
 }
 
 function closeDayEdit() {
-    // Remover listener de salvamento automático
-    var notebookLines = document.getElementById('notebookLines');
-    notebookLines.removeEventListener('input', saveLineContent, true);
-    notebookLines.removeEventListener('blur', saveLineContent, true);
-
+    saveDataToStorage();
     document.getElementById('dayEditView').style.display = 'none';
+    document.body.style.overflow = '';
+    
     if (appState.view === 'week') {
         renderWeekView();
     } else {
@@ -465,74 +503,153 @@ function closeDayEdit() {
     }
 }
 
-function applyStyle(command, value = null) {
-    // Garante que o comando seja aplicado ao elemento com foco
-    document.execCommand(command, false, value);
-    
-    // O salvamento é feito automaticamente na função saveLineContent, mas para garantir que a formatação seja salva imediatamente após o comando execCommand:
-    var activeEl = document.activeElement;
-    if (activeEl && activeEl.classList.contains('notebook-line-editable')) {
-        saveLineContent({ target: activeEl });
-    }
-}
-
-function saveLineContent(e) {
-    var activeEl = e.target;
-    if (activeEl && activeEl.classList.contains('notebook-line-editable')) {
-        var idx = parseInt(activeEl.getAttribute('data-index'));
-        
-        // Salvar o HTML para manter a formatação (cores, negrito, etc.)
-        appState.days[appState.selectedDay].lines[idx].html = activeEl.innerHTML;
-        // Salvar o texto puro para uso em outras funções (como impressão)
-        appState.days[appState.selectedDay].lines[idx].text = activeEl.textContent;
-        
-        saveDataToStorage();
-    }
-}
-
+// ========== PALETA DE CORES ==========
 function renderColorPalette() {
     var palette = document.getElementById('colorPalette');
+    if (!palette) return;
     palette.innerHTML = '';
     
     COLORS.forEach(function(color, index) {
-        var btn = document.createElement('button');
-        btn.className = 'color-btn';
+        var btn = document.createElement('div');
+        btn.className = 'color-btn' + (appState.selectedColor === index ? ' active' : '');
         btn.style.backgroundColor = color;
-        if (index === appState.selectedColor) btn.classList.add('active');
         
-        // Usar mousedown em vez de click para evitar perda de foco/seleção
         btn.addEventListener('mousedown', function(e) {
-            e.preventDefault(); // Impede que o botão roube o foco do campo de texto
+            // Usar mousedown para evitar perda de foco/seleção
+            e.preventDefault();
+            e.stopPropagation();
             appState.selectedColor = index;
-            document.querySelectorAll('.color-btn').forEach(function(b) { b.classList.remove('active'); });
+            
+            // Atualizar visual dos botões de cores
+            var allBtns = palette.querySelectorAll('.color-btn');
+            allBtns.forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
             
-            // Aplicar cor de fundo (marcação) ao texto selecionado
-            var selection = window.getSelection();
-            if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
-                applyStyle('hiliteColor', color);
-            }
+            applyColorToSelectedText(index);
         });
         
         palette.appendChild(btn);
     });
 }
 
-// ========== UTILITÁRIOS ==========
-
-function escapeHtml(text) {
-    var div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+function getTextPosition(container, node, offset) {
+    var position = 0;
+    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+    var currentNode;
+    while (currentNode = walker.nextNode()) {
+        if (currentNode === node) {
+            position += offset;
+            break;
+        }
+        position += currentNode.textContent.length;
+    }
+    return position;
 }
 
-function getContrastColor(hexColor) {
-    // Função para calcular a cor de contraste (preto ou branco)
-    var r = parseInt(hexColor.substr(1, 2), 16);
-    var g = parseInt(hexColor.substr(3, 2), 16);
-    var b = parseInt(hexColor.substr(5, 2), 16);
-    var brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? '#000000' : '#FFFFFF';
+function applyTextStyle(style) {
+    var selection = window.getSelection();
+    var selectedText = selection.toString();
+    if (selectedText.length === 0) return;
+
+    var anchorNode = selection.anchorNode;
+    var editableElement = anchorNode.nodeType === 3 ? anchorNode.parentElement : anchorNode;
+    while (editableElement && !editableElement.classList.contains('notebook-line-editable')) {
+        editableElement = editableElement.parentElement;
+    }
+    if (!editableElement) return;
+
+    var lineIndex = parseInt(editableElement.getAttribute('data-index'));
+    var dayData = appState.days[appState.selectedDay];
+    var lineData = dayData.lines[lineIndex];
+    
+    var range = selection.getRangeAt(0);
+    var start = getTextPosition(editableElement, range.startContainer, range.startOffset);
+    var end = start + selectedText.length;
+
+    if (!lineData.spans) lineData.spans = [];
+    
+    // Adicionar o estilo ao span
+    lineData.spans.push({ start: start, end: end, style: style });
+    lineData.spans.sort(function(a, b) { return a.start - b.start; });
+
+    saveDataToStorage();
+    updateEditableContent(editableElement, lineData);
+}
+
+function applyColorToSelectedText(colorIndex) {
+    var selection = window.getSelection();
+    var selectedText = selection.toString();
+    
+    if (selectedText.length === 0) {
+        alert('Por favor, selecione o texto que deseja colorir');
+        return;
+    }
+    var anchorNode = selection.anchorNode;
+    var editableElement = anchorNode.nodeType === 3 ? anchorNode.parentElement : anchorNode;
+    
+    while (editableElement && !editableElement.classList.contains('notebook-line-editable')) {
+        editableElement = editableElement.parentElement;
+    }
+
+    if (!editableElement) {
+        alert('Por favor, selecione o texto dentro de uma linha');
+        return;
+    }
+
+    var lineIndex = parseInt(editableElement.getAttribute('data-index'));
+    var dayData = appState.days[appState.selectedDay];
+    var lineData = dayData.lines[lineIndex];
+    
+    var range = selection.getRangeAt(0);
+    var start = getTextPosition(editableElement, range.startContainer, range.startOffset);
+    var end = start + selectedText.length;
+
+    if (!lineData.spans) lineData.spans = [];
+    
+    lineData.spans.push({ start: start, end: end, color: colorIndex });
+    lineData.spans.sort(function(a, b) { return a.start - b.start; });
+    
+    lineData.spans = lineData.spans.filter(function(s) {
+        if (s.color !== undefined && s.start >= start && s.end <= end && (s.start !== start || s.end !== end)) return false;
+        return true;
+    });
+
+    saveDataToStorage();
+    
+    var cursorPosition = end;
+    updateEditableContent(editableElement, lineData);
+    
+    setTimeout(function() {
+        editableElement.focus();
+        try {
+            var textNode = getTextNodeAtPosition(editableElement, cursorPosition);
+            if (textNode) {
+                var newRange = document.createRange();
+                newRange.setStart(textNode.node, textNode.offset);
+                newRange.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+            }
+        } catch (e) {
+            console.log('Erro ao restaurar cursor:', e);
+        }
+    }, 10);
+}
+
+function getTextNodeAtPosition(container, position) {
+    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+    var currentPos = 0;
+    var node;
+    
+    while (node = walker.nextNode()) {
+        var nodeLength = node.textContent.length;
+        if (currentPos + nodeLength >= position) {
+            return { node: node, offset: position - currentPos };
+        }
+        currentPos += nodeLength;
+    }
+    
+    return null;
 }
 
 function renderLineWithColors(lineData) {
@@ -540,6 +657,7 @@ function renderLineWithColors(lineData) {
     if (!lineData.spans || lineData.spans.length === 0) return escapeHtml(lineData.text);
 
     var html = '';
+    var lastIndex = 0;
     var spans = lineData.spans.slice().sort(function(a, b) { return a.start - b.start; });
 
     // Agrupar spans por posição para aplicar múltiplos estilos/cores
@@ -563,8 +681,6 @@ function renderLineWithColors(lineData) {
         if (activeSpans.length > 0) {
             var styleAttr = '';
             var colorSpan = activeSpans.find(function(s) { return s.color !== undefined; });
-            
-            // Lógica do Marca-Texto: Aplica background-color e cor de fonte de contraste
             if (colorSpan) {
                 var color = COLORS[colorSpan.color];
                 styleAttr += 'background-color: ' + color + '; color: ' + getContrastColor(color) + '; padding: 1px 3px; border-radius: 2px;';
@@ -587,55 +703,254 @@ function renderLineWithColors(lineData) {
     return html;
 }
 
+function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 
-function escapeHtml(
+function getContrastColor(hexColor) {
+    var r = parseInt(hexColor.substr(1, 2), 16);
+    var g = parseInt(hexColor.substr(3, 2), 16);
+    var b = parseInt(hexColor.substr(5, 2), 16);
+    var brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#FFFFFF';
+}
+
+// ========== UTILITÁRIOS DE DATA ==========
+function getDateString(date) {
+    return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+}
+
+function getDayName(dayOfWeek) {
+    var days = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    return days[dayOfWeek];
+}
+
+function formatDate(date) {
+    return date.toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+}
+
+function isHolidayDate(date) {
+    var monthDay = String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+    return FERIADOS_BRASIL.indexOf(monthDay) !== -1;
+}
 
 // ========== IMPRESSÃO ==========
+
+function printMonth(size) {
+    var year = appState.currentDate.getFullYear();
+    var month = appState.currentDate.getMonth();
+    var monthName = appState.currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
+
+    var printWindow = window.open('', '', 'width=800,height=600');
+    
+    var firstDay = new Date(year, month, 1);
+    var startDate = new Date(firstDay);
+    startDate.setDate(firstDay.getDate() - firstDay.getDay());
+
+    var gridHtml = '';
+    var currentDate = new Date(startDate);
+    
+    for (var i = 0; i < 42; i++) {
+        var dateStr = getDateString(currentDate);
+        var dayData = appState.days[dateStr];
+        var isOtherMonth = currentDate.getMonth() !== month;
+        var isSpecial = currentDate.getDay() === 0 || currentDate.getDay() === 6 || isHolidayDate(currentDate);
+        
+        var linesHtml = '';
+        if (dayData && dayData.lines) {
+            var validLines = dayData.lines.filter(function(l) { return l && l.text && l.text.trim() !== ''; });
+            linesHtml = validLines.map(function(l) {
+                return '<div class="print-month-line">' + renderLineWithColors(l) + '</div>';
+            }).join('');
+        }
+
+        gridHtml += '<div class="print-month-day' + (isOtherMonth ? ' other-month' : '') + (isSpecial ? ' special' : '') + '">' +
+                        '<div class="print-month-num">' + currentDate.getDate() + '</div>' +
+                        '<div class="print-month-content">' + linesHtml + '</div>' +
+                    '</div>';
+        
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    var style = '';
+    if (size === 'Plotter') {
+        style = '@page { size: 550mm 450mm landscape; margin: 0; }' +
+                'body { font-family: Arial, sans-serif; margin: 0; padding: 10mm; background: white; width: 550mm; height: 450mm; box-sizing: border-box; display: flex; flex-direction: column; }' +
+                '.print-month-header { text-align: center; font-size: 48px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; }' +
+                '.print-month-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 2px solid #000; border-left: 2px solid #000; flex: 1; }' +
+                '.print-month-day-header { border-right: 2px solid #000; border-bottom: 2px solid #000; text-align: center; font-weight: bold; font-size: 28px; padding: 10px; background: #f0f0f0; }' +
+                '.print-month-day { border-right: 2px solid #000; border-bottom: 2px solid #000; position: relative; overflow: hidden; display: flex; flex-direction: column; }' +
+                '.print-month-num { font-weight: bold; font-size: 32px; padding: 8px; border-bottom: 1px solid #eee; }' +
+                '.print-month-content { font-size: 18px; line-height: 1.3; padding: 5px 10px; flex: 1; overflow: hidden; }' +
+                '.print-month-line { border-bottom: 1px solid #eee; padding: 4px 0; word-break: break-word; }';
+    } else {
+        // A4 Landscape
+        style = '@page { size: A4 landscape; margin: 5mm; }' +
+                'body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: white; }' +
+                '.print-month-header { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 5px; }' +
+                '.print-month-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid #000; border-left: 1px solid #000; }' +
+                '.print-month-day-header { border-right: 1px solid #000; border-bottom: 1px solid #000; text-align: center; font-weight: bold; font-size: 12px; padding: 2px; background: #eee; }' +
+                '.print-month-day { border-right: 1px solid #000; border-bottom: 1px solid #000; height: 2.8cm; position: relative; overflow: hidden; }' +
+                '.print-month-num { font-weight: bold; font-size: 10px; padding: 2px; }' +
+                '.print-month-content { font-size: 7px; line-height: 1.1; padding: 0 2px; }' +
+                '.print-month-line { border-bottom: 0.1px solid #eee; padding: 1px 0; word-break: break-word; }';
+    }
+
+    var html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Calendário Mensal - ' + monthName + '</title>' +
+        '<style>' + style +
+        '.print-month-day.special .print-month-num { color: #FF0000; }' +
+        '.print-month-day.other-month { background: #fafafa; color: #bbb; }' +
+        '@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }' +
+        '</style><script>' +
+        'function adjustFontSize() {' +
+        '  const containers = document.querySelectorAll(".print-month-content");' +
+        '  containers.forEach(container => {' +
+        '    let fontSize = parseFloat(window.getComputedStyle(container).fontSize);' +
+        '    while (container.scrollHeight > container.clientHeight && fontSize > 4) {' +
+        '      fontSize -= 0.5;' +
+        '      container.style.fontSize = fontSize + "px";' +
+        '    }' +
+        '  });' +
+        '}' +
+        'window.onload = adjustFontSize;' +
+        'window.onafterprint = function() { window.close(); };' +
+        '</script></head><body>' +
+        '<div class="print-month-header">PLANEJADOR MENSAL - ' + monthName + '</div>' +
+        '<div class="print-month-grid">' +
+        '<div class="print-month-day-header">DOMINGO</div><div class="print-month-day-header">SEGUNDA</div><div class="print-month-day-header">TERÇA</div>' +
+        '<div class="print-month-day-header">QUARTA</div><div class="print-month-day-header">QUINTA</div><div class="print-month-day-header">SEXTA</div><div class="print-month-day-header">SÁBADO</div>' +
+        gridHtml + '</div></body></html>';
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    setTimeout(function() { 
+        printWindow.print();
+        // Após fechar a janela de impressão, garantir que a visão semanal seja renderizada
+        appState.view = 'week';
+        renderWeekView();
+    }, 500);
+}
+
+function printDay() {
+    if (!appState.selectedDay) return;
+    var dateParts = appState.selectedDay.split('-');
+    var date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+    var dayData = appState.days[appState.selectedDay];
+    var dayName = getDayName(date.getDay());
+    var isSpecial = date.getDay() === 0 || date.getDay() === 6 || isHolidayDate(date);
+
+    var printWindow = window.open('', '', 'width=800,height=600');
+    var linesToPrint = dayData.lines.slice(0, 25);
+    var html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Impressão - ' + dayName + '</title>' +
+        '<style>' +
+        '@page { size: A4 portrait; margin: 5mm; }' +
+        'body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: white; height: 28.7cm; display: flex; flex-direction: column; }' +
+        '.print-header { text-align: center; padding: 5px 0; border-bottom: 1px solid #333; margin: 0 0.5cm; }' +
+        '.print-header h1 { margin: 0; font-size: 14px; font-weight: bold; ' + (isSpecial ? 'color: #FF0000;' : '') + ' }' +
+        '.print-lines { flex: 1; display: flex; flex-direction: column; margin: 0 0.5cm; height: calc(100% - 40px); }' +
+        '.print-line { flex: 1; border-bottom: 1px solid ' + (isSpecial ? '#FF0000' : '#000') + '; display: flex; align-items: center; padding: 0; box-sizing: border-box; overflow: hidden; ' + (isSpecial ? 'color: #FF0000;' : '') + ' }' +
+        '.print-line:last-child { border-bottom: none; }' +
+        '.print-line-content { font-size: 8.5mm; line-height: 1; white-space: normal; word-break: break-word; }' +
+        '@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }' +
+        '</style><script>' +
+        'function adjustFontSize() {' +
+        '  const lines = document.querySelectorAll(".print-line-content");' +
+        '  lines.forEach(line => {' +
+        '    const parent = line.parentElement;' +
+        '    let fontSize = parseFloat(window.getComputedStyle(line).fontSize);' +
+        '    while ((line.scrollHeight > parent.clientHeight || line.scrollWidth > parent.clientWidth) && fontSize > 8) {' +
+        '      fontSize -= 1;' +
+        '      line.style.fontSize = fontSize + "px";' +
+        '    }' +
+        '  });' +
+        '}' +
+        'window.onload = adjustFontSize;' +
+        'window.onafterprint = function() { window.close(); };' +
+        '</script></head><body>' +
+        '<div class="print-header"><h1>' + dayName + ', ' + formatDate(date) + '</h1></div>' +
+        '<div class="print-lines">' +
+        linesToPrint.map(function(line) { return '<div class="print-line"><div class="print-line-content">' + renderLineWithColors(line) + '</div></div>'; }).join('') +
+        '</div></body></html>';
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    setTimeout(function() { 
+        printWindow.print();
+        appState.view = 'week';
+        renderWeekView();
+    }, 500);
+}
+
 function printWeek() {
     var startDate = new Date(appState.currentDate);
     startDate.setDate(appState.currentDate.getDate() - appState.currentDate.getDay());
-    
-    var daysHtml = '';
-    for (var i = 1; i < 8; i++) {
-        var date = new Date(startDate);
-        date.setDate(startDate.getDate() + i);
-        var dateStr = getDateString(date);
-        var dayData = appState.days[dateStr] || { lines: [] };
-        var dayName = getDayName(date.getDay());
-        
-        // Reduzido para 24 linhas na impressão semanal
-        var linesHtml = '';
-        for (var j = 0; j < 24; j++) {
-            var line = dayData.lines[j] || { html: '' };
-            linesHtml += '<div class="print-line"><b>' + (j + 1) + '.</b> ' + (line.html || '') + '</div>';
-        }
 
-        daysHtml += '<div class="print-day">' +
-            '<div class="print-header">' + dayName + ', ' + formatDate(date) + '</div>' +
-            '<div class="print-lines">' + linesHtml + '</div></div>';
-    }
-    
     var printWindow = window.open('', '', 'width=800,height=600');
-    var html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Impressao Semanal</title>' +
+    var daysHtml = '';
+    var hasAnyContent = false;
+
+    for (var i = 1; i <= 7; i++) {
+        var dayIndex = i % 7;
+        var date = new Date(startDate);
+        date.setDate(startDate.getDate() + dayIndex);
+        var dateStr = getDateString(date);
+        var dayData = appState.days[dateStr];
+        
+        var validLines = dayData ? dayData.lines.filter(function(line) { return line && line.text && line.text.trim() !== ''; }) : [];
+
+        if (validLines.length > 0) {
+            hasAnyContent = true;
+            var isSpecial = date.getDay() === 0 || date.getDay() === 6 || isHolidayDate(date);
+            var dayName = getDayName(date.getDay());
+
+            daysHtml += '<div class="print-day" style="' + (isSpecial ? 'color: #FF0000;' : '') + '">' +
+                '<div class="print-header" style="' + (isSpecial ? 'color: #FF0000;' : '') + '">' + dayName + ', ' + formatDate(date) + '</div>' +
+                '<div class="print-lines">' +
+                validLines.map(function(line) { return '<div class="print-line" style="' + (isSpecial ? 'border-bottom: 1px solid #FF0000;' : 'border-bottom: 1px solid #eee;') + '">' + renderLineWithColors(line) + '</div>'; }).join('') +
+                '</div></div>';
+        }
+    }
+
+    if (!hasAnyContent) {
+        daysHtml = '<div style="text-align: center; padding: 50px;">Nenhuma anotação encontrada para esta semana.</div>';
+    }
+
+    var html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Impressão Semanal</title>' +
         '<style>' +
         '@page { size: A4 portrait; margin: 5mm; }' +
         'body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: white; }' +
         '.week-container-print { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }' +
-        '.print-day { page-break-inside: avoid; border-bottom: 2px solid #333; padding: 5px 0.5cm; display: flex; flex-direction: column; }' +
+        '.print-day { page-break-inside: avoid; border-bottom: 2px solid #333; padding: 10px 0.5cm; display: flex; flex-direction: column; }' +
         '.print-day:last-child { border-bottom: none; }' +
-        '.print-header { padding: 2px 0; font-weight: bold; font-size: 14px; border-bottom: 1px solid #eee; margin-bottom: 2px; }' +
-        '.print-lines { display: flex; flex-direction: column; gap: 2px; }' +
-        '.print-line { border-bottom: 1px solid #eee; padding: 2px 0; font-size: 11px; line-height: 1.2; min-height: 14px; }' +
+        '.print-header { padding: 5px 0; font-weight: bold; font-size: 16px; border-bottom: 1px solid #eee; margin-bottom: 5px; }' +
+        '.print-lines { display: flex; flex-direction: column; gap: 5px; }' +
+        '.print-line { border-bottom: 1px solid #eee; padding: 5px 0; font-size: 14px; line-height: 1.4; word-break: break-word; }' +
         '@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }' +
-        '</style></head><body><div class="week-container-print">' + daysHtml + '</div></body></html>';
-    
+        '</style><script>' +
+        'function adjustFontSize() {' +
+        '  const containers = document.querySelectorAll(".print-lines");' +
+        '  containers.forEach(container => {' +
+        '    const lines = container.querySelectorAll(".print-line");' +
+        '    let fontSize = 14;' +
+        '    while (container.scrollHeight > container.clientHeight && fontSize > 6) {' +
+        '      fontSize -= 0.5;' +
+        '      lines.forEach(l => l.style.fontSize = fontSize + "px");' +
+        '    }' +
+        '  });' +
+        '}' +
+        'window.onload = adjustFontSize;' +
+        'window.onafterprint = function() { window.close(); };' +
+        '</script></head><body><div class="week-container-print">' + daysHtml + '</div></body></html>';
+
     printWindow.document.write(html);
     printWindow.document.close();
-    setTimeout(function() { printWindow.print(); }, 500);
-}
-
-function printMonth(type) {
-    window.print();
+    setTimeout(function() { 
+        printWindow.print();
+        appState.view = 'week';
+        renderWeekView();
+    }, 500);
 }
 
 function printDayCustom() {
@@ -644,7 +959,7 @@ function printDayCustom() {
     var dayData = appState.days[appState.selectedDay];
     var dayName = getDayName(date.getDay());
     var isSpecial = date.getDay() === 0 || date.getDay() === 6 || isHolidayDate(date);
-    
+
     var printWindow = window.open('', '', 'width=800,height=600');
     var linesToPrint = dayData.lines.slice(0, 30);
     
@@ -657,23 +972,33 @@ function printDayCustom() {
         '.print-lines { flex: 1; display: flex; flex-direction: column; margin: 0 10mm; height: calc(100% - 50px); }' +
         '.print-line { flex: 1; border-bottom: 1px solid ' + (isSpecial ? '#FF0000' : '#999') + '; display: flex; align-items: center; padding: 0; box-sizing: border-box; overflow: hidden; ' + (isSpecial ? 'color: #FF0000;' : '') + ' }' +
         '.print-line:last-child { border-bottom: none; }' +
-        '.print-line-content { font-size: 14pt; line-height: 1.2; white-space: normal; word-break: break-word; padding: 2mm 0; }' +
+        '.print-line-content { font-size: 10mm; line-height: 1.2; white-space: normal; word-break: break-word; padding: 2mm 0; }' +
         '@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }' +
-        '</style></head><body>' +
+        '</style><script>' +
+        'function adjustFontSize() {' +
+        '  const lines = document.querySelectorAll(".print-line-content");' +
+        '  lines.forEach(line => {' +
+        '    const parent = line.parentElement;' +
+        '    let fontSize = parseFloat(window.getComputedStyle(line).fontSize);' +
+        '    while ((line.scrollHeight > parent.clientHeight || line.scrollWidth > parent.clientWidth) && fontSize > 8) {' +
+        '      fontSize -= 1;' +
+        '      line.style.fontSize = fontSize + "px";' +
+        '    }' +
+        '  });' +
+        '}' +
+        'window.onload = adjustFontSize;' +
+        'window.onafterprint = function() { window.close(); };' +
+        '</script></head><body>' +
         '<div class="print-header"><h1>' + dayName + ', ' + formatDate(date) + '</h1></div>' +
         '<div class="print-lines">' +
-        linesToPrint.map(function(line, idx) { 
-            var lineContent = line.html || '';
-            // Incluir o texto anotado (que pode estar em line.text ou line.html)
-            if (line.text && line.text.trim() !== '') {
-                // Usar a função renderLineWithColors para garantir que a formatação (cores, marca-texto) seja aplicada
-                lineContent = renderLineWithColors(line);
-            }
-            return '<div class="print-line"><div class="print-line-content"><b>' + (idx + 1) + '.</b> ' + lineContent + '</div></div>'; 
-        }).join('') +
+        linesToPrint.map(function(line) { return '<div class="print-line"><div class="print-line-content">' + renderLineWithColors(line) + '</div></div>'; }).join('') +
         '</div></body></html>';
-    
+
     printWindow.document.write(html);
     printWindow.document.close();
-    setTimeout(function() { printWindow.print(); }, 500);
+    setTimeout(function() { 
+        printWindow.print();
+        appState.view = 'week';
+        renderWeekView();
+    }, 500);
 }
