@@ -102,10 +102,10 @@ function initializeEventListeners() {
         printMonth('Plotter');
     });
 
-    // Estilos de Texto
-    document.getElementById('btnBold').addEventListener('click', function() { applyStyle('bold'); });
-    document.getElementById('btnItalic').addEventListener('click', function() { applyStyle('italic'); });
-    document.getElementById('btnStrike').addEventListener('click', function() { applyStyle('strikethrough'); });
+    // Estilos de Texto - Usar mousedown para manter a seleção
+    document.getElementById('btnBold').addEventListener('mousedown', function(e) { e.preventDefault(); applyStyle('bold'); });
+    document.getElementById('btnItalic').addEventListener('mousedown', function(e) { e.preventDefault(); applyStyle('italic'); });
+    document.getElementById('btnStrike').addEventListener('mousedown', function(e) { e.preventDefault(); applyStyle('strikethrough'); });
 
     // Fechar edição
     var closeBtn = document.getElementById('closeDayEdit');
@@ -437,14 +437,16 @@ function closeDayEdit() {
 }
 
 function applyStyle(command, value = null) {
+    // Garante que o comando seja aplicado ao elemento com foco
     document.execCommand(command, false, value);
-    // Salvar alterações em todas as linhas editadas
-    var editables = document.querySelectorAll('.notebook-line-editable');
-    editables.forEach(function(el) {
-        var idx = parseInt(el.getAttribute('data-index'));
-        appState.days[appState.selectedDay].lines[idx].html = el.innerHTML;
-    });
-    saveDataToStorage();
+    
+    // Salvar alterações na linha que está sendo editada
+    var activeEl = document.activeElement;
+    if (activeEl && activeEl.classList.contains('notebook-line-editable')) {
+        var idx = parseInt(activeEl.getAttribute('data-index'));
+        appState.days[appState.selectedDay].lines[idx].html = activeEl.innerHTML;
+        saveDataToStorage();
+    }
 }
 
 function renderColorPalette() {
@@ -457,7 +459,9 @@ function renderColorPalette() {
         btn.style.backgroundColor = color;
         if (index === appState.selectedColor) btn.classList.add('active');
         
-        btn.addEventListener('click', function() {
+        // Usar mousedown em vez de click para evitar perda de foco/seleção
+        btn.addEventListener('mousedown', function(e) {
+            e.preventDefault(); // Impede que o botão roube o foco do campo de texto
             appState.selectedColor = index;
             document.querySelectorAll('.color-btn').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
