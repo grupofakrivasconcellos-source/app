@@ -32,13 +32,9 @@ body {
 #app {
     width: 100%;
     height: 100%;
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
+    /* Ajuste para Dynamic Island */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
@@ -46,15 +42,8 @@ body {
 }
 
 .main-view {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
     padding: 0;
     overflow: hidden;
@@ -64,31 +53,26 @@ body {
 
 /* ========== HEADER ========== */
 .header {
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-pack: justify;
-    -webkit-justify-content: space-between;
     justify-content: space-between;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
     align-items: center;
     padding: 15px 20px;
     background: #c41e3a;
     background: linear-gradient(135deg, #c41e3a 0%, #8b1428 100%);
     color: white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    /* Garante que o header fique abaixo da Dynamic Island se necessário */
+    margin-top: 10px; 
+    border-radius: 12px 12px 0 0;
 }
 
 .header-title {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
     text-align: center;
 }
 
 .header-title h1 {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
     letter-spacing: 1px;
 }
@@ -96,55 +80,37 @@ body {
 .btn-nav-arrow {
     background: white;
     border: none;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    font-size: 24px;
+    font-size: 20px;
     cursor: pointer;
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
     align-items: center;
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    -webkit-appearance: none;
-    appearance: none;
     color: #c41e3a;
     font-weight: bold;
 }
 
 /* ========== CONTROLES DE VISÃO ========== */
 .view-controls {
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-pack: start;
-    -webkit-justify-content: flex-start;
-    justify-content: flex-start;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
+    justify-content: center;
     align-items: center;
-    padding: 12px 15px;
+    padding: 10px;
     background: white;
     border-bottom: 1px solid #e2e8f0;
-    -webkit-flex-wrap: wrap;
     flex-wrap: wrap;
+    gap: 8px;
 }
 
 .view-btn {
-    padding: 8px 16px;
-    border: 2px solid #e2e8f0;
+    padding: 6px 12px;
+    border: 1px solid #e2e8f0;
     background: white;
-    border-radius: 6px;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
+    border-radius: 20px;
+    font-size: 12px;
     cursor: pointer;
-    margin-right: 10px;
-    margin-bottom: 5px;
     color: #333;
 }
 
@@ -157,51 +123,27 @@ body {
 .btn-print {
     background: #48bb78;
     color: white;
-    padding: 8px 16px;
+    padding: 6px 12px;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: 20px;
+    font-size: 12px;
     cursor: pointer;
-    margin-right: 10px;
-    margin-bottom: 5px;
     display: flex;
     align-items: center;
-    gap: 5px;
-    transition: background 0.2s;
-}
-
-.btn-print:hover {
-    background: #38a169;
-}
-
-.month-print-controls .btn-print {
-    margin: 0;
+    gap: 4px;
 }
 
 /* ========== VISÃO SEMANAL (GRID) ========== */
 .week-view-container {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
     overflow: hidden;
-    position: relative;
 }
 
 .week-grid {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    display: -webkit-box !important;
-    display: -webkit-flex !important;
     display: flex !important;
-    -webkit-flex-wrap: nowrap !important;
     flex-wrap: nowrap !important;
     padding: 0;
     overflow-y: auto;
@@ -210,119 +152,73 @@ body {
 }
 
 .week-column {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1 1 50%;
     flex: 1 1 50%;
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
     height: 100%;
-    overflow-y: auto;
 }
 
 /* ========== CARTÃO DE DIA (GRID) ========== */
 .day-card-grid {
     background: white;
-    border: 1px solid #d0d0d0;
-    display: -webkit-box;
-    display: -webkit-flex;
+    border: 0.5px solid #eee;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
     cursor: pointer;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-}
-
-.day-card-grid.weekend,
-.day-card-grid.holiday {
-    background: #ffe0e0;
+    min-height: 150px;
 }
 
 .day-card-header {
-    padding: 8px 12px;
-    background: white;
-    border-bottom: 1px solid #d0d0d0;
+    padding: 6px 10px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
     font-weight: bold;
-    font-size: 13px;
-    color: #333;
-}
-
-.day-card-header.weekend {
-    background: #c41e3a;
-    color: white;
+    font-size: 12px;
+    color: #c41e3a;
 }
 
 .day-card-content {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    padding: 4px 8px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    padding: 4px;
+    overflow-y: hidden;
     font-size: 10px;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-    max-height: 180px; /* Aproximadamente 10 linhas de 18px */
 }
 
 .day-line-preview {
-    padding: 2px 4px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 2px 0;
+    border-bottom: 0.5px solid #f0f0f0;
     font-size: 9px;
-    min-height: 18px;
-    height: 18px;
-    word-break: break-word;
-    overflow: hidden;
     white-space: nowrap;
+    overflow: hidden;
     text-overflow: ellipsis;
+    display: flex;
+    gap: 4px;
+}
+
+.line-number-preview {
+    font-weight: bold;
+    color: #999;
+    min-width: 15px;
 }
 
 /* ========== VISÃO MENSAL ========== */
 .month-view {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
     overflow: hidden;
 }
 
 .month-calendar {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
     background: white;
-    padding: 15px;
-    margin: 12px;
+    padding: 5px;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
 }
 
 .month-grid {
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-flex-wrap: wrap;
     flex-wrap: wrap;
 }
 
@@ -330,83 +226,47 @@ body {
     width: 14.28%;
     text-align: center;
     font-weight: bold;
-    padding: 8px;
-    background-color: #e2e8f0;
-    font-size: 12px;
+    padding: 6px;
+    background-color: #f8f9fa;
+    font-size: 10px;
+    border: 0.5px solid #eee;
 }
 
 .month-day-cell {
     width: 14.28%;
-    height: 80px;
-    border: 1px solid #e2e8f0;
-    padding: 4px;
+    height: 100px;
+    border: 0.5px solid #eee;
+    padding: 2px;
     cursor: pointer;
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
-    font-size: 12px;
-}
-
-.month-day-cell.weekend {
-    background-color: #fff5f5;
-    color: #c41e3a;
-}
-
-.month-day-cell.holiday {
-    background-color: #ffe0e0;
-    color: #c41e3a;
-    font-weight: bold;
-}
-
-.month-day-cell.other-month {
-    opacity: 0.4;
 }
 
 .month-day-number {
     font-weight: bold;
-    margin-bottom: 4px;
-    font-size: 14px;
-}
-
-.month-day-notes {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
-    flex: 1;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-    overflow: hidden;
-    gap: 2px;
-}
-
-.month-note-line {
-    font-size: 9px;
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal;
-    color: #333;
-    word-break: break-word;
-    border-bottom: 1px solid #d3d3d3;
-    padding-bottom: 2px;
+    font-size: 12px;
     margin-bottom: 2px;
 }
 
-.month-note-more {
-    font-size: 8px;
-    color: #999;
-    text-align: center;
+.month-day-notes {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    gap: 1px;
 }
 
-/* ========== VISÃO DE EDIÇÃO DIÁRIA ========== */
+.month-note-line {
+    font-size: 8px;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    gap: 2px;
+}
+
+/* ========== EDIÇÃO DIÁRIA ========== */
 .day-edit-view {
     position: fixed;
     top: 0;
@@ -414,225 +274,124 @@ body {
     width: 100%;
     height: 100%;
     background: white;
-    z-index: 1000;
-    display: -webkit-box;
-    display: -webkit-flex;
+    z-index: 2000;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
     padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
 }
 
 .edit-header {
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-pack: justify;
-    -webkit-justify-content: space-between;
     justify-content: space-between;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
     align-items: center;
-    padding: 20px 15px;
-    background: #667eea;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 10px 15px;
+    background: #c41e3a;
     color: white;
-    border-bottom: 2px solid #e2e8f0;
     flex-shrink: 0;
-    order: -1;
-    min-height: 60px;
-    display: flex;
-    align-items: center;
+    margin-top: 10px;
+    border-radius: 12px 12px 0 0;
+}
+
+.edit-day-info {
+    font-weight: bold;
+    font-size: 14px;
 }
 
 .edit-header-right {
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
     align-items: center;
-    gap: 15px;
-    -webkit-flex-wrap: nowrap;
-    flex-wrap: nowrap;
-    -webkit-box-pack: end;
-    -webkit-justify-content: flex-end;
-    justify-content: flex-end;
-    z-index: 1001;
+    gap: 10px;
 }
 
-.btn {
-    position: relative;
-    z-index: 1002;
+.text-styles-inline {
+    display: flex;
+    gap: 4px;
+}
+
+.btn-style {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    border: none;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-weight: bold;
     cursor: pointer;
-}
-
-.color-palette-inline {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-    align-items: center;
-    margin-right: 10px;
 }
 
 .color-buttons {
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    gap: 6px;
-    -webkit-flex-wrap: wrap;
-    flex-wrap: wrap;
-    max-width: 600px;
-    padding: 5px;
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-    justify-content: center;
+    gap: 4px;
+    overflow-x: auto;
+    max-width: 120px;
+    padding: 2px;
 }
 
 .color-btn {
-    width: 32px;
-    height: 32px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.8);
-    cursor: pointer;
-    -webkit-flex-shrink: 0;
+    border: 2px solid transparent;
     flex-shrink: 0;
-    transition: transform 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.color-btn:hover {
-    transform: scale(1.2);
 }
 
 .color-btn.active {
-    border-color: #333;
-    box-shadow: 0 0 0 2px white;
-}
-
-.edit-header-left {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-    align-items: center;
+    border-color: white;
 }
 
 .edit-content {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
-    flex-direction: column;
     overflow-y: auto;
-    padding: 15px;
-    -webkit-overflow-scrolling: touch;
-    order: 1;
-}
-
-.edit-footer {
-    display: none;
-}
-
-.palette-label {
-    font-size: 12px;
-    font-weight: bold;
-    color: #666;
-    margin-right: 8px;
-    white-space: nowrap;
-}
-
-.color-btn {
-    width: 36px;
-    height: 36px;
-    border: 2px solid transparent;
-    border-radius: 50%;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: transform 0.2s ease;
-}
-
-.color-btn:active {
-    transform: scale(1.1);
-}
-
-/* ========== NOTEBOOK (CADERNO) ========== */
-.notebook-container {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
-    flex: 1;
+    background: #fff;
     padding: 10px;
-    background: white;
+}
+
+.notebook-container {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: #fff;
 }
 
 .notebook-line-wrapper {
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+    min-height: 40px;
     align-items: center;
-    border-bottom: 2px solid #d3d3d3;
-    padding: 4px 0;
-    min-height: 32px;
 }
 
 .line-number {
-    min-width: 25px;
-    font-weight: bold;
-    color: #ccc;
-    font-size: 10px;
+    width: 30px;
     text-align: center;
+    font-size: 12px;
+    color: #999;
+    font-weight: bold;
+    border-right: 1px solid #f0f0f0;
+    padding: 10px 0;
 }
 
 .notebook-line-editable {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    border: none;
-    background: transparent;
+    padding: 10px;
     font-size: 16px;
-    color: #333;
     outline: none;
-    padding: 2px 8px;
-    line-height: 1.4;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
     word-break: break-word;
 }
 
-/* ========== BOTÕES ========== */
-.btn {
-    padding: 12px 18px;
+.btn-primary, .btn-secondary {
+    padding: 6px 12px;
+    border-radius: 4px;
     border: none;
-    border-radius: 6px;
     font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
-    margin-left: 10px;
-    white-space: nowrap;
-    flex-shrink: 0;
 }
 
-.btn-primary {
-    background-color: #667eea;
-    color: white;
-}
+.btn-primary { background: #48bb78; color: white; }
+.btn-secondary { background: rgba(255,255,255,0.2); color: white; }
 
-.btn-secondary {
-    background-color: #e2e8f0;
-    color: #333;
+/* Ajustes para iPhone 17 */
+@supports (padding: env(safe-area-inset-top)) {
+    .header, .edit-header {
+        margin-top: calc(env(safe-area-inset-top) + 5px);
+    }
 }
