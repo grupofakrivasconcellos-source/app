@@ -212,8 +212,11 @@
             var day = String(date.getDate()).padStart(2, '0');
             var month = String(date.getMonth() + 1).padStart(2, '0');
             var year = date.getFullYear();
-            printHeader.innerHTML = '<div class="print-date">' + day + '/' + month + '/' + year + '</div>' +
-                                   '<div class="print-day-name">' + getDayName(date.getDay()) + '</div>' +
+            // Garantindo que a data e o dia da semana apareçam na mesma linha ou blocos visíveis
+            printHeader.innerHTML = '<div class="print-header-content">' +
+                                   '<span class="print-date">' + day + '/' + month + '/' + year + '</span>' +
+                                   '<span class="print-day-name"> - ' + getDayName(date.getDay()) + '</span>' +
+                                   '</div>' +
                                    '<hr class="print-divider">';
 
             var content = document.createElement('div');
@@ -478,11 +481,10 @@
             document.getElementById('printMonthBtn').onclick = function() {
                 appState.view = 'month';
                 renderMonthView();
-                var element = document.getElementById('monthView');
-                element.classList.add('print-mode');
+                document.body.classList.add('print-monthly-landscape');
                 setTimeout(function() { 
                     window.print(); 
-                    element.classList.remove('print-mode');
+                    document.body.classList.remove('print-monthly-landscape');
                 }, 500);
             };
             

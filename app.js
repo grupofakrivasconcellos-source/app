@@ -100,7 +100,7 @@ function initializeEventListeners() {
     });
 
     document.getElementById('printMonthBtn').addEventListener('click', function() {
-        alert("Função de impressão mensal.");
+        printMonthlyView();
     });
 
     document.getElementById('closeDayEdit').addEventListener('click', function() {
@@ -443,4 +443,22 @@ function renderLineWithColors(lineData) {
     if (lineData.html) return lineData.html;
     if (lineData.text) return lineData.text;
     return '';
+}
+
+function printMonthlyView() {
+    // Garantir que estamos na visão mensal
+    if (appState.view !== 'month') {
+        appState.view = 'month';
+        renderMonthView();
+    }
+    
+    // Adicionar classe para impressão mensal paisagem
+    document.body.classList.add('print-monthly-landscape');
+    
+    // Pequeno delay para garantir a renderização e o estilo
+    setTimeout(function() {
+        window.print();
+        // Remover a classe após a impressão (ou cancelamento)
+        document.body.classList.remove('print-monthly-landscape');
+    }, 500);
 }
