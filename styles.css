@@ -262,6 +262,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 120px; /* Aumentado levemente para caber mais conteúdo */
     background-color: #fff;
 }
 
@@ -295,7 +296,16 @@ body {
 .month-cell-content {
     flex: 1;
     overflow-y: auto;
-    font-size: 9px;
+    font-size: 7.5px; /* Fonte ainda menor para garantir que caiba tudo */
+    line-height: 1.1;
+    max-height: 85px; /* Limite para não estourar o quadro */
+}
+
+.month-line-rich {
+    margin-bottom: 1px;
+    border-bottom: 1px dotted #eee;
+    word-break: break-word;
+    white-space: normal; /* Garante que o texto quebre linha */
 }
 
 .month-line-rich {

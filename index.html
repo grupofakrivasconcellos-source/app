@@ -316,7 +316,9 @@
             if (dayData && dayData.lines) {
                 dayData.lines.forEach(function(l, idx) {
                     if (l && (l.text || l.html)) {
-                        html += '<div class="month-line-rich">' + (idx+1) + '. ' + (l.html || l.text) + '</div>';
+                        // Limpar tags de tamanho de fonte para a visão mensal para garantir que caiba
+                        var cleanHtml = (l.html || l.text).replace(/font-size:[^;"]+;?/g, '');
+                        html += '<div class="month-line-rich">' + (idx+1) + '. ' + cleanHtml + '</div>';
                     }
                 });
             }
