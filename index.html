@@ -325,23 +325,26 @@
             html += '</div>';
             
             cell.innerHTML = html;
-            cell.onclick = function() { appState.currentDate = new Date(date); renderWeekView(); };
+            cell.onclick = function() { openDayEdit(new Date(date)); };
             return cell;
         }
 
         function openDayEdit(date) {
-            appState.selectedDay = getDateString(date);
+            // Garantir que a data seja tratada corretamente
+            var targetDate = new Date(date);
+            appState.selectedDay = getDateString(targetDate);
             var dayData = appState.days[appState.selectedDay] || { lines: [] };
-            document.getElementById('editDayInfo').textContent = getDayName(date.getDay()) + ', ' + date.getDate();
+            document.getElementById('editDayInfo').textContent = getDayName(targetDate.getDay()) + ', ' + targetDate.getDate();
             
-            // Atualizar cabeçalho de impressão
-            var day = String(date.getDate()).padStart(2, '0');
-            var month = String(date.getMonth() + 1).padStart(2, '0');
-            var year = date.getFullYear();
+            // Atualizar cabeçalho de impressão com a data correta do dia selecionado
+            var day = String(targetDate.getDate()).padStart(2, '0');
+            var month = String(targetDate.getMonth() + 1).padStart(2, '0');
+            var year = targetDate.getFullYear();
             document.getElementById('printDate').textContent = day + '/' + month + '/' + year;
-            document.getElementById('printDayName').textContent = getDayName(date.getDay());
+            document.getElementById('printDayName').textContent = getDayName(targetDate.getDay());
 
             var notebook = document.getElementById('notebookLines');
+            document.body.classList.add('editing-day');
             notebook.innerHTML = '';
             for (var i = 0; i < 30; i++) {
                 var lineData = dayData.lines[i] || { text: '' };
@@ -411,6 +414,7 @@
         function closeDayEdit() {
             document.getElementById('dayEditView').style.display = 'none';
             document.getElementById('mainView').style.display = 'flex';
+            document.body.classList.remove('editing-day');
             renderWeekView();
         }
 

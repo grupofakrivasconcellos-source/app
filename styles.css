@@ -518,6 +518,11 @@ body {
         width: 100% !important;
     }
 
+    /* Se estivermos na visão de edição diária, ocultar a visão semanal na impressão */
+    body.editing-day .week-view-container {
+        display: none !important;
+    }
+
     .week-column {
         display: block !important;
         width: 100% !important;
