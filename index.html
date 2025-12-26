@@ -35,7 +35,7 @@
             </div>
 
             <div id="monthView" class="month-view" style="display: none;">
-                <div id="monthPrintHeader" class="month-print-header" style="display: none;">
+                <div id="monthPrintHeader" class="month-print-header print-only">
                     <h1 id="monthPrintTitle"></h1>
                 </div>
                 <div id="monthCalendar" class="month-calendar"></div>
@@ -54,26 +54,30 @@
             </div>
 
             <div class="edit-toolbar no-print">
-                <div class="toolbar-group">
-                    <button onclick="formatDoc('bold')" title="Negrito"><b>B</b></button>
-                    <button onclick="formatDoc('italic')" title="Itálico"><i>I</i></button>
-                    <button onclick="formatDoc('underline')" title="Sublinhado"><u>U</u></button>
-                    <button onclick="formatDoc('strikeThrough')" title="Tracejado"><s>S</s></button>
+                <div class="toolbar-row">
+                    <div class="toolbar-group">
+                        <button onclick="formatDoc('bold')" title="Negrito"><b>B</b></button>
+                        <button onclick="formatDoc('italic')" title="Itálico"><i>I</i></button>
+                        <button onclick="formatDoc('underline')" title="Sublinhado"><u>U</u></button>
+                        <button onclick="formatDoc('strikeThrough')" title="Tracejado"><s>S</s></button>
+                    </div>
+                    <div class="toolbar-group">
+                        <select onchange="formatDoc('fontSize', this.value); this.selectedIndex=0;">
+                            <option value="">Tamanho</option>
+                            <option value="1">Muito Pequeno</option>
+                            <option value="2">Pequeno</option>
+                            <option value="3">Normal</option>
+                            <option value="4">Grande</option>
+                            <option value="5">Muito Grande</option>
+                            <option value="6">Enorme</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="toolbar-group">
-                    <select onchange="formatDoc('fontSize', this.value); this.selectedIndex=0;">
-                        <option value="">Tamanho</option>
-                        <option value="1">Muito Pequeno</option>
-                        <option value="2">Pequeno</option>
-                        <option value="3">Normal</option>
-                        <option value="4">Grande</option>
-                        <option value="5">Muito Grande</option>
-                        <option value="6">Enorme</option>
-                    </select>
-                </div>
-                <div class="toolbar-group">
-                    <span class="label">Cores:</span>
-                    <div id="colorPalette" class="color-buttons"></div>
+                <div class="toolbar-row">
+                    <div class="toolbar-group" style="width: 100%;">
+                        <span class="label">Cores:</span>
+                        <div id="colorPalette" class="color-buttons"></div>
+                    </div>
                 </div>
             </div>
 
@@ -169,29 +173,28 @@
 
             var startDate = new Date(appState.currentDate);
             var dayOfWeek = appState.currentDate.getDay();
+            // Ajustar para começar na Segunda-feira (1) e terminar no Domingo (0)
             var daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
             startDate.setDate(appState.currentDate.getDate() - daysToSubtract);
 
             document.getElementById('headerTitle').textContent = startDate.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).toUpperCase();
 
-            var leftCol = document.createElement('div'); leftCol.className = 'week-column';
-            var rightCol = document.createElement('div'); rightCol.className = 'week-column';
+            // O grid agora é unificado e controlado via CSS
 
             for (var i = 0; i < 7; i++) {
                 var date = new Date(startDate);
                 date.setDate(startDate.getDate() + i);
+                
+                // Card unificado (usará classes CSS para alternar entre tela e impressão)
                 var card = createDayCard(date);
-                if (i < 4) leftCol.appendChild(card); else rightCol.appendChild(card);
+                weekGrid.appendChild(card);
             }
-
-            weekGrid.appendChild(leftCol);
-            weekGrid.appendChild(rightCol);
             
             document.getElementById('weekView').style.display = 'flex';
             document.getElementById('monthView').style.display = 'none';
             document.getElementById('viewWeekly').classList.add('active');
             document.getElementById('viewMonthly').classList.remove('active');
-            document.getElementById('exportPdfBtn').style.display = 'none';
+            document.getElementById('exportPdfBtn').style.display = 'inline-block'; // Habilitar PDF na semana
         }
 
         function createDayCard(date) {
@@ -228,15 +231,50 @@
             var dayData = appState.days[dateStr] || { lines: [] };
             var hasAnyContent = false;
             
+            // Container para colunas de impressão (unificado em uma coluna por dia para a semana)
+            var printCols = document.createElement('div');
+            printCols.className = 'print-only day-print-columns';
+            var pCol1 = document.createElement('div'); pCol1.className = 'print-col';
+            printCols.appendChild(pCol1);
+
+            var contentLines = [];
             for (var i = 0; i < 30; i++) {
                 var line = dayData.lines[i] || { text: '' };
-                var lineWrap = document.createElement('div');
                 var hasContent = !!(line.text || line.html);
-                if (hasContent) hasAnyContent = true;
+                if (hasContent) {
+                    hasAnyContent = true;
+                    contentLines.push({ index: i + 1, data: line });
+                }
                 
-                lineWrap.className = 'day-line-wrapper' + (hasContent ? ' has-content' : ' empty-line');
-                lineWrap.innerHTML = '<span class="line-number-preview">' + (i+1) + '.</span><div class="day-line-preview">' + (line.html || line.text || '&nbsp;') + '</div>';
+                // Renderizar para tela (comportamento original)
+                var lineWrap = document.createElement('div');
+                lineWrap.className = 'day-line-wrapper no-print' + (hasContent ? ' has-content' : ' empty-line');
+                lineWrap.innerHTML = '<span class="line-number-preview" style="color:#bbb;">' + (i+1) + '.</span><div class="day-line-preview">' + (line.html || line.text || '&nbsp;') + '</div>';
                 content.appendChild(lineWrap);
+            }
+
+            // Distribuir em 3 colunas para impressão (Regra: 10 linhas por coluna)
+            if (hasAnyContent) {
+                var totalChars = contentLines.reduce(function(acc, curr) { 
+                    return acc + (curr.data.text || curr.data.html || "").length; 
+                }, 0);
+
+                var fontSize = 8;
+                if (totalChars > 1000 || contentLines.length > 25) fontSize = 5;
+                else if (totalChars > 600 || contentLines.length > 20) fontSize = 6;
+                else if (totalChars > 300 || contentLines.length > 15) fontSize = 7;
+
+                contentLines.forEach(function(item, idx) {
+                    var pWrap = document.createElement('div');
+                    pWrap.className = 'day-line-wrapper has-content';
+                    pWrap.style.marginBottom = '1px';
+                    pWrap.style.borderBottom = '0.5px dotted #ddd';
+                    pWrap.innerHTML = '<span class="line-number-preview" style="color:#bbb; font-size:' + (fontSize-1) + 'px; width: 10px;">' + item.index + '.</span>' +
+                                     '<div class="day-line-preview" style="font-size:' + fontSize + 'px; word-break: break-all; line-height: 1.1;">' + (item.data.html || item.data.text) + '</div>';
+                    
+                    pCol1.appendChild(pWrap);
+                });
+                content.appendChild(printCols);
             }
 
             if (!hasAnyContent) {
@@ -320,13 +358,56 @@
             
             html += '<div class="month-cell-content">';
             if (dayData && dayData.lines) {
+                var contentLines = [];
                 dayData.lines.forEach(function(l, idx) {
                     if (l && (l.text || l.html)) {
-                        // Limpar tags de tamanho de fonte para a visão mensal para garantir que caiba
-                        var cleanHtml = (l.html || l.text).replace(/font-size:[^;"]+;?/g, '');
-                        html += '<div class="month-line-rich">' + (idx+1) + '. ' + cleanHtml + '</div>';
+                        contentLines.push({ index: idx + 1, data: l });
                     }
                 });
+
+                // Lógica para tela (comportamento original - mostra anotações)
+                html += '<div class="no-print">';
+                contentLines.forEach(function(item) {
+                    var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
+                    html += '<div class="month-line-rich"><span class="line-num">' + item.index + '.</span> ' + cleanHtml + '</div>';
+                });
+                html += '</div>';
+
+                // Lógica para Impressão/PDF (3 Colunas de 10 linhas cada)
+                html += '<div class="print-only month-print-columns" style="display: flex; gap: 1px; width: 100%; height: 100%; overflow: visible;">';
+                
+                var pCol1 = '<div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">';
+                var pCol2 = '<div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">';
+                var pCol3 = '<div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">';
+                
+                // Calcular fonte baseada no volume total de texto
+                var totalChars = contentLines.reduce(function(acc, curr) { 
+                    return acc + (curr.data.text || curr.data.html || "").length; 
+                }, 0);
+                
+                var fontSize = 6;
+                if (totalChars > 600 || contentLines.length > 25) fontSize = 3;
+                else if (totalChars > 400 || contentLines.length > 20) fontSize = 4;
+                else if (totalChars > 200 || contentLines.length > 12) fontSize = 5;
+
+                // Criar as 30 linhas (mesmo as vazias para manter o grid se necessário, ou apenas as com conteúdo)
+                // O usuário pediu 30 linhas distribuídas em 3 colunas
+                for (var lineIdx = 1; lineIdx <= 30; lineIdx++) {
+                    var lineData = dayData.lines[lineIdx-1];
+                    var hasContent = lineData && (lineData.text || lineData.html);
+                    var cleanHtml = hasContent ? (lineData.html || lineData.text).replace(/font-size:[^;"]+;?/g, '') : '&nbsp;';
+                    
+                    var lineHtml = '<div class="month-line-rich" style="font-size:' + fontSize + 'px; border-bottom: 0.1px solid #eee; height: ' + (100/10) + '%; line-height: 1; word-break: break-all; white-space: normal; display: flex; align-items: center;">' +
+                                   '<span style="color:#ccc; font-size: 0.8em; width: 8px; flex-shrink: 0;">' + lineIdx + '.</span> ' +
+                                   '<div style="flex: 1; overflow: hidden;">' + cleanHtml + '</div></div>';
+                    
+                    if (lineIdx <= 10) pCol1 += lineHtml;
+                    else if (lineIdx <= 20) pCol2 += lineHtml;
+                    else pCol3 += lineHtml;
+                }
+                
+                pCol1 += '</div>'; pCol2 += '</div>'; pCol3 += '</div>';
+                html += pCol1 + pCol2 + pCol3 + '</div>';
             }
             html += '</div>';
             
@@ -352,19 +433,43 @@
             var notebook = document.getElementById('notebookLines');
             document.body.classList.add('editing-day');
             notebook.innerHTML = '';
+            
+            // Container para colunas de impressão diária
+            var printColumns = document.createElement('div');
+            printColumns.className = 'print-only day-print-columns';
+            var col1 = document.createElement('div'); col1.className = 'print-col';
+            var col2 = document.createElement('div'); col2.className = 'print-col';
+            var col3 = document.createElement('div'); col3.className = 'print-col';
+            printColumns.appendChild(col1);
+            printColumns.appendChild(col2);
+            printColumns.appendChild(col3);
+            
+            var contentLines = [];
             for (var i = 0; i < 30; i++) {
                 var lineData = dayData.lines[i] || { text: '' };
-                var wrap = document.createElement('div');
                 var hasContent = !!(lineData.text || lineData.html);
-                wrap.className = 'notebook-line-wrapper' + (hasContent ? ' has-content' : ' empty-line');
+                if (hasContent) contentLines.push({ index: i + 1, data: lineData });
+
+                // Renderizar para tela (comportamento original)
+                var wrap = document.createElement('div');
+                wrap.className = 'notebook-line-wrapper no-print' + (hasContent ? ' has-content' : ' empty-line');
                 var line = document.createElement('div');
                 line.className = 'notebook-line';
                 line.contentEditable = true;
                 line.setAttribute('data-index', i);
                 line.innerHTML = lineData.html || lineData.text || '';
                 
-                line.oninput = function() { updateLine(this.getAttribute('data-index'), this); };
+                line.oninput = function() { 
+                    updateLine(this.getAttribute('data-index'), this);
+                    adjustFontSize(this, 24);
+                };
                 line.onfocus = function() { appState.selectedLineIndex = parseInt(this.getAttribute('data-index')); };
+                
+                if (hasContent) {
+                    setTimeout((function(el) {
+                        return function() { adjustFontSize(el, 24); };
+                    })(line), 0);
+                }
                 
                 line.onkeydown = function(e) {
                     var idx = parseInt(this.getAttribute('data-index'));
@@ -383,9 +488,44 @@
                 notebook.appendChild(wrap);
             }
 
+            // Renderizar para impressão diária (colunas se > 10 linhas)
+            if (contentLines.length > 0) {
+                var numCols = 1;
+                if (contentLines.length > 20) numCols = 3;
+                else if (contentLines.length > 10) numCols = 2;
+
+                contentLines.forEach(function(item, idx) {
+                    var lineWrap = document.createElement('div');
+                    lineWrap.className = 'notebook-line-wrapper has-content';
+                    lineWrap.innerHTML = '<div class="line-number">' + item.index + '.</div><div class="notebook-line">' + (item.data.html || item.data.text) + '</div>';
+                    
+                    var colIdx = idx % numCols;
+                    if (colIdx === 0) col1.appendChild(lineWrap);
+                    else if (colIdx === 1) col2.appendChild(lineWrap);
+                    else col3.appendChild(lineWrap);
+
+                    var lineEl = lineWrap.querySelector('.notebook-line');
+                    setTimeout((function(el) {
+                        return function() { adjustFontSize(el, 24); };
+                    })(lineEl), 0);
+                });
+                notebook.appendChild(printColumns);
+            }
+
             document.getElementById('dayEditView').style.display = 'flex';
             document.getElementById('mainView').style.display = 'none';
             renderColorPalette();
+        }
+
+        function adjustFontSize(element, maxHeight) {
+            var fontSize = 16; // Tamanho inicial para edição diária
+            if (element.classList.contains('day-line-preview')) fontSize = 10; // Tamanho inicial para semanal
+            
+            element.style.fontSize = fontSize + 'px';
+            while (element.scrollHeight > maxHeight && fontSize > 6) {
+                fontSize -= 0.5;
+                element.style.fontSize = fontSize + 'px';
+            }
         }
 
         function updateLine(idx, el) {
@@ -425,32 +565,50 @@
         }
 
         function exportToPdf() {
-            var element = document.getElementById('monthView');
+            var element = appState.view === 'week' ? document.getElementById('weekView') : document.getElementById('monthView');
             var header = document.querySelector('.header');
             var controls = document.querySelector('.view-controls');
             
-            // Forçar altura total para o PDF
-            element.style.height = '210mm';
-            element.style.width = '297mm';
+            // Forçar dimensões de paisagem para o PDF
+            var isWeek = appState.view === 'week';
+            element.style.width = isWeek ? '297mm' : '420mm'; // A3 para o mês
+            element.style.height = isWeek ? '210mm' : '297mm';
+
+            var filename = (isWeek ? 'semana-' : 'calendario-') + 
+                           appState.currentDate.getFullYear() + '-' + (appState.currentDate.getMonth()+1) + '.pdf';
 
             var opt = {
-                margin:       0,
-                filename:     'calendario-' + appState.currentDate.getFullYear() + '-' + (appState.currentDate.getMonth()+1) + '.pdf',
-                image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  { scale: 3, useCORS: true, logging: false, letterRendering: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                margin: 0,
+                filename: filename,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false, 
+                    letterRendering: true,
+                    windowWidth: isWeek ? 1122 : 1587,
+                    windowHeight: isWeek ? 794 : 1123
+                },
+                jsPDF: { unit: 'mm', format: isWeek ? 'a4' : 'a3', orientation: 'landscape', compress: true }
             };
             
-            element.classList.add('pdf-export-mode');
+            // Adicionar classes de impressão
+            document.body.classList.add('print-mode');
+            if (isWeek) document.body.classList.add('print-weekly-landscape');
+            else document.body.classList.add('print-monthly-landscape');
+            
+            // Ocultar elementos desnecessários
             if(header) header.style.display = 'none';
             if(controls) controls.style.display = 'none';
             
-            html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
-                // Opcional: ajustes finos no PDF se necessário
-            }).save().then(function() {
-                element.classList.remove('pdf-export-mode');
-                element.style.height = '';
+            html2pdf().set(opt).from(element).save().then(function() {
+                // Restaurar
+                document.body.classList.remove('print-mode');
+                document.body.classList.remove('print-weekly-landscape');
+                document.body.classList.remove('print-monthly-landscape');
+                
                 element.style.width = '';
+                element.style.height = '';
                 if(header) header.style.display = 'flex';
                 if(controls) controls.style.display = 'flex';
             });
@@ -478,7 +636,11 @@
             document.getElementById('printWeekBtn').onclick = function() {
                 appState.view = 'week';
                 renderWeekView();
-                setTimeout(function() { window.print(); }, 500);
+                document.body.classList.add('print-weekly-landscape');
+                setTimeout(function() { 
+                    window.print(); 
+                    document.body.classList.remove('print-weekly-landscape');
+                }, 500);
             };
             
             document.getElementById('printMonthBtn').onclick = function() {
