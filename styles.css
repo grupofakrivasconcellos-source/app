@@ -74,7 +74,7 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
-.view-btn, .btn-print, .btn-primary, .btn-secondary, .btn-pdf {
+.view-btn, .btn-print, .btn-primary, .btn-secondary, .btn-pdf, .btn-backup {
     padding: 8px 12px;
     border-radius: 4px;
     font-size: 13px;
@@ -98,6 +98,12 @@ body {
 
 .btn-pdf {
     background: #e53e3e;
+    color: white;
+    border: none;
+}
+
+.btn-backup {
+    background: #3182ce;
     color: white;
     border: none;
 }
