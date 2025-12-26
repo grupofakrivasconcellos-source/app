@@ -468,7 +468,7 @@ body {
         display: block !important;
     }
 
-    #app, .main-view, .day-edit-view {
+    #app, .main-view {
         display: block !important;
         position: static !important;
         width: 100% !important;
@@ -477,6 +477,21 @@ body {
         margin: 0 !important;
         background: white !important;
         overflow: visible !important;
+    }
+
+    .day-edit-view {
+        display: none !important; /* Oculto por padrão na impressão */
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: white !important;
+        overflow: visible !important;
+    }
+
+    body.editing-day .day-edit-view {
+        display: block !important; /* Mostra apenas se estiver editando */
     }
 
     /* Ajuste de escala para garantir que caiba em uma folha */
@@ -488,8 +503,12 @@ body {
     /* Cabeçalho de Impressão (Modelo Imagem) */
     .day-print-header {
         text-align: center !important;
-        margin-bottom: 15px !important;
-        width: 100% !important;
+        margin-bottom: 20px !important;
+        display: none !important; /* Oculto por padrão */
+    }
+
+    body.editing-day .day-print-header {
+        display: block !important; /* Mostra apenas na impressão diária individual */
     }
 
     .print-date {
