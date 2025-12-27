@@ -12,7 +12,6 @@
     <meta name="msapplication-tap-highlight" content="no">
     <title>Planejador de Agenda Interativo</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5IfWUGQBVP2RZKY2huP08r86oQSCkonGeSX6nq1u/l0msTHkOtKw43uxERw65zBe8xeAggQfg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
     <div id="app">
@@ -35,9 +34,6 @@
                 <button id="printWeekBtn" class="btn btn-print">🖨️ Imprimir Semana</button>
                 <button id="pdfMonthBtn" class="btn btn-pdf">📄 PDF Mês</button>
                 <button id="pdfWeekBtn" class="btn btn-pdf">📄 PDF Semana</button>
-                <button id="exportDataBtn" class="btn btn-secondary">📤 Exportar Dados</button>
-                <button id="importDataBtn" class="btn btn-secondary">📥 Importar Dados</button>
-                <input type="file" id="importFile" style="display: none;" accept=".json">
             </div>
 
             <!-- Visão Semanal (Grid) -->
@@ -71,6 +67,7 @@
                         <button id="btnBold" class="btn-format" title="Negrito"><b>B</b></button>
                         <button id="btnItalic" class="btn-format" title="Itálico"><i>I</i></button>
                         <button id="btnStrike" class="btn-format" title="Tachado"><s>S</s></button>
+                        <button id="btnUnderline" class="btn-format" title="Sublinhado"><u>U</u></button>
                     </div>
                 </div>
 
@@ -84,6 +81,7 @@
     <!-- Template para impressão -->
     <div id="printContainer" style="display: none;"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5IfWUGQBVP2RZKY2huP08r86oQSCkonGeSX6nq1u/l0msTHkOtKw43uxERw65zBe8xeAggQfg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="app.js"></script>
 </body>
 </html>

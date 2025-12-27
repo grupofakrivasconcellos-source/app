@@ -4,7 +4,7 @@ var COLORS = [
     '#0066FF', '#6600FF', '#FF00FF', '#FF1493', '#00FF7F',
     '#FF4500', '#1E90FF', '#DC143C', '#00CED1', '#FFB6C1',
     '#32CD32', '#FF8C00', '#8B00FF', '#00FF00', '#FF69B4',
-    '#000000', '#FFFFFF'
+    '#000000', '#808080', '#FFFFFF' // Preto, Cinza, Branco
 ];
 
 var FERIADOS_BRASIL = [
@@ -83,7 +83,7 @@ function initializeEventListeners() {
         }
     });
 
-    // Impressão e PDF
+    // Impressão
     document.getElementById('printWeekBtn').addEventListener('click', function() {
         printWeek();
     });
@@ -96,53 +96,51 @@ function initializeEventListeners() {
         printMonth();
     });
 
-    document.getElementById('pdfWeekBtn').addEventListener('click', function() {
-        exportWeekPDF();
-    });
-
-    document.getElementById('pdfMonthBtn').addEventListener('click', function() {
-        exportMonthPDF();
-    });
-
-    document.getElementById('exportDataBtn').addEventListener('click', function() {
-        exportData();
-    });
-
-    document.getElementById('importDataBtn').addEventListener('click', function() {
-        document.getElementById('importFile').click();
-    });
-
-    document.getElementById('importFile').addEventListener('change', function(e) {
-        importData(e);
+    // Fechar edição
+    document.getElementById('closeDayEdit').addEventListener('click', function() {
+        closeDayEdit();
     });
 
     // Formatação
     document.getElementById('btnBold').addEventListener('click', function() { applyFormat('bold'); });
     document.getElementById('btnItalic').addEventListener('click', function() { applyFormat('italic'); });
     document.getElementById('btnStrike').addEventListener('click', function() { applyFormat('strike'); });
+    document.getElementById('btnUnderline').addEventListener('click', function() { applyFormat('underline'); });
 
-    // Fechar edição
-    document.getElementById('closeDayEdit').addEventListener('click', function() {
-        closeDayEdit();
-    });
+    // PDF
+    document.getElementById('pdfWeekBtn').addEventListener('click', function() { exportWeekPDF(); });
+    document.getElementById('pdfMonthBtn').addEventListener('click', function() { exportMonthPDF(); });
 }
 
 // ========== NAVEGAÇÃO POR GESTO ==========
 function setupGestureHandling() {
-    var app = document.getElementById('app');
+    var weekGrid = document.getElementById('weekGrid');
     var touchStartX = 0;
     var touchStartY = 0;
     var isSwiping = false;
 
-    app.addEventListener('touchstart', function(e) {
+    weekGrid.addEventListener('touchstart', function(e) {
         if (e.touches.length === 1) {
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
             isSwiping = true;
         }
-    }, { passive: true });
+    }, false);
 
-    app.addEventListener('touchend', function(e) {
+    weekGrid.addEventListener('touchmove', function(e) {
+        if (!isSwiping || e.touches.length !== 1) return;
+        
+        var currentX = e.touches[0].clientX;
+        var currentY = e.touches[0].clientY;
+        var deltaX = currentX - touchStartX;
+        var deltaY = currentY - touchStartY;
+        
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+            e.preventDefault();
+        }
+    }, true);
+
+    weekGrid.addEventListener('touchend', function(e) {
         if (!isSwiping) return;
         
         var touchEndX = e.changedTouches[0].clientX;
@@ -152,39 +150,22 @@ function setupGestureHandling() {
         
         isSwiping = false;
         
-        // Detectar swipe horizontal (mínimo 50px)
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
-            handleSwipe(deltaX > 0 ? 'right' : 'left');
+            if (deltaX > 0) {
+                appState.currentDate.setDate(appState.currentDate.getDate() - 7);
+            } else {
+                appState.currentDate.setDate(appState.currentDate.getDate() + 7);
+            }
+            renderWeekView();
         }
-    }, { passive: true });
+    }, false);
 }
 
-function handleSwipe(direction) {
-    if (appState.view === 'week') {
-        var days = direction === 'right' ? -7 : 7;
-        appState.currentDate.setDate(appState.currentDate.getDate() + days);
-        renderWeekView();
-    } else if (appState.view === 'month') {
-        var months = direction === 'right' ? -1 : 1;
-        appState.currentDate.setMonth(appState.currentDate.getMonth() + months);
-        renderMonthView();
-    } else if (appState.selectedDay) {
-        // Navegação diária na tela de edição
-        var dateParts = appState.selectedDay.split('-');
-        var date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-        var days = direction === 'right' ? -1 : 1;
-        date.setDate(date.getDate() + days);
-        openDayEdit(date);
-    }
-}
-
-// ========== RENDERIZAÇÃO SEMANAL (7 COLUNAS) ==========
+// ========== RENDERIZAÇÃO SEMANAL ==========
 function renderWeekView() {
     var weekGrid = document.getElementById('weekGrid');
     weekGrid.innerHTML = '';
-    weekGrid.className = 'week-grid week-grid-7-cols';
 
-    // Pegar o início da semana (Domingo)
     var startDate = new Date(appState.currentDate);
     startDate.setDate(appState.currentDate.getDate() - appState.currentDate.getDay());
 
@@ -192,12 +173,9 @@ function renderWeekView() {
     var monthName = startDate.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).toUpperCase();
     headerTitle.textContent = monthName;
 
-    // Ordem: Segunda (1) a Sexta (5), depois Sábado (6) e Domingo (0)
     var dayOrder = [1, 2, 3, 4, 5, 6, 0];
-    
     dayOrder.forEach(function(dayOffset) {
         var date = new Date(startDate);
-        // Se o offset for 0 (Domingo), ele deve ser o 7º dia da sequência começando da Segunda
         var actualOffset = dayOffset === 0 ? 7 : dayOffset;
         date.setDate(startDate.getDate() + actualOffset);
         weekGrid.appendChild(createDayCardGrid(date));
@@ -206,16 +184,11 @@ function renderWeekView() {
     // Atualizar botões
     document.getElementById('viewWeekly').classList.add('active');
     document.getElementById('viewMonthly').classList.remove('active');
-    
+
     // Mostrar visão semanal
     document.getElementById('weekView').style.display = 'flex';
     document.getElementById('monthView').style.display = 'none';
     appState.view = 'week';
-
-    var weekContainer = document.getElementById('weekView');
-    if (weekContainer) {
-        weekContainer.scrollTop = 0;
-    }
 }
 
 // ========== RENDERIZAÇÃO MENSAL ==========
@@ -230,21 +203,19 @@ function renderMonthView() {
     var grid = document.createElement('div');
     grid.className = 'month-grid';
 
-    // Cabeçalho com dias da semana (Segunda a Domingo)
+    // Cabeçalho com dias da semana (Seg-Dom)
     var dayNames = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'];
     dayNames.forEach(function(day) {
         var dayHeader = document.createElement('div');
         dayHeader.className = 'month-day-header';
-        if (day === 'Sab' || day === 'Dom') dayHeader.style.color = '#c41e3a';
+        if (day === 'Sab' || day === 'Dom') dayHeader.style.color = '#FF0000';
         dayHeader.textContent = day;
         grid.appendChild(dayHeader);
     });
 
     var firstDay = new Date(appState.currentDate.getFullYear(), appState.currentDate.getMonth(), 1);
-    // Ajustar para começar na Segunda-feira
-    var firstDayOfWeek = firstDay.getDay(); // 0 = Dom, 1 = Seg...
+    var firstDayOfWeek = firstDay.getDay();
     var diff = firstDayOfWeek === 0 ? -6 : 1 - firstDayOfWeek;
-    
     var startDate = new Date(firstDay);
     startDate.setDate(firstDay.getDate() + diff);
 
@@ -292,10 +263,14 @@ function createDayCardGrid(date) {
         dayData.lines = Array(30).fill(null).map(function() { return { text: '', spans: [] }; });
     }
     
+    content.style.height = '140px';
+    content.style.overflowY = 'auto';
+    
     for (var i = 0; i < 30; i++) {
         var line = dayData.lines[i] || { text: '', spans: [] };
         var lineDiv = document.createElement('div');
         lineDiv.className = 'day-line-preview';
+        lineDiv.style.borderBottom = '1px solid #eee';
         
         if (line && line.text && line.text.trim() !== '') {
             lineDiv.innerHTML = renderLineWithColors(line, i);
@@ -329,58 +304,36 @@ function createMonthDayCell(date) {
 
     if (isOtherMonth) {
         cell.classList.add('other-month');
-    }
-
-    if (isWeekend || isHoliday) {
+    } else if (isWeekend || isHoliday) {
         cell.classList.add(isHoliday ? 'holiday' : 'weekend');
     }
 
-    var num = document.createElement('div');
-    num.className = 'month-day-number';
-    num.textContent = date.getDate();
-    cell.appendChild(num);
-
-    var notes = document.createElement('div');
-    notes.className = 'month-day-notes';
+    var dayNum = document.createElement('div');
+    dayNum.className = 'month-day-number';
+    dayNum.textContent = date.getDate();
+    cell.appendChild(dayNum);
 
     var dayData = appState.days[dateStr];
-        if (dayData && dayData.lines) {
-            var validLines = dayData.lines.map((l, idx) => ({...l, originalIndex: idx})).filter(function(l) { return l && l.text && l.text.trim() !== ''; });
-            
-            // Ajuste dinâmico de fonte para a interface
-            var fontSize = '8px';
-            if (validLines.length > 6) fontSize = '6px';
-            else if (validLines.length > 4) fontSize = '7px';
-            
-            notes.style.fontSize = fontSize;
-
-            validLines.forEach(function(line, index) {
-                // Mostrar até 8 linhas na interface para não quebrar o layout
-                if (index < 8) {
-                    var lineDiv = document.createElement('div');
-                    lineDiv.className = 'month-note-line';
-                    lineDiv.style.fontSize = 'inherit';
-                    lineDiv.innerHTML = renderLineWithColors(line, line.originalIndex);
-                    notes.appendChild(lineDiv);
-                }
-            });
+    if (dayData) {
+        var notesContainer = document.createElement('div');
+        notesContainer.className = 'month-day-notes';
         
-        if (validLines.length > 8) {
-            var more = document.createElement('div');
-            more.className = 'month-note-more';
-            more.textContent = '+ ' + (validLines.length - 8) + ' mais';
-            notes.appendChild(more);
-        }
-    }
-
-    cell.appendChild(notes);
-
-    cell.addEventListener('click', function() {
-        openDayEdit(date);
-    });
-
-    return cell;
-}        notesContainer.appendChild(moreDiv);
+        var validLines = dayData.lines.filter(function(line) { return line && line.text && line.text.trim() !== ''; });
+        
+        if (validLines.length > 0) {
+            var maxLines = Math.min(3, validLines.length);
+            for (var i = 0; i < maxLines; i++) {
+                var noteDiv = document.createElement('div');
+                noteDiv.className = 'month-note-line';
+                noteDiv.innerHTML = renderLineWithColors(validLines[i]);
+                notesContainer.appendChild(noteDiv);
+            }
+            
+            if (validLines.length > 3) {
+                var moreDiv = document.createElement('div');
+                moreDiv.className = 'month-note-more';
+                moreDiv.textContent = '...';
+                notesContainer.appendChild(moreDiv);
             }
         }
         
@@ -441,29 +394,28 @@ function openDayEdit(date) {
                 saveDataToStorage();
             });
 
-	            lineEditable.addEventListener('focus', function() {
-	                appState.selectedLineIndex = index;
-	            });
+            lineEditable.addEventListener('focus', function() {
+                appState.selectedLineIndex = index;
+            });
 
-	            lineEditable.addEventListener('keydown', function(e) {
-	                if (e.key === 'Enter' || e.key === 'Tab') {
-	                    e.preventDefault();
-	                    var nextIndex = index + 1;
-	                    if (nextIndex < 30) {
-	                        var nextLine = notebookLines.querySelector('[data-index="' + nextIndex + '"]');
-	                        if (nextLine) {
-	                            nextLine.focus();
-	                            // Mover cursor para o final
-	                            var range = document.createRange();
-	                            var sel = window.getSelection();
-	                            range.selectNodeContents(nextLine);
-	                            range.collapse(false);
-	                            sel.removeAllRanges();
-	                            sel.addRange(range);
-	                        }
-	                    }
-	                }
-	            });
+            lineEditable.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === 'Tab') {
+                    e.preventDefault();
+                    var nextIndex = index + 1;
+                    if (nextIndex < 30) {
+                        var nextLine = notebookLines.querySelector('[data-index="' + nextIndex + '"]');
+                        if (nextLine) {
+                            nextLine.focus();
+                            var range = document.createRange();
+                            var sel = window.getSelection();
+                            range.selectNodeContents(nextLine);
+                            range.collapse(false);
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        }
+                    }
+                }
+            });
 
             lineWrapper.appendChild(lineNum);
             lineWrapper.appendChild(lineEditable);
@@ -501,12 +453,10 @@ function renderColorPalette() {
         var btn = document.createElement('button');
         btn.className = 'color-btn';
         btn.style.backgroundColor = color;
-        if (color === '#FFFFFF') btn.style.border = '1px solid #ddd';
         
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             applyColorToSelectedText(index);
-            saveDataToStorage();
         });
         
         palette.appendChild(btn);
@@ -608,12 +558,11 @@ function renderLineWithColors(lineData, index) {
     
     var html = '';
     if (index !== undefined) {
-        html += '<span style="color: #ccc; font-weight: bold; margin-right: 5px; font-size: 0.8em;">' + (index + 1) + '</span>';
+        html += '<span style="color: #808080; font-weight: bold; margin-right: 8px; font-size: 0.9em;">' + (index + 1) + '</span>';
     }
 
     if (!lineData.spans || lineData.spans.length === 0) return html + escapeHtml(lineData.text);
 
-    var lastIndex = 0;
     var lastIndex = 0;
     var spans = lineData.spans.slice().sort(function(a, b) { return a.start - b.start; });
 
@@ -621,9 +570,11 @@ function renderLineWithColors(lineData, index) {
         var span = spans[i];
         if (span.start >= lineData.text.length) continue;
         var end = Math.min(span.end, lineData.text.length);
+        
         if (lastIndex < span.start) {
             html += escapeHtml(lineData.text.substring(lastIndex, span.start));
         }
+        
         var spanText = lineData.text.substring(span.start, end);
         var color = COLORS[span.color];
         var textColor = getContrastColor(color);
@@ -632,12 +583,112 @@ function renderLineWithColors(lineData, index) {
         if (span.bold) style += ' font-weight: bold;';
         if (span.italic) style += ' font-style: italic;';
         if (span.strike) style += ' text-decoration: line-through;';
+        if (span.underline) style += ' text-decoration: underline;';
+        if (span.strike && span.underline) style += ' text-decoration: line-through underline;';
         
+        // Ajuste para highlight branco
+        if (color === '#FFFFFF') style += ' border: 1px solid #ddd;';
+
         html += '<span style="' + style + '">' + escapeHtml(spanText) + '</span>';
         lastIndex = end;
     }
     if (lastIndex < lineData.text.length) html += escapeHtml(lineData.text.substring(lastIndex));
-    return html + '\n';
+    return html;
+}
+
+function applyFormat(type) {
+    var selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    
+    var range = selection.getRangeAt(0);
+    var container = range.commonAncestorContainer;
+    while (container && (!container.classList || !container.classList.contains('notebook-line-editable'))) {
+        container = container.parentNode;
+    }
+    
+    if (!container) return;
+    
+    var lineIndex = parseInt(container.getAttribute('data-index'));
+    var start = getSelectionOffset(container, range.startContainer, range.startOffset);
+    var end = getSelectionOffset(container, range.endContainer, range.endOffset);
+    
+    if (start === end) return;
+    
+    var dayData = appState.days[appState.selectedDay];
+    var lineData = dayData.lines[lineIndex];
+    
+    var newSpans = [];
+    var affected = false;
+    
+    lineData.spans.forEach(function(span) {
+        if (span.end <= start || span.start >= end) {
+            newSpans.push(span);
+        } else {
+            affected = true;
+            if (span.start < start) {
+                newSpans.push({ start: span.start, end: start, color: span.color, bold: span.bold, italic: span.italic, strike: span.strike, underline: span.underline });
+            }
+            
+            var overlapStart = Math.max(span.start, start);
+            var overlapEnd = Math.min(span.end, end);
+            newSpans.push({ 
+                start: overlapStart, 
+                end: overlapEnd, 
+                color: span.color, 
+                bold: type === 'bold' ? !span.bold : span.bold,
+                italic: type === 'italic' ? !span.italic : span.italic,
+                strike: type === 'strike' ? !span.strike : span.strike,
+                underline: type === 'underline' ? !span.underline : span.underline
+            });
+            
+            if (span.end > end) {
+                newSpans.push({ start: end, end: span.end, color: span.color, bold: span.bold, italic: span.italic, strike: span.strike, underline: span.underline });
+            }
+        }
+    });
+    
+    if (!affected) {
+        newSpans.push({ 
+            start: start, 
+            end: end, 
+            color: appState.selectedColor || 0, 
+            bold: type === 'bold', 
+            italic: type === 'italic', 
+            strike: type === 'strike',
+            underline: type === 'underline'
+        });
+    }
+    
+    lineData.spans = normalizeSpans(newSpans);
+    updateEditableContent(container, lineData);
+    saveDataToStorage();
+}
+
+function normalizeSpans(spans) {
+    if (spans.length <= 1) return spans;
+    spans.sort(function(a, b) { return a.start - b.start; });
+    var result = [spans[0]];
+    for (var i = 1; i < spans.length; i++) {
+        var last = result[result.length - 1];
+        var curr = spans[i];
+        if (curr.start <= last.end) {
+            if (curr.color === last.color && curr.bold === last.bold && curr.italic === last.italic && curr.strike === last.strike && curr.underline === last.underline) {
+                last.end = Math.max(last.end, curr.end);
+            } else if (curr.start < last.end) {
+                last.end = curr.start;
+                if (last.start < last.end) {
+                    result.push(curr);
+                } else {
+                    result[result.length - 1] = curr;
+                }
+            } else {
+                result.push(curr);
+            }
+        } else {
+            result.push(curr);
+        }
+    }
+    return result;
 }
 
 function escapeHtml(text) {
@@ -683,8 +734,10 @@ function printMonth() {
     var printWindow = window.open('', '', 'width=800,height=600');
     
     var firstDay = new Date(year, month, 1);
+    var firstDayOfWeek = firstDay.getDay();
+    var diff = firstDayOfWeek === 0 ? -6 : 1 - firstDayOfWeek;
     var startDate = new Date(firstDay);
-    startDate.setDate(firstDay.getDate() - firstDay.getDay());
+    startDate.setDate(firstDay.getDate() + diff);
 
     var gridHtml = '';
     var currentDate = new Date(startDate);
@@ -719,7 +772,7 @@ function printMonth() {
         '.print-month-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid #000; border-left: 1px solid #000; }' +
         '.print-month-day-header { border-right: 1px solid #000; border-bottom: 1px solid #000; text-align: center; font-weight: bold; font-size: 12px; padding: 2px; background: #eee; }' +
         '.print-month-day { border-right: 1px solid #000; border-bottom: 1px solid #000; height: 2.8cm; position: relative; overflow: hidden; }' +
-        '.print-month-num { font-weight: bold; font-size: 10px; padding: 2px; }' +
+        '.print-month-num { font-weight: bold; font-size: 10px; padding: 2px; text-align: center; }' +
         '.print-month-day.special .print-month-num { color: #FF0000; }' +
         '.print-month-day.other-month { background: #f9f9f9; color: #ccc; }' +
         '.print-month-content { font-size: 7px; line-height: 1.1; padding: 0 2px; }' +
@@ -728,100 +781,14 @@ function printMonth() {
         '</style><script>window.onafterprint = function() { window.close(); };</script></head><body>' +
         '<div class="print-month-header">PLANEJADOR MENSAL - ' + monthName + '</div>' +
         '<div class="print-month-grid">' +
-        '<div class="print-month-day-header">DOM</div><div class="print-month-day-header">SEG</div><div class="print-month-day-header">TER</div>' +
-        '<div class="print-month-day-header">QUA</div><div class="print-month-day-header">QUI</div><div class="print-month-day-header">SEX</div><div class="print-month-day-header">SAB</div>' +
+        '<div class="print-month-day-header">SEG</div><div class="print-month-day-header">TER</div><div class="print-month-day-header">QUA</div>' +
+        '<div class="print-month-day-header">QUI</div><div class="print-month-day-header">SEX</div><div class="print-month-day-header">SAB</div><div class="print-month-day-header">DOM</div>' +
         gridHtml + '</div></body></html>';
 
     printWindow.document.write(html);
     printWindow.document.close();
     setTimeout(function() { printWindow.print(); }, 500);
 }
-
-function printDay() {
-    if (!appState.selectedDay) return;
-    var dateParts = appState.selectedDay.split('-');
-    var date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-    var dayData = appState.days[appState.selectedDay];
-    var dayName = getDayName(date.getDay());
-    var isSpecial = date.getDay() === 0 || date.getDay() === 6 || isHolidayDate(date);
-
-    var printWindow = window.open('', '', 'width=800,height=600');
-    var linesToPrint = dayData.lines.slice(0, 25);
-    var html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Impressão - ' + dayName + '</title>' +
-        '<style>' +
-        '@page { size: A4 portrait; margin: 5mm; }' +
-        'body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: white; height: 28.7cm; display: flex; flex-direction: column; }' +
-        '.print-header { text-align: center; padding: 5px 0; border-bottom: 1px solid #333; margin: 0 0.5cm; }' +
-        '.print-header h1 { margin: 0; font-size: 14px; font-weight: bold; ' + (isSpecial ? 'color: #FF0000;' : '') + ' }' +
-        '.print-lines { flex: 1; display: flex; flex-direction: column; margin: 0 0.5cm; height: calc(100% - 40px); }' +
-        '.print-line { flex: 1; border-bottom: 1px solid ' + (isSpecial ? '#FF0000' : '#000') + '; display: flex; align-items: center; padding: 0; box-sizing: border-box; overflow: hidden; ' + (isSpecial ? 'color: #FF0000;' : '') + ' }' +
-        '.print-line:last-child { border-bottom: none; }' +
-        '.print-line-content { font-size: 8.5mm; line-height: 1; white-space: normal; word-break: break-word; }' +
-        '@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }' +
-        '</style><script>window.onafterprint = function() { window.close(); };</script></head><body>' +
-        '<div class="print-header"><h1>' + dayName + ', ' + formatDate(date) + '</h1></div>' +
-        '<div class="print-lines">' +
-        linesToPrint.map(function(line) { return '<div class="print-line"><div class="print-line-content">' + renderLineWithColors(line) + '</div></div>'; }).join('') +
-        '</div></body></html>';
-
-    printWindow.document.write(html);
-    printWindow.document.close();
-    setTimeout(function() { printWindow.print(); }, 500);
-}
-
-function printWeek() {
-    var startDate = new Date(appState.currentDate);
-    startDate.setDate(appState.currentDate.getDate() - appState.currentDate.getDay());
-
-    var printWindow = window.open('', '', 'width=800,height=600');
-    var daysHtml = '';
-    var hasAnyContent = false;
-
-    for (var i = 1; i <= 7; i++) {
-        var dayIndex = i % 7;
-        var date = new Date(startDate);
-        date.setDate(startDate.getDate() + dayIndex);
-        var dateStr = getDateString(date);
-        var dayData = appState.days[dateStr];
-        
-        var validLinesWithIdx = dayData ? dayData.lines.map((l, idx) => ({...l, originalIndex: idx})).filter(function(line) { return line && line.text && line.text.trim() !== ''; }) : [];
-
-        if (validLinesWithIdx.length > 0) {
-            hasAnyContent = true;
-            var isSpecial = date.getDay() === 0 || date.getDay() === 6 || isHolidayDate(date);
-            var dayName = getDayName(date.getDay());
-
-            daysHtml += '<div class="print-day" style="' + (isSpecial ? 'color: #FF0000;' : '') + '">' +
-                '<div class="print-header" style="' + (isSpecial ? 'color: #FF0000;' : '') + '">' + dayName + ', ' + formatDate(date) + '</div>' +
-                '<div class="print-lines">' +
-                validLinesWithIdx.map(function(line) { return '<div class="print-line" style="' + (isSpecial ? 'border-bottom: 1px solid #FF0000;' : 'border-bottom: 1px solid #eee;') + '">' + renderLineWithColors(line, line.originalIndex) + '</div>'; }).join('') +
-                '</div></div>';
-        }
-    }
-
-    if (!hasAnyContent) {
-        daysHtml = '<div style="text-align: center; padding: 50px;">Nenhuma anotação encontrada para esta semana.</div>';
-    }
-
-    var html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Impressão Semanal</title>' +
-        '<style>' +
-        '@page { size: A4 portrait; margin: 5mm; }' +
-        'body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: white; }' +
-        '.week-container-print { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }' +
-        '.print-day { page-break-inside: avoid; border-bottom: 2px solid #333; padding: 10px 0.5cm; display: flex; flex-direction: column; }' +
-        '.print-day:last-child { border-bottom: none; }' +
-        '.print-header { padding: 5px 0; font-weight: bold; font-size: 16px; border-bottom: 1px solid #eee; margin-bottom: 5px; }' +
-        '.print-lines { display: flex; flex-direction: column; gap: 5px; }' +
-        '.print-line { border-bottom: 1px solid #eee; padding: 5px 0; font-size: 14px; line-height: 1.4; word-break: break-word; }' +
-        '@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }' +
-        '</style><script>window.onafterprint = function() { window.close(); };</script></head><body><div class="week-container-print">' + daysHtml + '</div></body></html>';
-
-    printWindow.document.write(html);
-    printWindow.document.close();
-    setTimeout(function() { printWindow.print(); }, 500);
-}
-
-// ========== EXPORTAÇÃO PDF ==========
 
 function exportWeekPDF() {
     var startDate = new Date(appState.currentDate);
@@ -933,7 +900,6 @@ function exportMonthPDF() {
     grid.style.borderTop = '1px solid #000';
     grid.style.borderLeft = '1px solid #000';
     
-    // Cabeçalho (Segunda a Domingo)
     var days = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'];
     days.forEach(function(d) {
         var h = document.createElement('div');
@@ -973,6 +939,7 @@ function exportMonthPDF() {
         var num = document.createElement('div');
         num.style.fontWeight = 'bold';
         num.style.fontSize = '10px';
+        num.style.textAlign = 'center';
         if (isSpecial) num.style.color = '#FF0000';
         num.textContent = currentDate.getDate();
         cell.appendChild(num);
@@ -1018,239 +985,86 @@ function exportMonthPDF() {
     });
 }
 
-// ========== NOVAS FUNCIONALIDADES ==========
-
-function applyFormat(type) {
-    var selection = window.getSelection();
-    if (!selection.rangeCount) return;
-    
-    var range = selection.getRangeAt(0);
-    var container = range.commonAncestorContainer;
-    while (container && (!container.classList || !container.classList.contains('notebook-line-editable'))) {
-        container = container.parentNode;
-    }
-    
-    if (!container) return;
-    
-    var lineIndex = parseInt(container.getAttribute('data-index'));
-    var start = getSelectionOffset(container, range.startContainer, range.startOffset);
-    var end = getSelectionOffset(container, range.endContainer, range.endOffset);
-    
-    if (start === end) return;
-    
+function printDay() {
+    if (!appState.selectedDay) return;
+    var dateParts = appState.selectedDay.split('-');
+    var date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
     var dayData = appState.days[appState.selectedDay];
-    var lineData = dayData.lines[lineIndex];
-    
-    var newSpans = [];
-    var affected = false;
-    
-    lineData.spans.forEach(function(span) {
-        if (span.end <= start || span.start >= end) {
-            newSpans.push(span);
-        } else {
-            affected = true;
-            if (span.start < start) {
-                newSpans.push({ start: span.start, end: start, color: span.color, bold: span.bold, italic: span.italic, strike: span.strike });
-            }
-            
-            var overlapStart = Math.max(span.start, start);
-            var overlapEnd = Math.min(span.end, end);
-            newSpans.push({ 
-                start: overlapStart, 
-                end: overlapEnd, 
-                color: span.color, 
-                bold: type === 'bold' ? !span.bold : span.bold,
-                italic: type === 'italic' ? !span.italic : span.italic,
-                strike: type === 'strike' ? !span.strike : span.strike
-            });
-            
-            if (span.end > end) {
-                newSpans.push({ start: end, end: span.end, color: span.color, bold: span.bold, italic: span.italic, strike: span.strike });
-            }
-        }
-    });
-    
-    if (!affected) {
-        newSpans.push({ 
-            start: start, 
-            end: end, 
-            color: appState.selectedColor || 0, 
-            bold: type === 'bold', 
-            italic: type === 'italic', 
-            strike: type === 'strike' 
-        });
-    }
-    
-    lineData.spans = normalizeSpans(newSpans);
-    updateEditableContent(container, lineData);
-    saveDataToStorage();
+    var dayName = getDayName(date.getDay());
+    var isSpecial = date.getDay() === 0 || date.getDay() === 6 || isHolidayDate(date);
+
+    var printWindow = window.open('', '', 'width=800,height=600');
+    var linesToPrint = dayData.lines.slice(0, 25);
+    var html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Impressão - ' + dayName + '</title>' +
+        '<style>' +
+        '@page { size: A4 portrait; margin: 5mm; }' +
+        'body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: white; height: 28.7cm; display: flex; flex-direction: column; }' +
+        '.print-header { text-align: center; padding: 5px 0; border-bottom: 1px solid #333; margin: 0 0.5cm; }' +
+        '.print-header h1 { margin: 0; font-size: 14px; font-weight: bold; ' + (isSpecial ? 'color: #FF0000;' : '') + ' }' +
+        '.print-lines { flex: 1; display: flex; flex-direction: column; margin: 0 0.5cm; height: calc(100% - 40px); }' +
+        '.print-line { flex: 1; border-bottom: 1px solid ' + (isSpecial ? '#FF0000' : '#000') + '; display: flex; align-items: center; padding: 0; box-sizing: border-box; overflow: hidden; ' + (isSpecial ? 'color: #FF0000;' : '') + ' }' +
+        '.print-line:last-child { border-bottom: none; }' +
+        '.print-line-content { font-size: 8.5mm; line-height: 1; white-space: normal; word-break: break-word; }' +
+        '@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }' +
+        '</style><script>window.onafterprint = function() { window.close(); };</script></head><body>' +
+        '<div class="print-header"><h1>' + dayName + ', ' + formatDate(date) + '</h1></div>' +
+        '<div class="print-lines">' +
+        linesToPrint.map(function(line) { return '<div class="print-line"><div class="print-line-content">' + renderLineWithColors(line) + '</div></div>'; }).join('') +
+        '</div></body></html>';
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    setTimeout(function() { printWindow.print(); }, 500);
 }
 
-function applyColorToSelectedText(colorIndex) {
-    var selection = window.getSelection();
-    if (!selection.rangeCount) return;
-    
-    var range = selection.getRangeAt(0);
-    var container = range.commonAncestorContainer;
-    while (container && (!container.classList || !container.classList.contains('notebook-line-editable'))) {
-        container = container.parentNode;
-    }
-    
-    if (!container) return;
-    
-    var lineIndex = parseInt(container.getAttribute('data-index'));
-    var start = getSelectionOffset(container, range.startContainer, range.startOffset);
-    var end = getSelectionOffset(container, range.endContainer, range.endOffset);
-    
-    if (start === end) return;
-    
-    var dayData = appState.days[appState.selectedDay];
-    var lineData = dayData.lines[lineIndex];
-    
-    var newSpans = [];
-    lineData.spans.forEach(function(span) {
-        if (span.end <= start || span.start >= end) {
-            newSpans.push(span);
-        } else {
-            if (span.start < start) {
-                newSpans.push({ start: span.start, end: start, color: span.color, bold: span.bold, italic: span.italic, strike: span.strike });
-            }
-            if (span.end > end) {
-                newSpans.push({ start: end, end: span.end, color: span.color, bold: span.bold, italic: span.italic, strike: span.strike });
-            }
-        }
-    });
-    
-    newSpans.push({ 
-        start: start, 
-        end: end, 
-        color: colorIndex,
-        bold: false,
-        italic: false,
-        strike: false
-    });
-    
-    lineData.spans = normalizeSpans(newSpans);
-    updateEditableContent(container, lineData);
-    saveDataToStorage();
-}
-            
-            var overlapStart = Math.max(span.start, start);
-            var overlapEnd = Math.min(span.end, end);
-            var newSpan = { 
-                start: overlapStart, 
-                end: overlapEnd, 
-                color: span.color, 
-                bold: type === 'bold' ? !span.bold : span.bold,
-                italic: type === 'italic' ? !span.italic : span.italic,
-                strike: type === 'strike' ? !span.strike : span.strike
-            };
-            newSpans.push(newSpan);
-            
-            if (span.end > end) {
-                newSpans.push({ start: end, end: span.end, color: span.color, bold: span.bold, italic: span.italic, strike: span.strike });
-            }
-        }
-    });
-    
-    if (!affected) {
-        newSpans.push({ 
-            start: start, 
-            end: end, 
-            color: appState.selectedColor, 
-            bold: type === 'bold', 
-            italic: type === 'italic', 
-            strike: type === 'strike' 
-        });
-    }
-    
-    lineData.spans = normalizeSpans(newSpans);
-    updateEditableContent(container, lineData);
-    saveDataToStorage();
-}
+function printWeek() {
+    var startDate = new Date(appState.currentDate);
+    startDate.setDate(appState.currentDate.getDate() - appState.currentDate.getDay());
 
-function normalizeSpans(spans) {
-    if (spans.length <= 1) return spans;
-    spans.sort(function(a, b) { return a.start - b.start; });
-    var result = [spans[0]];
-    for (var i = 1; i < spans.length; i++) {
-        var last = result[result.length - 1];
-        var curr = spans[i];
-        if (curr.start <= last.end) {
-            if (curr.color === last.color && curr.bold === last.bold && curr.italic === last.italic && curr.strike === last.strike) {
-                last.end = Math.max(last.end, curr.end);
-            } else if (curr.start < last.end) {
-                // Se houver sobreposição de cores diferentes, o mais novo (curr) ganha
-                last.end = curr.start;
-                if (last.start < last.end) {
-                    result.push(curr);
-                } else {
-                    result[result.length - 1] = curr;
-                }
-            } else {
-                result.push(curr);
-            }
-        } else {
-            result.push(curr);
-        }
-    }
-    return result;
-}
+    var printWindow = window.open('', '', 'width=800,height=600');
+    var daysHtml = '';
+    var hasAnyContent = false;
 
-function exportData() {
-    var dataStr = JSON.stringify(appState.days, null, 2);
-    var blob = new Blob([dataStr], { type: 'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'agenda_backup_' + new Date().toISOString().split('T')[0] + '.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
-
-function importData(event) {
-    var file = event.target.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            var imported = JSON.parse(e.target.result);
-            if (confirm('Isso substituirá todos os seus dados atuais. Deseja continuar?')) {
-                appState.days = imported;
-                saveDataToStorage();
-                location.reload();
-            }
-        } catch (err) {
-            alert('Erro ao importar arquivo: ' + err.message);
-        }
-    };
-    reader.readAsText(file);
-}
-
-// Modificar o salvamento automático
-function setupAutoSave(element, lineIndex) {
-    element.addEventListener('input', function() {
-        var dayData = appState.days[appState.selectedDay];
-        var lineData = dayData.lines[lineIndex];
-        var newText = element.textContent;
+    for (var i = 1; i <= 7; i++) {
+        var dayIndex = i % 7;
+        var date = new Date(startDate);
+        date.setDate(startDate.getDate() + dayIndex);
+        var dateStr = getDateString(date);
+        var dayData = appState.days[dateStr];
         
-        // Ajustar spans se o texto mudar
-        var diff = newText.length - lineData.text.length;
-        if (diff !== 0) {
-            var selection = window.getSelection();
-            var offset = getSelectionOffset(element, selection.anchorNode, selection.anchorOffset);
-            lineData.spans.forEach(span => {
-                if (span.start >= offset) {
-                    span.start += diff;
-                    span.end += diff;
-                } else if (span.end >= offset) {
-                    span.end += diff;
-                }
-            });
+        var validLines = dayData ? dayData.lines.filter(function(line) { return line && line.text && line.text.trim() !== ''; }) : [];
+
+        if (validLines.length > 0) {
+            hasAnyContent = true;
+            var isSpecial = date.getDay() === 0 || date.getDay() === 6 || isHolidayDate(date);
+            var dayName = getDayName(date.getDay());
+
+            daysHtml += '<div class="print-day" style="' + (isSpecial ? 'color: #FF0000;' : '') + '">' +
+                '<div class="print-header" style="' + (isSpecial ? 'color: #FF0000;' : '') + '">' + dayName + ', ' + formatDate(date) + '</div>' +
+                '<div class="print-lines">' +
+                validLines.map(function(line) { return '<div class="print-line" style="' + (isSpecial ? 'border-bottom: 1px solid #FF0000;' : 'border-bottom: 1px solid #eee;') + '">' + renderLineWithColors(line) + '</div>'; }).join('') +
+                '</div></div>';
         }
-        
-        lineData.text = newText;
-        saveDataToStorage();
-    });
+    }
+
+    if (!hasAnyContent) {
+        daysHtml = '<div style="text-align: center; padding: 50px;">Nenhuma anotação encontrada para esta semana.</div>';
+    }
+
+    var html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Impressão Semanal</title>' +
+        '<style>' +
+        '@page { size: A4 portrait; margin: 5mm; }' +
+        'body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: white; }' +
+        '.week-container-print { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }' +
+        '.print-day { page-break-inside: avoid; border-bottom: 2px solid #333; padding: 10px 0.5cm; display: flex; flex-direction: column; }' +
+        '.print-day:last-child { border-bottom: none; }' +
+        '.print-header { padding: 5px 0; font-weight: bold; font-size: 16px; border-bottom: 1px solid #eee; margin-bottom: 5px; }' +
+        '.print-lines { display: flex; flex-direction: column; gap: 5px; }' +
+        '.print-line { border-bottom: 1px solid #eee; padding: 5px 0; font-size: 14px; line-height: 1.4; word-break: break-word; }' +
+        '@media print { * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }' +
+        '</style><script>window.onafterprint = function() { window.close(); };</script></head><body><div class="week-container-print">' + daysHtml + '</div></body></html>';
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    setTimeout(function() { printWindow.print(); }, 500);
 }
