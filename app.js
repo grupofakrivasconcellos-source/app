@@ -107,9 +107,6 @@ function initializeEventListeners() {
     document.getElementById('btnStrike').addEventListener('click', function() { applyFormat('strike'); });
     document.getElementById('btnUnderline').addEventListener('click', function() { applyFormat('underline'); });
 
-    // PDF
-    document.getElementById('pdfWeekBtn').addEventListener('click', function() { exportWeekPDF(); });
-    document.getElementById('pdfMonthBtn').addEventListener('click', function() { exportMonthPDF(); });
 }
 
 // ========== NAVEGAÇÃO POR GESTO ==========
@@ -173,13 +170,26 @@ function renderWeekView() {
     var monthName = startDate.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).toUpperCase();
     headerTitle.textContent = monthName;
 
-    var dayOrder = [1, 2, 3, 4, 5, 6, 0];
-    dayOrder.forEach(function(dayOffset) {
+    // Coluna esquerda: 4 dias (Segunda a Quinta)
+    var leftColumn = document.createElement('div');
+    leftColumn.className = 'week-column';
+    for (var i = 1; i < 5; i++) {
         var date = new Date(startDate);
-        var actualOffset = dayOffset === 0 ? 7 : dayOffset;
-        date.setDate(startDate.getDate() + actualOffset);
-        weekGrid.appendChild(createDayCardGrid(date));
-    });
+        date.setDate(startDate.getDate() + i);
+        leftColumn.appendChild(createDayCardGrid(date));
+    }
+
+    // Coluna direita: 3 dias (Sexta, Sábado, Domingo)
+    var rightColumn = document.createElement('div');
+    rightColumn.className = 'week-column';
+    for (var i = 5; i < 8; i++) {
+        var date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        rightColumn.appendChild(createDayCardGrid(date));
+    }
+
+    weekGrid.appendChild(leftColumn);
+    weekGrid.appendChild(rightColumn);
 
     // Atualizar botões
     document.getElementById('viewWeekly').classList.add('active');
@@ -286,7 +296,7 @@ function createDayCardGrid(date) {
     card.appendChild(content);
 
     card.addEventListener('click', function() {
-        openDayEdit(date);
+        openDayEdit(new Date(date));
     });
     
     return card;
@@ -302,46 +312,45 @@ function createMonthDayCell(date) {
     var isHoliday = isHolidayDate(date);
     var isOtherMonth = date.getMonth() !== appState.currentDate.getMonth();
 
-    if (isOtherMonth) {
-        cell.classList.add('other-month');
-    } else if (isWeekend || isHoliday) {
+    if (isWeekend || isHoliday) {
         cell.classList.add(isHoliday ? 'holiday' : 'weekend');
     }
+    if (isOtherMonth) {
+        cell.classList.add('other-month');
+    }
 
-    var dayNum = document.createElement('div');
-    dayNum.className = 'month-day-number';
-    dayNum.textContent = date.getDate();
-    cell.appendChild(dayNum);
+    var num = document.createElement('div');
+    num.className = 'month-day-number';
+    num.textContent = date.getDate();
+    cell.appendChild(num);
 
     var dayData = appState.days[dateStr];
-    if (dayData) {
+    if (dayData && dayData.lines) {
         var notesContainer = document.createElement('div');
         notesContainer.className = 'month-day-notes';
         
-        var validLines = dayData.lines.filter(function(line) { return line && line.text && line.text.trim() !== ''; });
-        
-        if (validLines.length > 0) {
-            var maxLines = Math.min(3, validLines.length);
-            for (var i = 0; i < maxLines; i++) {
-                var noteDiv = document.createElement('div');
-                noteDiv.className = 'month-note-line';
-                noteDiv.innerHTML = renderLineWithColors(validLines[i]);
-                notesContainer.appendChild(noteDiv);
-            }
-            
-            if (validLines.length > 3) {
-                var moreDiv = document.createElement('div');
-                moreDiv.className = 'month-note-more';
-                moreDiv.textContent = '...';
-                notesContainer.appendChild(moreDiv);
-            }
+        var validLines = dayData.lines.filter(function(l) { return l && l.text && l.text.trim() !== ''; });
+        validLines.slice(0, 3).forEach(function(line) {
+            var note = document.createElement('div');
+            note.className = 'month-note-line';
+            note.innerHTML = renderLineWithColors(line);
+            notesContainer.appendChild(note);
+        });
+
+        if (validLines.length > 3) {
+            var more = document.createElement('div');
+            more.className = 'month-note-more';
+            more.textContent = '+' + (validLines.length - 3);
+            notesContainer.appendChild(more);
         }
         
         cell.appendChild(notesContainer);
     }
 
+    // Criar uma cópia da data para evitar problemas de referência
+    var cellDate = new Date(date);
     cell.addEventListener('click', function() {
-        openDayEdit(date);
+        openDayEdit(cellDate);
     });
 
     return cell;
