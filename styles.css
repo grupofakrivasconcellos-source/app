@@ -2,149 +2,84 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
     width: 100%;
     height: 100%;
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #f5f5f5;
     color: #333;
-    -webkit-user-select: text;
-    user-select: text;
-    -webkit-touch-callout: none;
-    -webkit-text-size-adjust: 100%;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-    overflow-x: hidden;
-    position: fixed;
     width: 100%;
-    height: 100vh;
-    height: 100dvh;
+    min-height: 100vh;
 }
 
 /* ========== LAYOUT GERAL ========== */
 #app {
     width: 100%;
-    height: 100%;
-    display: -webkit-box;
-    display: -webkit-flex;
+    min-height: 100vh;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
-    /* Ajuste específico para Dynamic Island */
-    padding-top: calc(env(safe-area-inset-top) + 10px);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
 }
 
 .main-view {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
-    padding: 0;
-    overflow: hidden;
     width: 100%;
-    height: 100%;
 }
 
 /* ========== HEADER ========== */
 .header {
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-pack: justify;
-    -webkit-justify-content: space-between;
     justify-content: space-between;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
     align-items: center;
-    padding: 15px 20px;
+    padding: calc(15px + env(safe-area-inset-top, 0px)) 15px 10px 15px;
     background: #c41e3a;
     background: linear-gradient(135deg, #c41e3a 0%, #8b1428 100%);
     color: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-
-.header-title {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
-    flex: 1;
-    text-align: center;
+    z-index: 10;
 }
 
 .header-title h1 {
-    font-size: 24px;
+    font-size: 18px;
     font-weight: bold;
-    letter-spacing: 1px;
 }
 
 .btn-nav-arrow {
-    background: white;
+    background: rgba(255,255,255,0.2);
     border: none;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    font-size: 24px;
+    font-size: 20px;
+    color: white;
     cursor: pointer;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-    align-items: center;
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    -webkit-appearance: none;
-    appearance: none;
-    color: #c41e3a;
-    font-weight: bold;
 }
 
 /* ========== CONTROLES DE VISÃO ========== */
 .view-controls {
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-pack: start;
-    -webkit-justify-content: flex-start;
-    justify-content: flex-start;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-    align-items: center;
-    padding: 12px 15px;
+    padding: 12px 10px;
     background: white;
-    border-bottom: 1px solid #e2e8f0;
-    -webkit-flex-wrap: wrap;
-    flex-wrap: wrap;
+    border-bottom: 1px solid #eee;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-.view-btn {
-    padding: 8px 16px;
-    border: 2px solid #e2e8f0;
+.view-btn, .btn-print, .btn-primary, .btn-secondary, .btn-pdf {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    border: 1px solid #ddd;
     background: white;
-    border-radius: 6px;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
     cursor: pointer;
-    margin-right: 10px;
-    margin-bottom: 5px;
-    color: #333;
+    font-weight: bold;
 }
 
 .view-btn.active {
@@ -156,421 +91,592 @@ body {
 .btn-print {
     background: #48bb78;
     color: white;
-    padding: 8px 16px;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    margin-right: 10px;
-    margin-bottom: 5px;
 }
 
 .btn-pdf {
-    background: #2d3748;
+    background: #e53e3e;
     color: white;
-    padding: 8px 16px;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    margin-right: 10px;
-    margin-bottom: 5px;
-}
-
-.format-buttons {
-    display: flex;
-    gap: 5px;
-    margin-left: 15px;
-    padding-left: 15px;
-    border-left: 1px solid #ddd;
-}
-
-.btn-format {
-    width: 32px;
-    height: 32px;
-    border: 1px solid #ccc;
-    background: white;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-}
-
-.btn-format:hover {
-    background: #f0f0f0;
 }
 
 /* ========== VISÃO SEMANAL (GRID) ========== */
 .week-view-container {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-    overflow: hidden;
-    position: relative;
+    background: #ddd;
 }
 
 .week-grid {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    display: -webkit-box !important;
-    display: -webkit-flex !important;
-    display: flex !important;
-    -webkit-flex-wrap: nowrap !important;
-    flex-wrap: nowrap !important;
-    padding: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    background: white;
+    display: flex;
+    gap: 1px;
+    width: 100%;
 }
 
 .week-column {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1 1 50%;
-    flex: 1 1 50%;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-    height: 100%;
-    overflow-y: auto;
-}
-
-/* ========== CARTÃO DE DIA (GRID) ========== */
-.day-card-grid {
-    background: white;
-    border: 1px solid #d0d0d0;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-    cursor: pointer;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
 }
 
-.day-card-grid.weekend,
-.day-card-grid.holiday {
-    background: #ffe0e0;
+.day-card-grid {
+    flex: 1;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    min-height: 150px;
+    cursor: pointer;
 }
 
 .day-card-header {
-    padding: 8px 12px;
-    background: white;
-    border-bottom: 1px solid #d0d0d0;
+    padding: 8px 10px;
+    font-size: 18px; /* Aumentado para melhor visibilidade */
     font-weight: bold;
-    font-size: 13px;
-    color: #333;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.day-card-header.weekend {
-    background: #c41e3a;
-    color: white;
+.special-day .day-name-label {
+    color: #c41e3a;
 }
 
 .day-card-content {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    padding: 8px 12px;
+    padding: 6px;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    font-size: 10px;
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
+    max-height: 400px; /* Aumentado para acomodar a fonte maior */
+}
+
+.day-line-wrapper {
+    display: flex;
+    font-size: 20px; /* Aumentado para cerca de 20pt conforme solicitado */
+    line-height: 1.2;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.line-number-preview {
+    color: #ccc;
+    margin-right: 5px;
+    font-weight: bold;
+    width: 25px; /* Aumentado para acomodar a fonte maior */
+    flex-shrink: 0;
 }
 
 .day-line-preview {
-    padding: 2px 4px;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 7px;
-    min-height: 14px;
+    flex: 1;
     word-break: break-word;
+    min-height: 1em;
 }
 
 /* ========== VISÃO MENSAL ========== */
 .month-view {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    display: -webkit-box;
-    display: -webkit-flex;
+    background: white;
+    padding: 5px;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
+    height: 100%;
     overflow: hidden;
+}
+
+/* Estilos específicos para exportação de PDF Mensal */
+.pdf-export-mode.month-view {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 10px !important;
+}
+
+.pdf-export-mode .month-grid {
+    height: auto !important;
+    min-height: 180mm; /* Garante que ocupe boa parte da página A4 landscape */
+}
+
+.pdf-export-mode .month-day-cell {
+    min-height: 40mm !important; /* Altura mínima para as células no PDF */
+    overflow: visible !important;
+}
+
+.pdf-export-mode .month-day-cell.empty-cell {
+    min-height: 0 !important; /* Células vazias não precisam de altura mínima no PDF */
+    border: none !important; /* Opcional: remover borda de células vazias no final */
+}
+
+.month-print-header {
+    text-align: center;
+    margin-bottom: 5px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 2px;
+    width: 100%;
+}
+
+.month-print-header h1 {
+    font-size: 24px;
+    margin: 0;
+    color: #000;
 }
 
 .month-calendar {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    background: white;
-    padding: 15px;
-    margin: 12px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .month-grid {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-wrap: wrap;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-top: 1px solid #000;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-top: 1px solid #000;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.month-day-cell.empty-cell {
+    background-color: transparent;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+    cursor: default;
+}
+
+/* Ajuste para iOS 12 e Safari antigo */
+@supports not (display: grid) {
+    .month-grid {
+        display: block;
+        white-space: nowrap;
+    }
+    .month-day-cell, .month-day-header {
+        display: inline-block;
+        width: 14.28%;
+        vertical-align: top;
+    }
 }
 
 .month-day-header {
-    width: 14.28%;
+    padding: 5px;
     text-align: center;
-    font-weight: bold;
-    padding: 8px;
-    background-color: #e2e8f0;
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: 900;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.month-day-header.special-day {
+    color: #c41e3a;
 }
 
 .month-day-cell {
-    width: 14.28%;
-    height: 80px;
-    border: 1px solid #e2e8f0;
-    padding: 4px;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+    padding: 2px;
     cursor: pointer;
-    display: -webkit-box;
-    display: -webkit-flex;
+    overflow-y: auto; /* Permitir rolagem no mensal também */
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
-    font-size: 12px;
-}
-
-.month-day-cell.weekend {
-    background-color: #fff5f5;
-    color: #c41e3a;
-}
-
-.month-day-cell.holiday {
-    background-color: #ffe0e0;
-    color: #c41e3a;
-    font-weight: bold;
+    height: 100%;
+    min-height: 250px; /* Aumentado para comportar 3 colunas x 10 linhas */
+    background-color: #fff;
 }
 
 .month-day-cell.other-month {
-    opacity: 0.4;
+    background-color: #fafafa;
 }
 
-.month-day-number {
-    font-weight: bold;
-    margin-bottom: 4px;
-    font-size: 14px;
-}
-
-.month-day-notes {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
-    flex: 1;
-    display: -webkit-box;
-    display: -webkit-flex;
+.month-day-num-container {
+    margin-bottom: 1px;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-    overflow: hidden;
-    gap: 2px;
+    justify-content: center;
 }
 
-.month-note-line {
-    font-size: 8px;
-    line-height: 1.2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: #333;
-}
-
-.month-note-more {
-    font-size: 8px;
-    color: #999;
+.month-day-num {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
     text-align: center;
+    background: #eee;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
 }
 
-/* ========== VISÃO DE EDIÇÃO DIÁRIA ========== */
+.special-day .month-day-num {
+    background: #ffcccc;
+    color: #c41e3a;
+}
+
+.month-cell-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    font-size: 9px; /* Aumentado para melhor legibilidade no PDF */
+    line-height: 1.3;
+}
+
+.month-column-part {
+    display: flex;
+    flex-direction: column;
+}
+
+.month-line-rich {
+    margin-bottom: 1px;
+    border-bottom: 1px dotted #eee;
+    word-break: break-word;
+    white-space: normal;
+}
+
+/* ========== EDIÇÃO DIÁRIA ========== */
 .day-edit-view {
-    /* Ajuste específico para Dynamic Island na tela de edição */
-    padding-top: calc(env(safe-area-inset-top) + 10px);
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background: white;
-    z-index: 1000;
-    display: -webkit-box;
-    display: -webkit-flex;
+    z-index: 100;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
     flex-direction: column;
 }
 
 .edit-header {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-pack: justify;
-    -webkit-justify-content: space-between;
-    justify-content: space-between;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-    align-items: center;
-    padding: 15px;
+    padding: calc(15px + env(safe-area-inset-top, 0px)) 15px 10px 15px;
     background: #667eea;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.edit-header-right {
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-}
-
-.edit-header-left {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
+    justify-content: space-between;
     align-items: center;
 }
 
-.edit-content {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
-    flex: 1;
-    display: -webkit-box;
-    display: -webkit-flex;
+.edit-toolbar {
+    padding: 12px 10px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
-    flex-direction: column;
-    overflow-y: auto;
-    padding: 15px;
-    -webkit-overflow-scrolling: touch;
-}
-
-.color-palette {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-    align-items: center;
-    margin-bottom: 20px;
-    -webkit-flex-wrap: wrap;
     flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.toolbar-group {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.toolbar-group button {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolbar-group select {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.color-buttons {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    padding: 2px;
 }
 
 .color-btn {
     width: 32px;
     height: 32px;
-    border: 2px solid transparent;
     border-radius: 50%;
+    border: 1px solid #ddd;
     cursor: pointer;
-    margin-right: 8px;
-    margin-bottom: 8px;
+    flex-shrink: 0;
 }
 
-/* ========== NOTEBOOK (CADERNO) ========== */
 .notebook-container {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
     flex: 1;
-    padding: 10px;
-    background: white;
+    overflow-y: auto; /* Garantindo que o editor diário role */
+    padding: 15px;
+    height: calc(100vh - 150px); /* Altura fixa para forçar o scroll se necessário */
 }
 
 .notebook-line-wrapper {
-    display: -webkit-box;
-    display: -webkit-flex;
     display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-    align-items: center;
-    border-bottom: 1px solid #e0e0e0;
-    padding: 4px 0;
-    min-height: 28px;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 8px 0;
 }
 
 .line-number {
-    min-width: 25px;
-    font-weight: bold;
+    width: 30px;
+    font-size: 14px;
     color: #ccc;
-    font-size: 10px;
-    text-align: center;
+    font-weight: bold;
 }
 
-.notebook-line-editable {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
+.notebook-line {
     flex: 1;
-    border: none;
-    background: transparent;
-    font-size: 14px;
-    color: #333;
+    font-size: 16px;
     outline: none;
-    padding: 2px 8px;
-    line-height: 1.2;
-    word-wrap: break-word;
-    white-space: pre-wrap;
+    min-height: 1.5em;
+    word-break: break-word;
 }
 
-/* ========== BOTÕES ========== */
-.btn {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    margin-left: 10px;
+/* ========== IMPRESSÃO ========== */
+.print-only {
+    display: none;
 }
 
-.btn-primary {
-    background-color: #667eea;
-    color: white;
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 5mm;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+
+    #app, .main-view {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        background: white !important;
+    }
+
+    /* Estilo Folha de Caderno para Impressão Semanal */
+    .day-card-grid {
+        page-break-after: always !important;
+        border: none !important;
+        width: 100% !important;
+        height: 200mm !important;
+        padding: 10mm !important;
+    }
+
+    .day-print-header {
+        text-align: center !important;
+        margin-bottom: 15px !important;
+    }
+
+    .print-date {
+        font-size: 28px !important;
+        font-weight: bold !important;
+        color: #000 !important;
+    }
+
+    .print-day-name {
+        font-size: 20px !important;
+        font-weight: bold !important;
+        color: #000 !important;
+        margin-bottom: 5px !important;
+    }
+
+    .print-divider {
+        border-top: 2px solid #000 !important;
+        margin-bottom: 20px !important;
+    }
+
+    .day-content-columns {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 5px !important;
+    }
+
+    .day-line-wrapper {
+        font-size: 9px !important;
+        padding: 1px 0 !important;
+        border-bottom: 1px solid #eee !important;
+        height: auto !important; /* Altura automática para impressão */
+        min-height: 15px !important;
+    }
+
+    /* Estilo para Impressão Semanal em 7 colunas */
+    .week-grid.print-mode {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 5px !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Estilo para Impressão Mensal (Alinhamento Semanal) */
+    .month-grid {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        width: 100% !important;
+        height: auto !important;
+        border: 1px solid #000 !important;
+    }
+
+    .month-day-cell {
+        height: auto !important;
+        min-height: 40mm !important; /* Ajuste para caber na página A4 */
+        page-break-inside: avoid !important;
+        border: 1px solid #000 !important;
+    }
+
+    .month-day-cell.empty-cell {
+        border-right: 1px solid #000 !important;
+        border-bottom: 1px solid #000 !important;
+        background: none !important;
+    }
+
+    .week-column {
+        display: contents !important; /* Ignorar colunas de layout da tela na impressão */
+    }
+
+    .day-card-grid {
+        page-break-inside: avoid !important;
+        height: auto !important;
+        min-height: 0 !important;
+        border: 1px solid #000 !important;
+    }
+
+    .day-card-content {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    .month-day-cell {
+        min-height: 250px !important;
+        height: auto !important;
+        overflow: visible !important;
+        page-break-inside: avoid !important;
+    }
+
+    .month-grid {
+        height: auto !important;
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+    }
+
+    .month-cell-content {
+        overflow: visible !important;
+    }
+
+    .day-line-wrapper.empty-line {
+        display: flex !important; /* Mostrar linhas vazias como folha de caderno */
+    }
+
+    /* Visão Mensal na Impressão */
+    .month-view.print-mode {
+        width: 287mm !important;
+        height: 200mm !important;
+    }
+
+    .month-grid {
+        height: 180mm !important;
+    }
+
+    .month-day-cell {
+        min-height: 0 !important;
+    }
+
+    .month-cell-content {
+        font-size: 6px !important;
+        overflow: hidden !important;
+    }
 }
 
-.btn-secondary {
-    background-color: #e2e8f0;
-    color: #333;
+/* Ajustes para o modo PDF via html2pdf */
+.pdf-export-mode {
+    width: 584mm !important; /* A2 landscape width minus margins */
+    height: 410mm !important; /* A2 landscape height minus margins */
+    padding: 10mm !important;
+    margin: 0 !important;
+    background: white !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+}
+
+.pdf-export-mode .month-calendar {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.pdf-export-mode .month-grid {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    grid-template-rows: auto repeat(6, 1fr) !important;
+    width: 100% !important;
+    flex: 1 !important;
+    border: 2px solid #000 !important;
+}
+
+.pdf-export-mode .month-day-header {
+    font-size: 24px !important;
+    padding: 10px !important;
+    border: 1px solid #000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.pdf-export-mode .month-day-cell {
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 5px !important;
+    border: 1px solid #000 !important;
+}
+
+.pdf-export-mode .month-cell-content {
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+}
+
+.pdf-export-mode .month-day-num {
+    width: 30px !important;
+    height: 30px !important;
+    line-height: 30px !important;
+    font-size: 18px !important;
+}
+
+.pdf-export-mode .month-line-rich {
+    margin-bottom: 0px !important;
+}
+
+.pdf-export-mode .month-day-num {
+    width: 15px !important;
+    height: 15px !important;
+    line-height: 15px !important;
+    font-size: 10px !important;
 }
