@@ -247,9 +247,7 @@ body {
 	    grid-template-columns: repeat(7, 1fr);
 	    border-top: 1px solid #000;
 	    border-left: 1px solid #000;
-	    flex: 1;
 	    width: 100%;
-	    height: 100%;
 	    box-sizing: border-box;
 	}
 
@@ -275,14 +273,13 @@ body {
 .month-day-cell {
     border-right: 1px solid #000;
     border-bottom: 1px solid #000;
-    padding: 6px;
+    padding: 4px;
     cursor: pointer;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    min-height: 120px;
+    aspect-ratio: 1 / 1; /* Forçar formato quadrado */
     background-color: #fff;
+    overflow: hidden;
 }
 
 .month-day-cell.other-month {
@@ -322,10 +319,11 @@ body {
 
 .month-day-content {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: auto; /* Rolagem interna para o conteúdo */
     font-size: 9.5px;
-    line-height: 1.4;
+    line-height: 1.2;
     padding: 2px 0;
+    -webkit-overflow-scrolling: touch;
 }
 
 .month-line-preview {
@@ -853,6 +851,7 @@ body {
         border-bottom: 1px solid #000 !important;
         min-height: 50px !important;
         height: auto !important;
+        aspect-ratio: auto !important; /* Remover quadrado na impressão */
         overflow: hidden !important;
         display: flex !important;
         flex-direction: column !important;
