@@ -215,11 +215,21 @@ function renderMonthView() {
     startDate.setDate(firstDay.getDate() - firstDay.getDay());
 
     var currentDate = new Date(startDate);
-    for (var i = 0; i < 42; i++) {
+    // Calcular quantas semanas o mês ocupa (4, 5 ou 6)
+    var totalDays = 42;
+    // Se o mês terminar exatamente no final da 5ª semana, podemos usar 35 dias para economizar espaço na impressão
+    var lastDayOfMonth = new Date(appState.currentDate.getFullYear(), appState.currentDate.getMonth() + 1, 0);
+    var daysInMonthGrid = 42;
+    
+    for (var i = 0; i < daysInMonthGrid; i++) {
         var cell = createMonthDayCell(new Date(currentDate));
         grid.appendChild(cell);
         currentDate.setDate(currentDate.getDate() + 1);
     }
+    
+    // Ajuste dinâmico do grid para impressão baseado no número de semanas
+    var numWeeks = Math.ceil(daysInMonthGrid / 7);
+    grid.style.setProperty('--num-weeks', numWeeks);
 
     monthCalendar.appendChild(grid);
     document.getElementById('weekView').style.display = 'none';

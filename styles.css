@@ -739,9 +739,11 @@ body {
     body.print-monthly-landscape .month-view {
         padding: 5mm !important;
         width: 297mm !important;
-        height: 210mm !important;
+        height: auto !important; /* Permitir altura automática para mostrar todo o conteúdo */
+        min-height: 210mm !important;
         display: flex !important;
         flex-direction: column !important;
+        overflow: visible !important;
     }
     
     body.print-monthly-landscape .header,
@@ -759,12 +761,13 @@ body {
     body.print-monthly-landscape .month-grid {
         display: grid !important;
         grid-template-columns: repeat(7, 1fr) !important;
-        grid-template-rows: 25px repeat(6, 1fr) !important; /* Ajustado para 6 semanas se necessário */
-        height: calc(100% - 40px) !important;
+        grid-template-rows: 25px auto !important; /* Altura automática para as linhas */
+        height: auto !important;
         width: 100% !important;
         gap: 0 !important;
         background: #fff !important;
         border: 1px solid #000 !important;
+        margin-bottom: 0 !important;
     }
 
     body.print-monthly-landscape .month-day-header {
@@ -793,16 +796,23 @@ body {
         width: 100% !important;
     }
     
-    /* Garantir que as anotações semanais não apareçam na impressão mensal */
+    /* Garantir que ABSOLUTAMENTE NADA além do mês apareça */
+    body.print-monthly-landscape .week-view-container,
     body.print-monthly-landscape .week-column,
-    body.print-monthly-landscape .day-card-grid {
+    body.print-monthly-landscape .day-card-grid,
+    body.print-monthly-landscape .day-edit-view,
+    body.print-monthly-landscape #dayEditView {
         display: none !important;
     }
     
     /* Mas as células do mês devem aparecer */
     body.print-monthly-landscape .month-day-cell {
         display: flex !important;
+        flex-direction: column !important;
         border: 0.5px solid #000 !important;
+        height: auto !important;
+        min-height: 35mm !important; /* Altura mínima para manter o formato de calendário */
+        overflow: visible !important;
     }}
 
     .month-print-columns {
