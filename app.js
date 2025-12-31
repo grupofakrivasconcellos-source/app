@@ -92,7 +92,7 @@ function initializeEventListeners() {
     });
 
     document.getElementById('printWeekBtn').addEventListener('click', function() {
-        window.print();
+        printWeeklyView();
     });
 
     document.getElementById('printDay').addEventListener('click', function() {
@@ -215,21 +215,11 @@ function renderMonthView() {
     startDate.setDate(firstDay.getDate() - firstDay.getDay());
 
     var currentDate = new Date(startDate);
-    // Calcular quantas semanas o mês ocupa (4, 5 ou 6)
-    var totalDays = 42;
-    // Se o mês terminar exatamente no final da 5ª semana, podemos usar 35 dias para economizar espaço na impressão
-    var lastDayOfMonth = new Date(appState.currentDate.getFullYear(), appState.currentDate.getMonth() + 1, 0);
-    var daysInMonthGrid = 42;
-    
-    for (var i = 0; i < daysInMonthGrid; i++) {
+    for (var i = 0; i < 42; i++) {
         var cell = createMonthDayCell(new Date(currentDate));
         grid.appendChild(cell);
         currentDate.setDate(currentDate.getDate() + 1);
     }
-    
-    // Ajuste dinâmico do grid para impressão baseado no número de semanas
-    var numWeeks = Math.ceil(daysInMonthGrid / 7);
-    grid.style.setProperty('--num-weeks', numWeeks);
 
     monthCalendar.appendChild(grid);
     document.getElementById('weekView').style.display = 'none';
@@ -455,18 +445,27 @@ function renderLineWithColors(lineData) {
     return '';
 }
 
+function printWeeklyView() {
+    if (appState.view !== 'week') {
+        appState.view = 'week';
+        renderWeekView();
+    }
+    
+    // Adicionar classe para impressão semanal paisagem
+    document.body.classList.add('print-weekly-landscape');
+    
+    // Pequeno delay para garantir a renderização e o estilo
+    setTimeout(function() {
+        window.print();
+        // Remover a classe após a impressão (ou cancelamento)
+        document.body.classList.remove('print-weekly-landscape');
+    }, 500);
+}
+
 function printMonthlyView() {
-    // Garantir que estamos na visão mensal
     if (appState.view !== 'month') {
         appState.view = 'month';
         renderMonthView();
-    }
-    
-    // Configurar o cabeçalho de impressão mensal
-    var monthPrintTitle = document.getElementById('monthPrintTitle');
-    var headerTitle = document.getElementById('headerTitle');
-    if (monthPrintTitle && headerTitle) {
-        monthPrintTitle.textContent = headerTitle.textContent;
     }
     
     // Adicionar classe para impressão mensal paisagem
