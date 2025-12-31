@@ -451,14 +451,73 @@ function printWeeklyView() {
         renderWeekView();
     }
     
+    // Preparar o grid para impressão (7 colunas) - Cópia exata da lógica do PDF
+    var weekGrid = document.getElementById('weekGrid');
+    var originalContent = weekGrid.innerHTML;
+    
+    // 1. Remover as colunas de tela (leftCol/rightCol) e colocar os cards direto no grid
+    var columns = weekGrid.querySelectorAll('.week-column');
+    if (columns.length > 0) {
+        var cards = [];
+        columns.forEach(function(col) {
+            while (col.firstChild) {
+                cards.push(col.firstChild);
+            }
+        });
+        weekGrid.innerHTML = '';
+        cards.forEach(function(card) {
+            weekGrid.appendChild(card);
+        });
+    }
+
+    // 2. Ajuste dinâmico de fonte idêntico ao PDF
+    var allCards = weekGrid.querySelectorAll('.day-card-grid');
+    allCards.forEach(function(card) {
+        var content = card.querySelector('.day-card-content');
+        if (content) {
+            content.style.setProperty('max-height', 'none', 'important'); // Remover limite de altura
+            var lines = content.querySelectorAll('.day-line-preview');
+            lines.forEach(function(line) {
+                var text = line.innerText.trim();
+                if (text.length > 0) {
+                    var fontSize = 8; // Padrão
+                    if (text.length > 50) fontSize = 7.5;
+                    if (text.length > 100) fontSize = 7;
+                    if (text.length > 200) fontSize = 6.5;
+                    if (text.length > 400) fontSize = 6;
+                    if (text.length > 600) fontSize = 5.5;
+                    
+                    line.style.setProperty('font-size', fontSize + 'pt', 'important');
+                    line.style.setProperty('line-height', '1.1', 'important');
+                    line.style.setProperty('margin-bottom', '1px', 'important');
+                    line.style.setProperty('word-break', 'break-word', 'important');
+                    line.style.setProperty('white-space', 'normal', 'important');
+                }
+            });
+        }
+    });
+    
+    // 3. Aplicar estilos de grid para impressão
+    weekGrid.style.setProperty('display', 'grid', 'important');
+    weekGrid.style.setProperty('grid-template-columns', 'repeat(7, 1fr)', 'important');
+    weekGrid.style.setProperty('width', '100%', 'important');
+    weekGrid.style.setProperty('height', 'auto', 'important');
+
     // Adicionar classe para impressão semanal paisagem
     document.body.classList.add('print-weekly-landscape');
     
     // Pequeno delay para garantir a renderização e o estilo
     setTimeout(function() {
         window.print();
-        // Remover a classe após a impressão (ou cancelamento)
+        // Restaurar o estado original após a impressão
         document.body.classList.remove('print-weekly-landscape');
+        weekGrid.innerHTML = originalContent;
+        weekGrid.style.display = '';
+        weekGrid.style.gridTemplateColumns = '';
+        weekGrid.style.width = '';
+        weekGrid.style.height = '';
+        // Re-renderizar para garantir que os eventos de clique voltem a funcionar
+        renderWeekView();
     }, 500);
 }
 

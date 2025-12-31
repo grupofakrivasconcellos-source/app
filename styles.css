@@ -184,10 +184,10 @@ body {
 .day-card-content {
     flex: 1;
     padding: 6px;
-    overflow-y: auto;
+    overflow-y: auto; /* Reabilitado conforme solicitado */
     -webkit-overflow-scrolling: touch;
-    /* Altura calculada para mostrar exatamente 7 linhas (1.4em da linha + 4px de margem) */
-    max-height: calc(7 * (1.4em + 4px) + 12px); 
+    /* Altura máxima para permitir rolagem na tela */
+    max-height: 400px; 
     background: #fff;
 }
 
@@ -284,10 +284,11 @@ body {
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    aspect-ratio: 1 / 1 !important; /* Forçar formato quadrado idêntico */
+    aspect-ratio: 1 / 1 !important;
     background-color: #fff;
-    overflow: hidden;
-    min-height: 0 !important; /* Remover qualquer min-height que possa expandir a célula */
+    overflow-y: auto; /* Habilitar rolagem nas células do mês */
+    -webkit-overflow-scrolling: touch;
+    min-height: 0 !important;
 }
 
 .month-day-cell.other-month {
@@ -485,9 +486,10 @@ body {
 
 .notebook-container {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: auto; /* Habilitar rolagem nas anotações diárias */
     padding: 15px;
     -webkit-overflow-scrolling: touch; /* Rolagem suave no iOS */
+    height: calc(100vh - 150px); /* Garantir altura para rolagem no mobile */
 }
 
 .notebook-line-wrapper {
@@ -594,10 +596,10 @@ body {
 
     .week-grid {
         display: grid !important;
-        grid-template-columns: repeat(7, 1fr) !important; /* Restaurar 7 colunas */
+        grid-template-columns: repeat(7, 1fr) !important;
         gap: 0 !important;
         width: 100% !important;
-        height: 100% !important;
+        height: auto !important; /* Permitir altura automática para caber conteúdo */
         background: #fff !important;
         border-top: 1px solid #000 !important;
         border-left: 1px solid #000 !important;
@@ -731,13 +733,12 @@ body {
     }
 
     .day-line-preview {
-        font-size: 7pt !important;
+        font-size: 6.5pt !important; /* Reduzido para caber melhor */
         font-weight: bold !important;
-        line-height: 1.1 !important; /* Reduzido para ganhar espaço */
-        word-break: break-all !important; /* Quebra agressiva */
+        line-height: 1.1 !important;
+        word-break: break-word !important; /* Quebra por palavra para não "amontoar" */
         overflow-wrap: break-word !important;
         color: inherit !important;
-        overflow: hidden !important; /* Ocultar transbordamento */
         white-space: normal !important;
         display: block !important;
         min-height: 0 !important;

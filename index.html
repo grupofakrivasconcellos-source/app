@@ -618,16 +618,17 @@
                         lines.forEach(function(line) {
                             var text = line.innerText.trim();
                             if (text.length > 0) {
-                                var fontSize = 10; // Padrão
-                                if (text.length > 50) fontSize = 9;
-                                if (text.length > 100) fontSize = 8;
-                                if (text.length > 200) fontSize = 7;
+                                var fontSize = 8; // Reduzido para caber melhor
+                                if (text.length > 50) fontSize = 7.5;
+                                if (text.length > 100) fontSize = 7;
+                                if (text.length > 200) fontSize = 6.5;
                                 if (text.length > 400) fontSize = 6;
-                                if (text.length > 600) fontSize = 5;
+                                if (text.length > 600) fontSize = 5.5;
                                 line.style.setProperty('font-size', fontSize + 'pt', 'important');
-	                                line.style.setProperty('line-height', '1.2', 'important');
-	                                line.style.setProperty('margin-bottom', '1px', 'important');
-	                                line.style.setProperty('border-bottom', '0.5px dotted #eee', 'important');
+                                line.style.setProperty('line-height', '1.1', 'important');
+                                line.style.setProperty('margin-bottom', '1px', 'important');
+                                line.style.setProperty('word-break', 'break-word', 'important');
+                                line.style.setProperty('white-space', 'normal', 'important');
                             }
                         });
                     }
