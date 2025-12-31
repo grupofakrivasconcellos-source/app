@@ -587,15 +587,17 @@ body {
     }
 
     .week-grid .print-only {
-        display: flex !important;
-        flex-direction: column !important;
-        flex: 1 1 0 !important; /* Forçar distribuição igualitária se necessário, mas permitir flex */
-        min-width: 0 !important;
-        border: 1px solid #000 !important;
-        border-bottom: none !important;
-        background: #fff !important;
-        overflow: visible !important;
-    }
+	        display: flex !important;
+	        flex-direction: column !important;
+	        flex: 1 1 0 !important;
+	        min-width: 0 !important;
+	        border: 1px solid #000 !important;
+	        border-right: 1px solid #000 !important; /* Linha vertical à direita */
+	        border-left: 1px solid #000 !important;  /* Linha vertical à esquerda */
+	        margin-left: -1px !important; /* Sobrepor bordas para evitar linhas duplas */
+	        background: #fff !important;
+	        overflow: visible !important;
+	    }
 
     body.print-weekly-landscape .day-card-grid {
         background: white !important;
@@ -644,15 +646,17 @@ body {
     }
 
     .day-card-grid .print-header-content {
-        display: flex !important;
-        font-size: 9px !important;
-        font-weight: bold !important;
-    }
+	        display: flex !important;
+	        flex-wrap: nowrap !important; /* Forçar uma única linha */
+	        font-size: 8px !important; /* Reduzido conforme solicitado */
+	        font-weight: bold !important;
+	        white-space: nowrap !important;
+	    }
 
-    .day-card-grid .print-date, .day-card-grid .print-day-name {
-        font-size: 9px !important;
-        color: #000 !important;
-    }
+	    .day-card-grid .print-date, .day-card-grid .print-day-name {
+	        font-size: 8px !important; /* Reduzido conforme solicitado */
+	        color: #000 !important;
+	    }
 
     /* Conteúdo das Linhas na Semana - Redução para caber TUDO */
     .day-card-content {

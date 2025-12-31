@@ -239,9 +239,9 @@
             
             // Garantindo que a data e o dia da semana apareçam na mesma linha ou blocos visíveis
             printHeader.innerHTML = '<div class="print-header-content" style="' + headerColor + '">' +
-                                   '<span class="print-date" style="' + headerColor + '">' + day + '/' + month + '/' + year + '</span>' +
-                                   '<span class="print-day-name" style="' + headerColor + '"> - ' + getDayName(date.getDay()) + '</span>' +
-                                   '</div>';
+                                   '<span class="print-date" style="' + headerColor + ' font-size: 8px;">' + day + '/' + month + '/' + year + '</span>' +
+	                                   '<span class="print-day-name" style="' + headerColor + ' font-size: 8px;"> - ' + getDayName(date.getDay()) + '</span>' +
+	                                   '</div>';
 
             var content = document.createElement('div');
             content.className = 'day-card-content';
@@ -627,7 +627,9 @@
                                 if (text.length > 400) fontSize = 6;
                                 if (text.length > 600) fontSize = 5;
                                 line.style.setProperty('font-size', fontSize + 'pt', 'important');
-                                line.style.setProperty('line-height', '1.1', 'important');
+	                                line.style.setProperty('line-height', '1.2', 'important');
+	                                line.style.setProperty('margin-bottom', '1px', 'important');
+	                                line.style.setProperty('border-bottom', '0.5px dotted #eee', 'important');
                             }
                         });
                     }
