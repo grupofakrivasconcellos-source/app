@@ -192,6 +192,9 @@
                 // Adicionar ao container de tela (que será oculto na impressão)
                 var screenClone = card.cloneNode(true);
                 screenClone.classList.add('no-print');
+                screenClone.onclick = (function(d) {
+                    return function() { openDayEdit(new Date(d)); };
+                })(date);
                 if (i < 4) leftCol.appendChild(screenClone); else rightCol.appendChild(screenClone);
                 
                 // Adicionar ao container de impressão (que será oculto na tela)
@@ -308,7 +311,9 @@
             card.appendChild(header);
             card.appendChild(printHeader);
             card.appendChild(content);
-            card.onclick = function() { openDayEdit(date); };
+            card.onclick = (function(d) {
+                return function() { openDayEdit(new Date(d)); };
+            })(date);
             return card;
         }
 
