@@ -286,8 +286,7 @@ body {
     flex-direction: column;
     aspect-ratio: 1 / 1 !important;
     background-color: #fff;
-    overflow-y: auto; /* Habilitar rolagem nas células do mês */
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden; /* O container principal não rola, quem rola é o conteúdo interno */
     min-height: 0 !important;
 }
 
@@ -326,13 +325,14 @@ body {
     line-height: 1.4;
 }
 
-.month-day-content {
+.month-day-content, .month-cell-content {
     flex: 1;
-    overflow-y: auto; /* Rolagem interna para o conteúdo */
+    overflow-y: auto !important; /* Forçar rolagem interna */
     font-size: 9.5px;
     line-height: 1.2;
     padding: 2px 0;
     -webkit-overflow-scrolling: touch;
+    display: block !important;
 }
 
 .month-line-preview {
