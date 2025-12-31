@@ -286,7 +286,7 @@
                 // Lógica de colunas e escala de papel
                 var paperSize = document.getElementById('paperSize').value;
                 // Invertendo escala: se for papel gigante, diminuímos a fonte para caber mais conteúdo
-                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 0.7 : 1;
+                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 0.5 : 1;
                 
                 var numCols = 1;
                 var fontSize = 8 * scale;
@@ -440,7 +440,7 @@
                 // Fonte dinâmica mensal otimizada para grid e escala de papel
                 var paperSize = document.getElementById('paperSize').value;
                 // Invertendo escala: se for papel gigante, diminuímos a fonte para caber mais conteúdo
-                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 0.7 : 1;
+                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 0.5 : 1;
                 
                 // Reduzir fonte se houver muito conteúdo para garantir que tudo apareça
                 var fontSize = 5 * scale;
@@ -621,16 +621,27 @@
             
             // Se for mensal, garantir que o cabeçalho de impressão esteja visível e limpo
             if (!isWeek) {
+                // Remover TUDO que não seja o título mensal e o grid
+                var allElements = clone.querySelectorAll('*');
+                allElements.forEach(function(el) {
+                    if (el.id === 'monthPrintHeader' || el.id === 'monthCalendar' || el.classList.contains('month-grid') || el.closest('#monthCalendar')) {
+                        // Manter elementos do calendário mensal
+                    } else if (el.id === 'monthView' || el.id === 'monthPrintTitle' || el.id === 'app' || el.classList.contains('main-view')) {
+                        // Manter containers principais
+                    } else {
+                        // Remover o resto para garantir que nada do semanal apareça
+                        el.style.setProperty('display', 'none', 'important');
+                    }
+                });
+
                 var printHeader = clone.querySelector('#monthPrintHeader');
                 if (printHeader) {
                     printHeader.style.setProperty('display', 'block', 'important');
                     printHeader.style.textAlign = 'center';
                     printHeader.style.marginBottom = '20px';
                     printHeader.style.borderBottom = '2px solid #000';
+                    printHeader.style.width = '100%';
                 }
-                // Remover qualquer outro elemento que possa estar "vazando" para o topo
-                var extraNotes = clone.querySelectorAll('.week-grid, .no-print');
-                extraNotes.forEach(function(el) { el.remove(); });
             }
             
             // Configurar o clone para o estado de impressão
