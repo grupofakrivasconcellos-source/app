@@ -744,6 +744,13 @@ body {
         width: 100% !important;
         height: auto !important;
         font-family: Arial, sans-serif !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Margem interna para evitar cortes da impressora ao usar margin: 0 no @page */
+    body {
+        padding: 5mm !important;
     }
 
     #app, .main-view {
@@ -793,6 +800,10 @@ body {
         flex-direction: column !important;
         min-height: 0 !important;
         height: 100% !important;
+    }
+    
+    body.print-weekly-landscape .week-view-container {
+        padding: 5mm !important;
     }
 
     body.print-weekly-landscape .special-day .day-name-label,
@@ -967,7 +978,7 @@ body {
 
     body.print-monthly-landscape .month-view {
         display: flex !important;
-        padding: 0 !important;
+        padding: 5mm !important;
         width: 297mm !important;
         height: 210mm !important;
     }
