@@ -566,12 +566,15 @@ body {
     
     /* LAYOUT SEMANAL: MUDAR PARA 1 COLUNA */
     .week-grid {
-        flex-direction: column;
+        display: flex !important;
+        flex-direction: column !important;
         gap: 8px;
         padding: 10px;
     }
     
     .week-column {
+        display: flex !important;
+        flex-direction: column !important;
         width: 100%;
         gap: 8px;
     }
@@ -728,8 +731,15 @@ body {
         visibility: hidden !important;
     }
 
-    /* Ocultar linhas vazias na impressão */
-    .day-line-wrapper.empty-line, .notebook-line-wrapper.empty-line {
+    /* Garantir que as 30 linhas apareçam na impressão semanal */
+    body.print-weekly-landscape .day-line-wrapper.empty-line {
+        display: flex !important;
+        min-height: 10px !important;
+    }
+
+    /* Ocultar linhas vazias apenas na impressão diária/mensal se necessário */
+    body:not(.print-weekly-landscape) .day-line-wrapper.empty-line, 
+    .notebook-line-wrapper.empty-line {
         display: none !important;
     }
 
@@ -778,9 +788,8 @@ body {
     }
 
     .week-grid {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
         gap: 2px !important;
         width: 100% !important;
         height: auto !important;
@@ -872,22 +881,14 @@ body {
         align-items: flex-start !important;
     }
 
-    .day-print-columns {
-        display: flex !important;
-        gap: 4px !important;
-        width: 100% !important;
-        align-items: stretch !important; /* Garantir que as colunas tenham a mesma altura */
-    }
-
-    .print-col {
-        flex: 1 !important;
-        min-width: 0 !important;
+    .day-print-container {
         display: flex !important;
         flex-direction: column !important;
+        width: 100% !important;
         border: 1px solid #000 !important;
-        border-top: none !important; /* Evitar linha dupla com o header */
-        padding: 6px !important;
+        border-top: none !important;
         background: #fff !important;
+        padding: 2px !important;
     }
 
     .print-col:last-child {

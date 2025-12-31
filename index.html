@@ -272,73 +272,25 @@
                 content.appendChild(lineWrap);
             }
 
-            // Distribuir em colunas para impressão de forma inteligente
-            if (hasAnyContent) {
-                var printCols = document.createElement('div');
-                printCols.className = 'print-only day-print-columns';
+            // Renderizar as 30 linhas para impressão (uma sobre a outra)
+            var printContainer = document.createElement('div');
+            printContainer.className = 'print-only day-print-container';
+            
+            for (var i = 0; i < 30; i++) {
+                var line = dayData.lines[i] || { text: '' };
+                var hasContent = !!(line.text || line.html);
                 
-                // Calcular volume de conteúdo para decidir número de colunas e tamanho da fonte
-                var totalChars = contentLines.reduce(function(acc, curr) { 
-                    return acc + (curr.data.text || curr.data.html || "").length; 
-                }, 0);
-                var numLines = contentLines.length;
+                var pWrap = document.createElement('div');
+                pWrap.className = 'day-line-wrapper print-only' + (hasContent ? ' has-content' : ' empty-line');
                 
-                // Lógica de colunas e escala de papel
-                var paperSize = document.getElementById('paperSize').value;
-                // Invertendo escala: se for papel gigante, diminuímos a fonte para caber mais conteúdo
-                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 0.5 : 1;
+                var cleanHtml = (line.html || line.text || '&nbsp;').replace(/font-size:[^;"]+;?/g, '');
                 
-                var numCols = 1;
-                var fontSize = 8 * scale;
+                pWrap.innerHTML = '<span class="line-number-preview" style="color:#000; font-size: 6px; width: 10px; font-weight: bold; flex-shrink: 0;">' + (i + 1) + '.</span>' +
+                                 '<div class="day-line-preview" style="font-size: 7px; word-break: break-word; line-height: 1.1; flex: 1;">' + cleanHtml + '</div>';
                 
-                if (numLines > 10 || totalChars > 300) {
-                    numCols = (scale > 1) ? 1 : 2; // Em A1/A0, manter 1 coluna para máxima largura
-                    fontSize = 7 * scale;
-                }
-                if (numLines > 20 || totalChars > 600) {
-                    numCols = (scale > 1) ? 2 : 3;
-                    fontSize = 6 * scale;
-                }
-
-                var cols = [];
-                for (var c = 0; c < numCols; c++) {
-                    var col = document.createElement('div');
-                    col.className = 'print-col';
-                    col.style.border = '1px solid #000';
-                    col.style.padding = '4px';
-                    col.style.flex = '1';
-                    printCols.appendChild(col);
-                    cols.push(col);
-                }
-                
-                // Distribuir linhas entre as colunas
-                var linesPerCol = Math.ceil(numLines / numCols);
-                contentLines.forEach(function(item, idx) {
-                    var colIdx = Math.floor(idx / linesPerCol);
-                    var targetCol = cols[colIdx] || cols[cols.length - 1];
-                    
-                    var pWrap = document.createElement('div');
-                    pWrap.className = 'day-line-wrapper has-content print-only';
-                    pWrap.style.marginBottom = '2px';
-                    pWrap.style.display = 'flex';
-                    pWrap.style.alignItems = 'flex-start';
-                    
-                    var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
-                    
-                    pWrap.innerHTML = '<span class="line-number-preview" style="color:#000; font-size:' + (fontSize-1) + 'px; width: 12px; font-weight: bold; flex-shrink: 0;">' + item.index + '.</span>' +
-                                     '<div class="day-line-preview" style="font-size:' + fontSize + 'px; word-break: break-word; line-height: 1.2; flex: 1;">' + cleanHtml + '</div>';
-                    
-                    targetCol.appendChild(pWrap);
-                });
-                content.appendChild(printCols);
+                printContainer.appendChild(pWrap);
             }
-
-            if (!hasAnyContent) {
-                var noContentMsg = document.createElement('div');
-                noContentMsg.className = 'print-only no-content-msg';
-                noContentMsg.textContent = 'Sem anotações';
-                content.appendChild(noContentMsg);
-            }
+            content.appendChild(printContainer);
 
             card.appendChild(header);
             card.appendChild(printHeader);
@@ -663,9 +615,9 @@
                 // Garantir que o grid de 7 colunas seja aplicado no clone
                 var grid = clone.querySelector('#weekGrid');
                 if (grid) {
-                    grid.style.display = 'flex';
-                    grid.style.flexDirection = 'row';
-                    grid.style.flexWrap = 'nowrap';
+                    grid.style.display = 'grid';
+                    grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+                    grid.style.gap = '2px';
                     grid.style.width = '100%';
                     grid.style.alignItems = 'stretch';
                 }
