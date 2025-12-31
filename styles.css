@@ -801,15 +801,29 @@ body {
         display: contents !important;
     }
 
-    body.print-weekly-landscape .day-card-grid {
-        background: white !important;
-        border: 0.5px solid #000 !important;
-        padding: 2px !important;
-        display: flex !important;
-        flex-direction: column !important;
-        min-height: 0 !important;
-        height: 100% !important;
-    }
+body.print-weekly-landscape .day-card-grid {
+
+    /* Visual idêntico ao mensal */
+    background: #fff !important;
+    border: 1px solid #000 !important;
+
+    /* NÃO forçar altura (igual ao mensal) */
+    height: auto !important;
+    min-height: auto !important;
+
+    /* Layout simples, sem esticar conteúdo */
+    display: block !important;
+
+    /* Espaçamento igual ao mês */
+    padding: 4px !important;
+
+    /* Nunca quebrar célula no meio */
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+
+    overflow: visible !important;
+}
+}
     
     body.print-weekly-landscape .week-view-container {
         padding: 5mm !important;
@@ -1091,16 +1105,33 @@ body {
         margin-bottom: 1px !important;
     }
 
-     body.print-monthly-landscape .month-cell-content {
-        font-size: 6px !important;
-        line-height: 1.2 !important;
-        max-height: none !important;
-        overflow: visible !important;
-        display: block !important;
-        width: 100% !important;
-        word-wrap: break-word !important;
-        overflow-wrap: break-word !important;
-    }
+body.print-monthly-landscape .month-cell-content {
+
+    /* Tamanho legível sem cortar conteúdo */
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+
+    /* NUNCA cortar conteúdo vindo do storage */
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+
+    /* Respeitar exatamente o texto salvo (ENTER, colagens, etc) */
+    white-space: pre-wrap !important;
+
+    /* Quebrar palavras grandes, URLs, textos colados */
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+
+    /* Safari / iOS */
+    -webkit-hyphens: auto;
+    hyphens: auto;
+
+    /* Garantir renderização completa */
+    display: block !important;
+    width: 100% !important;
+}
+
     
     /* Garantir que elementos da visão semanal não apareçam na impressão mensal */
     body.print-monthly-landscape .week-grid,
