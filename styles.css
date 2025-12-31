@@ -122,15 +122,14 @@ body {
 
 .week-grid {
     flex: 1;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 colunas na tela */
+    display: flex;
     gap: 1px;
     width: 100%;
 }
 
 @media screen and (max-width: 600px) {
     .week-grid {
-        grid-template-columns: 1fr; /* 1 coluna no mobile */
+        flex-direction: column;
     }
 }
 
@@ -639,7 +638,7 @@ body {
     }
 
     .week-column {
-        display: contents !important;
+        display: contents !important; /* Faz com que os cards dentro das colunas se comportem como filhos diretos do grid */
     }
 
     .day-card-grid {

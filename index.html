@@ -179,6 +179,9 @@
 
             document.getElementById('headerTitle').textContent = startDate.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).toUpperCase();
 
+            var leftCol = document.createElement('div'); leftCol.className = 'week-column';
+            var rightCol = document.createElement('div'); rightCol.className = 'week-column';
+
             for (var i = 0; i < 7; i++) {
                 var date = new Date(startDate);
                 date.setDate(startDate.getDate() + i);
@@ -189,9 +192,12 @@
                     return function() { openDayEdit(new Date(d)); };
                 })(date);
                 
-                // Adicionar diretamente ao grid para suportar o layout de 7 colunas na impressão
-                weekGrid.appendChild(card);
+                // Adicionar ao grid de tela (2 colunas)
+                if (i < 4) leftCol.appendChild(card); else rightCol.appendChild(card);
             }
+
+            weekGrid.appendChild(leftCol);
+            weekGrid.appendChild(rightCol);
             
             document.getElementById('weekView').style.display = 'flex';
             document.getElementById('monthView').style.display = 'none';
@@ -630,6 +636,15 @@
                 // Garantir que o grid de 7 colunas seja aplicado no clone
                 var grid = clone.querySelector('#weekGrid');
                 if (grid) {
+                    // Remover as colunas de tela (leftCol/rightCol) e colocar os cards direto no grid
+                    var columns = grid.querySelectorAll('.week-column');
+                    columns.forEach(function(col) {
+                        while (col.firstChild) {
+                            grid.appendChild(col.firstChild);
+                        }
+                        col.remove();
+                    });
+                    
                     grid.style.display = 'grid';
                     grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
                     grid.style.width = '100%';
