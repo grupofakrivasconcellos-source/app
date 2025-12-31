@@ -599,6 +599,17 @@
                 var noPrint = clone.querySelectorAll('.no-print');
                 noPrint.forEach(function(el) { el.style.setProperty('display', 'none', 'important'); });
                 
+                // Ajuste automático de fonte para caber no PDF
+                var allLines = clone.querySelectorAll('.day-line-preview');
+                allLines.forEach(function(line) {
+                    var textLength = line.innerText.length;
+                    var fontSize = 10; // Base 10pt
+                    if (textLength > 100) fontSize = 8;
+                    if (textLength > 200) fontSize = 7;
+                    if (textLength > 300) fontSize = 6;
+                    line.style.setProperty('font-size', fontSize + 'pt', 'important');
+                });
+
                 // Garantir que o grid de 7 colunas seja aplicado no clone
                 var grid = clone.querySelector('#weekGrid');
                 if (grid) {
@@ -606,6 +617,7 @@
                     grid.style.flexDirection = 'row';
                     grid.style.flexWrap = 'nowrap';
                     grid.style.width = '100%';
+                    grid.style.alignItems = 'stretch';
                 }
             }
 

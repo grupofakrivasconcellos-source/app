@@ -619,8 +619,9 @@ body {
         min-height: auto !important;
         display: flex !important;
         flex-direction: column !important;
-        page-break-inside: avoid !important;
+        page-break-inside: auto !important; /* Permitir quebra se necessário */
         width: 100% !important;
+        overflow: visible !important;
     }
 
     .day-card-grid.special-day .day-name-label,
@@ -693,14 +694,15 @@ body {
     }
 
     .day-line-preview {
-        font-size: 10pt !important; /* Usar pt para consistência no PDF */
+        font-size: 10pt !important;
         font-weight: bold !important;
         line-height: 1.2 !important;
         word-break: break-word !important;
-        color: #000 !important; /* Forçar preto se não houver cor específica */
+        color: #000 !important;
         overflow: visible !important;
         white-space: normal !important;
         display: block !important;
+        min-height: 0 !important; /* Permitir encolher se necessário */
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
