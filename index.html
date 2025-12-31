@@ -630,11 +630,10 @@
                 // Garantir que o grid de 7 colunas seja aplicado no clone
                 var grid = clone.querySelector('#weekGrid');
                 if (grid) {
-                    grid.style.display = 'flex';
-                    grid.style.flexDirection = 'row';
-                    grid.style.flexWrap = 'nowrap';
+                    grid.style.display = 'grid';
+                    grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
                     grid.style.width = '100%';
-                    grid.style.alignItems = 'stretch';
+                    grid.style.height = '100%';
                 }
             }
 

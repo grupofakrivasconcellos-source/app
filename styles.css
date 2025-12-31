@@ -611,15 +611,16 @@ body {
 
     .week-grid .print-only,
     .print-weekly-landscape .week-grid .print-only {
-			        display: flex !important;
-			        flex-direction: column !important;
-			        border-right: 1px solid #000 !important;
-			        border-bottom: 1px solid #000 !important;
-			        background: #fff !important;
-			        overflow: hidden !important;
-			        width: 100% !important;
-			        height: 100% !important;
-			    }
+				        display: flex !important;
+				        flex-direction: column !important;
+				        border-right: 1px solid #000 !important;
+				        border-bottom: 1px solid #000 !important;
+				        background: #fff !important;
+				        overflow: hidden !important;
+				        width: 100% !important;
+				        height: 100% !important;
+				        min-height: 190mm !important;
+				    }
 
     body.print-weekly-landscape .day-card-grid {
         background: white !important;
