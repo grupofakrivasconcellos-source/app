@@ -179,9 +179,6 @@
 
             document.getElementById('headerTitle').textContent = startDate.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).toUpperCase();
 
-            var leftCol = document.createElement('div'); leftCol.className = 'week-column';
-            var rightCol = document.createElement('div'); rightCol.className = 'week-column';
-
             for (var i = 0; i < 7; i++) {
                 var date = new Date(startDate);
                 date.setDate(startDate.getDate() + i);
@@ -192,12 +189,9 @@
                     return function() { openDayEdit(new Date(d)); };
                 })(date);
                 
-                // Adicionar ao grid (será usado tanto para tela quanto impressão)
-                if (i < 4) leftCol.appendChild(card); else rightCol.appendChild(card);
+                // Adicionar diretamente ao grid para suportar o layout de 7 colunas na impressão
+                weekGrid.appendChild(card);
             }
-
-            weekGrid.appendChild(leftCol);
-            weekGrid.appendChild(rightCol);
             
             document.getElementById('weekView').style.display = 'flex';
             document.getElementById('monthView').style.display = 'none';

@@ -122,9 +122,16 @@ body {
 
 .week-grid {
     flex: 1;
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas na tela */
     gap: 1px;
     width: 100%;
+}
+
+@media screen and (max-width: 600px) {
+    .week-grid {
+        grid-template-columns: 1fr; /* 1 coluna no mobile */
+    }
 }
 
 .week-column {
@@ -587,14 +594,14 @@ body {
     }
 
     .week-grid {
-        display: flex !important; /* Mudar para flex para permitir largura dinâmica */
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 2px !important;
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important; /* Restaurar 7 colunas */
+        gap: 0 !important;
         width: 100% !important;
-        height: auto !important;
+        height: 100% !important;
         background: #fff !important;
-        align-items: stretch !important;
+        border-top: 1px solid #000 !important;
+        border-left: 1px solid #000 !important;
     }
 
     /* Garantir que apenas os elementos marcados como print-only apareçam no grid de 7 colunas */
@@ -604,28 +611,24 @@ body {
 
     .week-grid .print-only,
     .print-weekly-landscape .week-grid .print-only {
-		        display: flex !important;
-		        flex-direction: column !important;
-		        flex: 1 1 auto !important;
-		        min-width: 0 !important;
-		        max-width: none !important;
-		        border: 1px solid #000 !important;
-		        border-right: 1px solid #000 !important;
-		        border-left: 1px solid #000 !important;
-		        margin-left: -1px !important;
-		        background: #fff !important;
-		        overflow: visible !important;
-		        width: auto !important;
-		    }
+			        display: flex !important;
+			        flex-direction: column !important;
+			        border-right: 1px solid #000 !important;
+			        border-bottom: 1px solid #000 !important;
+			        background: #fff !important;
+			        overflow: hidden !important;
+			        width: 100% !important;
+			        height: 100% !important;
+			    }
 
     body.print-weekly-landscape .day-card-grid {
         background: white !important;
-        border: 0.5px solid #000 !important;
-        padding: 5px !important;
+        border: none !important; /* Borda controlada pelo grid */
+        padding: 4px !important;
         display: flex !important;
         flex-direction: column !important;
+        height: 100% !important;
         min-height: 190mm !important;
-        height: auto !important;
     }
 
     body.print-weekly-landscape .special-day .day-name-label,
