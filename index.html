@@ -285,7 +285,8 @@
                 
                 // Lógica de colunas e escala de papel
                 var paperSize = document.getElementById('paperSize').value;
-                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 4 : 1;
+                // Invertendo escala: se for papel gigante, diminuímos a fonte para caber mais conteúdo
+                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 0.7 : 1;
                 
                 var numCols = 1;
                 var fontSize = 8 * scale;
@@ -438,7 +439,8 @@
                 
                 // Fonte dinâmica mensal otimizada para grid e escala de papel
                 var paperSize = document.getElementById('paperSize').value;
-                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 3 : 1;
+                // Invertendo escala: se for papel gigante, diminuímos a fonte para caber mais conteúdo
+                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 0.7 : 1;
                 
                 // Reduzir fonte se houver muito conteúdo para garantir que tudo apareça
                 var fontSize = 5 * scale;
