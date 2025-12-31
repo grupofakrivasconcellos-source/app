@@ -235,20 +235,17 @@
             var dayNameShort = getDayName(date.getDay()).split('-')[0].toUpperCase();
             header.innerHTML = '<span class="day-name-label">' + dayNameShort + ' ' + date.getDate() + '</span>';
             
-            // Cabeçalho para impressão (conforme modelo)
+            // Cabeçalho para impressão (estilo agenda circular)
             var printHeader = document.createElement('div');
-            printHeader.className = 'print-only day-print-header';
-            var day = String(date.getDate()).padStart(2, '0');
-            var month = String(date.getMonth() + 1).padStart(2, '0');
-            var year = date.getFullYear();
+            printHeader.className = 'print-only day-print-header-agenda';
+            var day = date.getDate();
+            var dayNameShort = getDayName(date.getDay()).split('-')[0].toUpperCase();
             
             var headerColor = isSpecial ? 'color: #FF0000 !important;' : 'color: #000000 !important;';
+            var bgColor = isSpecial ? 'background-color: #FFE6E6 !important;' : 'background-color: #F0F0F0 !important;';
             
-            // Garantindo que a data e o dia da semana apareçam na mesma linha ou blocos visíveis
-            printHeader.innerHTML = '<div class="print-header-content" style="' + headerColor + '">' +
-                                   '<span class="print-date" style="' + headerColor + ' font-size: 8px;">' + day + '/' + month + '/' + year + '</span>' +
-	                                   '<span class="print-day-name" style="' + headerColor + ' font-size: 8px;"> - ' + getDayName(date.getDay()) + '</span>' +
-	                                   '</div>';
+            printHeader.innerHTML = '<div class="print-day-name-label" style="' + headerColor + '">' + dayNameShort + '</div>' +
+                                   '<div class="print-day-number-circle" style="' + headerColor + bgColor + '">' + day + '</div>';
 
             var content = document.createElement('div');
             content.className = 'day-card-content';
@@ -272,21 +269,22 @@
                 content.appendChild(lineWrap);
             }
 
-            // Renderizar as 30 linhas para impressão (uma sobre a outra)
+            // Renderizar as 30 linhas para impressão (estilo caderno)
             var printContainer = document.createElement('div');
-            printContainer.className = 'print-only day-print-container';
+            printContainer.className = 'print-only day-print-container-agenda';
             
             for (var i = 0; i < 30; i++) {
                 var line = dayData.lines[i] || { text: '' };
                 var hasContent = !!(line.text || line.html);
                 
                 var pWrap = document.createElement('div');
-                pWrap.className = 'day-line-wrapper print-only' + (hasContent ? ' has-content' : ' empty-line');
+                pWrap.className = 'day-line-wrapper-agenda print-only' + (hasContent ? ' has-content' : ' empty-line');
                 
                 var cleanHtml = (line.html || line.text || '&nbsp;').replace(/font-size:[^;"]+;?/g, '');
                 
-                pWrap.innerHTML = '<span class="line-number-preview" style="color:#000; font-size: 6px; width: 10px; font-weight: bold; flex-shrink: 0;">' + (i + 1) + '.</span>' +
-                                 '<div class="day-line-preview" style="font-size: 7px; word-break: break-word; line-height: 1.1; flex: 1;">' + cleanHtml + '</div>';
+                pWrap.innerHTML = '<div class="day-line-preview-agenda" style="font-size: 7px; word-break: break-word; line-height: 1.2;">' + 
+                                 (hasContent ? '<span class="line-number-agenda">' + (i + 1) + '. </span>' + cleanHtml : '&nbsp;') + 
+                                 '</div>';
                 
                 printContainer.appendChild(pWrap);
             }
@@ -585,29 +583,17 @@
                 var noPrint = clone.querySelectorAll('.no-print');
                 noPrint.forEach(function(el) { el.style.setProperty('display', 'none', 'important'); });
                 
-                // Ajuste automático de fonte agressivo para caber no PDF
+                // Ajuste para o layout de agenda no PDF
                 var allCards = clone.querySelectorAll('.day-card-grid');
                 allCards.forEach(function(card) {
                     var content = card.querySelector('.day-card-content');
                     if (content) {
-                        content.style.maxHeight = 'none'; // Remover limite de altura no PDF
-                        var lines = content.querySelectorAll('.day-line-preview');
+                        content.style.height = 'auto';
+                        var lines = content.querySelectorAll('.day-line-wrapper-agenda');
                         lines.forEach(function(line) {
-                            var text = line.innerText.trim();
-                            if (text.length > 0) {
-                                var fontSize = 10; // Padrão
-                                if (text.length > 50) fontSize = 9;
-                                if (text.length > 100) fontSize = 8;
-                                if (text.length > 200) fontSize = 7;
-                                if (text.length > 400) fontSize = 6;
-                                if (text.length > 600) fontSize = 5;
-                                line.style.setProperty('font-size', fontSize + 'pt', 'important');
-		                                line.style.setProperty('line-height', '1.2', 'important');
-		                                line.style.setProperty('margin-bottom', '1px', 'important');
-		                                line.style.setProperty('border-bottom', '0.5px dotted #eee', 'important');
-		                                line.style.setProperty('word-break', 'break-all', 'important');
-		                                line.style.setProperty('overflow-wrap', 'anywhere', 'important');
-                            }
+                            line.style.setProperty('height', '18px', 'important');
+                            line.style.setProperty('display', 'flex', 'important');
+                            line.style.setProperty('visibility', 'visible', 'important');
                         });
                     }
                 });

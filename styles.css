@@ -843,14 +843,33 @@ body {
         color: #FF0000 !important; /* Vermelho para Sábado, Domingo e Feriados */
     }
 
-    .day-card-grid .day-print-header {
+    .day-card-grid .day-print-header-agenda {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        border: 1px solid #000 !important;
+        border-bottom: none !important;
+        padding: 6px 2px !important;
+        background: #fff !important;
+        gap: 4px !important;
+    }
+
+    .print-day-name-label {
+        font-size: 8px !important;
+        font-weight: bold !important;
+        text-transform: uppercase !important;
+    }
+
+    .print-day-number-circle {
+        width: 22px !important;
+        height: 22px !important;
+        border-radius: 50% !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
+        font-size: 11px !important;
+        font-weight: bold !important;
         border: 1px solid #000 !important;
-        margin-bottom: 0 !important; /* Colar no conteúdo */
-        padding: 4px !important;
-        background: #f0f0f0 !important;
     }
 
     .day-card-grid .print-header-content {
@@ -881,14 +900,40 @@ body {
         align-items: flex-start !important;
     }
 
-    .day-print-container {
+    .day-print-container-agenda {
         display: flex !important;
         flex-direction: column !important;
         width: 100% !important;
         border: 1px solid #000 !important;
-        border-top: none !important;
         background: #fff !important;
-        padding: 2px !important;
+        height: 100% !important;
+    }
+
+    .day-line-wrapper-agenda {
+        display: flex !important;
+        height: 18px !important; /* Altura fixa para manter o grid alinhado */
+        border-bottom: 0.5px solid #000 !important;
+        padding: 0 4px !important;
+        align-items: center !important;
+        overflow: hidden !important;
+    }
+
+    .day-line-wrapper-agenda:last-child {
+        border-bottom: none !important;
+    }
+
+    .day-line-preview-agenda {
+        font-size: 7px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        width: 100% !important;
+    }
+
+    .line-number-agenda {
+        font-weight: bold !important;
+        margin-right: 2px !important;
     }
 
     .print-col:last-child {
