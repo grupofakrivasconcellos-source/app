@@ -274,13 +274,13 @@
                     return acc + (curr.data.text || curr.data.html || "").length; 
                 }, 0);
 
-                // Fonte dinâmica: ajusta baseado na quantidade de conteúdo
-                var fontSize = 7; // Tamanho padrão
-                if (totalChars > 1500 || contentLines.length > 25) fontSize = 4.5;
-                else if (totalChars > 1000 || contentLines.length > 20) fontSize = 5;
-                else if (totalChars > 700 || contentLines.length > 15) fontSize = 5.5;
-                else if (totalChars > 400 || contentLines.length > 10) fontSize = 6;
-                else if (totalChars < 200 && contentLines.length < 8) fontSize = 8;
+                // Fonte dinâmica ultra-agressiva: ajusta baseado na quantidade de conteúdo
+                var fontSize = 6.5; // Tamanho padrão reduzido
+                if (totalChars > 1500 || contentLines.length > 25) fontSize = 3.5;
+                else if (totalChars > 1000 || contentLines.length > 20) fontSize = 4;
+                else if (totalChars > 700 || contentLines.length > 15) fontSize = 4.5;
+                else if (totalChars > 400 || contentLines.length > 10) fontSize = 5;
+                else if (totalChars < 200 && contentLines.length < 8) fontSize = 7.5;
                 
                 contentLines.forEach(function(item, idx) {
                     var pWrap = document.createElement('div');
@@ -409,13 +409,13 @@
                     return acc + (curr.data.text || curr.data.html || "").length; 
                 }, 0);
                 
-                // Fonte dinâmica mensal: ajusta baseado na quantidade de conteúdo
-                var fontSize = 6; // Tamanho padrão aumentado
-                if (totalChars > 1200 || contentLines.length > 25) fontSize = 4;
-                else if (totalChars > 800 || contentLines.length > 20) fontSize = 4.5;
-                else if (totalChars > 500 || contentLines.length > 15) fontSize = 5;
-                else if (totalChars > 300 || contentLines.length > 10) fontSize = 5.5;
-                else if (totalChars < 150 && contentLines.length < 8) fontSize = 7;
+                // Fonte dinâmica mensal ultra-agressiva: ajusta baseado na quantidade de conteúdo
+                var fontSize = 5.5; // Tamanho padrão reduzido
+                if (totalChars > 1200 || contentLines.length > 25) fontSize = 3;
+                else if (totalChars > 800 || contentLines.length > 20) fontSize = 3.5;
+                else if (totalChars > 500 || contentLines.length > 15) fontSize = 4;
+                else if (totalChars > 300 || contentLines.length > 10) fontSize = 4.5;
+                else if (totalChars < 150 && contentLines.length < 8) fontSize = 6.5;
                 
                 contentLines.forEach(function(item, idx) {
                     // Limpar apenas o tamanho da fonte do HTML original para aplicar o tamanho dinâmico, mantendo cores e outros estilos
