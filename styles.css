@@ -600,20 +600,21 @@ body {
         display: none !important;
     }
 
-    .week-grid .print-only {
-	        display: flex !important;
-	        flex-direction: column !important;
-	        flex: 1 1 auto !important;
-	        min-width: 0 !important;
-	        max-width: none !important;
-	        border: 1px solid #000 !important;
-	        border-right: 1px solid #000 !important;
-	        border-left: 1px solid #000 !important;
-	        margin-left: -1px !important;
-	        background: #fff !important;
-	        overflow: visible !important;
-	        width: auto !important;
-	    }
+    .week-grid .print-only,
+    .print-weekly-landscape .week-grid .print-only {
+		        display: flex !important;
+		        flex-direction: column !important;
+		        flex: 1 1 auto !important;
+		        min-width: 0 !important;
+		        max-width: none !important;
+		        border: 1px solid #000 !important;
+		        border-right: 1px solid #000 !important;
+		        border-left: 1px solid #000 !important;
+		        margin-left: -1px !important;
+		        background: #fff !important;
+		        overflow: visible !important;
+		        width: auto !important;
+		    }
 
     body.print-weekly-landscape .day-card-grid {
         background: white !important;

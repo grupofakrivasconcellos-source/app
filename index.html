@@ -179,8 +179,8 @@
 
             document.getElementById('headerTitle').textContent = startDate.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).toUpperCase();
 
-            var leftCol = document.createElement('div'); leftCol.className = 'week-column no-print';
-            var rightCol = document.createElement('div'); rightCol.className = 'week-column no-print';
+            var leftCol = document.createElement('div'); leftCol.className = 'week-column';
+            var rightCol = document.createElement('div'); rightCol.className = 'week-column';
 
             for (var i = 0; i < 7; i++) {
                 var date = new Date(startDate);
@@ -600,10 +600,11 @@
             if (isWeek) {
                 clone.style.width = '1122px'; // Largura A4 Paisagem em pixels (96dpi)
                 clone.style.background = 'white';
+                clone.classList.add('print-weekly-landscape');
                 
                 // Forçar visibilidade dos elementos de impressão no clone
                 var printOnly = clone.querySelectorAll('.print-only');
-                printOnly.forEach(function(el) { el.style.setProperty('display', 'block', 'important'); });
+                printOnly.forEach(function(el) { el.style.setProperty('display', 'flex', 'important'); });
                 var noPrint = clone.querySelectorAll('.no-print');
                 noPrint.forEach(function(el) { el.style.setProperty('display', 'none', 'important'); });
                 
