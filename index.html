@@ -719,7 +719,33 @@
             };
             
             document.getElementById('printDay').onclick = function() {
+                // Ajuste dinâmico de fonte para impressão diária
+                var notebookLines = document.getElementById('notebookLines');
+                var lines = notebookLines.querySelectorAll('.notebook-line-preview');
+                var totalChars = 0;
+                lines.forEach(function(line) {
+                    totalChars += line.innerText.trim().length;
+                });
+
+                // Definir tamanho de fonte baseado no volume de texto
+                var fontSize = 14; // Padrão
+                if (totalChars > 3000) fontSize = 8;
+                else if (totalChars > 2000) fontSize = 10;
+                else if (totalChars > 1000) fontSize = 12;
+
+                // Aplicar o tamanho da fonte temporariamente para impressão
+                var style = document.createElement('style');
+                style.id = 'print-dynamic-font';
+                style.innerHTML = '@media print { .notebook-line-preview { font-size: ' + fontSize + 'px !important; } }';
+                document.head.appendChild(style);
+
                 window.print();
+
+                // Remover o estilo após a impressão
+                setTimeout(function() {
+                    var s = document.getElementById('print-dynamic-font');
+                    if (s) s.remove();
+                }, 1000);
             };
 
             // ========== LÓGICA DE BACKUP (EXPORTAR/IMPORTAR) ==========

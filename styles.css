@@ -754,30 +754,30 @@ body {
 
     /* ========== 2. IMPRESSÃO DIÁRIA (Individual) ========== */
     .day-edit-view .day-print-header {
-	        text-align: left !important;
-	        margin-bottom: 20px !important;
-	        border-bottom: 2px solid #000 !important;
-	        padding-bottom: 10px !important;
-	    }
+		        text-align: left !important;
+		        margin-bottom: 10px !important;
+		        border-bottom: 1px solid #000 !important;
+		        padding-bottom: 5px !important;
+		    }
 
-	    .day-edit-view .print-date {
-	        font-size: 24px !important;
-	        font-weight: bold !important;
-	        display: inline-block !important;
-	    }
+		    .day-edit-view .print-date {
+		        font-size: 18px !important;
+		        font-weight: bold !important;
+		        display: inline-block !important;
+		    }
 
-	    .day-edit-view .print-day-name {
-	        font-size: 20px !important;
-	        display: inline-block !important;
-	        margin-left: 10px !important;
-	    }
+		    .day-edit-view .print-day-name {
+		        font-size: 16px !important;
+		        display: inline-block !important;
+		        margin-left: 10px !important;
+		    }
 
     .notebook-line-wrapper {
-	        display: flex !important;
-	        padding: 8px 0 !important;
-	        border-bottom: 1px solid #eee !important;
-	        align-items: flex-start !important;
-	    }
+		        display: flex !important;
+		        padding: 3px 0 !important; /* Reduzido para economizar espaço */
+		        border-bottom: 1px solid #eee !important;
+		        align-items: flex-start !important;
+		    }
 
 	    .line-number {
 	        font-size: 12px !important;
@@ -788,13 +788,13 @@ body {
 	        visibility: visible !important;
 	    }
 
-	    .notebook-line {
-	        font-size: 14px !important;
-	        line-height: 1.5 !important;
-	        word-wrap: break-word !important;
-	        overflow-wrap: break-word !important;
-	        color: #000 !important;
-	    }
+		    .notebook-line, .notebook-line-preview {
+		        font-size: 12px !important; /* Tamanho base reduzido */
+		        line-height: 1.2 !important; /* Espaçamento reduzido */
+		        word-wrap: break-word !important;
+		        overflow-wrap: break-word !important;
+		        color: #000 !important;
+		    }
 
     /* ========== 3. IMPRESSÃO MENSAL PAISAGEM (ESTILO PDF) ========== */
     body.print-monthly-landscape {
