@@ -276,7 +276,7 @@
                 var pWrap = document.createElement('div');
                 pWrap.className = 'day-line-wrapper-agenda print-only' + (hasContent ? ' has-content' : ' empty-line');
                 
-                var cleanHtml = (line.html || line.text || '&nbsp;').replace(/font-size:[^;"]+;?/g, '');
+                var cleanHtml = (line.html || line.text || '&nbsp;');
                 
                 pWrap.innerHTML = '<div class="day-line-preview-agenda" style="font-size: 7px; word-break: break-word; line-height: 1.2;">' + 
                                  (hasContent ? '<span class="line-number-agenda">' + (i + 1) + '. </span>' + cleanHtml : '&nbsp;') + 
@@ -361,17 +361,18 @@
             var html = '<div class="month-day-num-container"><div class="month-day-num">' + date.getDate() + '</div></div>';
             
             if (dayData && dayData.lines) {
-	                var contentLines = [];
-	                dayData.lines.forEach(function(l, idx) {
-	                    if (l && (l.text || l.html)) {
-	                        contentLines.push({ index: idx + 1, data: l });
-	                    }
-	                });
+		                var contentLines = [];
+		                dayData.lines.forEach(function(l, idx) {
+		                    if (l && (l.text || l.html) && (l.text || "").trim() !== "") {
+		                        contentLines.push({ index: idx + 1, data: l });
+		                    }
+		                });
+                        if (contentLines.length > 0) cell.classList.add('has-content');
 	
 	                // Lógica para tela (comportamento original)
 	                html += '<div class="month-cell-content no-print">';
 	                contentLines.forEach(function(item) {
-	                    var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
+	                    var cleanHtml = (item.data.html || item.data.text);
 	                    html += '<div class="month-line-rich"><span class="line-num">' + item.index + '.</span> ' + cleanHtml + '</div>';
 	                });
 	                html += '</div>';
@@ -379,7 +380,7 @@
                 // Lógica para Impressão/PDF (Exibir anotações diárias no grid)
                 html += '<div class="month-cell-content print-only">';
                 contentLines.forEach(function(item) {
-                    var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
+                    var cleanHtml = (item.data.html || item.data.text);
                     html += '<div class="month-line-rich"><span class="line-num">' + item.index + '.</span> ' + cleanHtml + '</div>';
                 });
                 html += '</div>';
@@ -472,7 +473,7 @@
                 contentLines.forEach(function(item, idx) {
                     var lineWrap = document.createElement('div');
                     lineWrap.className = 'notebook-line-wrapper has-content';
-                    var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
+                    var cleanHtml = (item.data.html || item.data.text);
                     lineWrap.innerHTML = '<div class="line-number">' + item.index + '.</div><div class="notebook-line">' + cleanHtml + '</div>';
                     
                     var colIdx = idx % numCols;
@@ -569,9 +570,9 @@
             }
             
             // Configurar o clone para o estado de impressão
+            clone.style.background = 'white';
             if (isWeek) {
                 clone.style.width = '1122px'; // Largura A4 Paisagem em pixels (96dpi)
-                clone.style.background = 'white';
                 
                 // Forçar visibilidade dos elementos de impressão no clone
                 var printOnly = clone.querySelectorAll('.print-only');
@@ -603,6 +604,29 @@
                     grid.style.width = '100%';
                     grid.style.alignItems = 'stretch';
                 }
+            } else {
+                // Ajustes específicos para o clone mensal no PDF
+                var grid = clone.querySelector('.month-grid');
+                if (grid) {
+                    grid.style.display = 'grid';
+                    grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+                    grid.style.gridAutoRows = 'auto';
+                    grid.style.width = '100%';
+                    grid.style.gap = '0';
+                }
+                
+                var cells = clone.querySelectorAll('.month-day-cell');
+                cells.forEach(function(cell) {
+                    cell.style.height = 'auto';
+                    cell.style.minHeight = cell.classList.contains('has-content') ? '40px' : '20px';
+                    cell.style.border = '1px solid #000';
+                    
+                    var content = cell.querySelector('.month-cell-content.print-only');
+                    if (content) {
+                        content.style.display = 'block';
+                        content.style.fontSize = '7px';
+                    }
+                });
             }
 
             var filename = (isWeek ? 'semana-' : 'calendario-') + 
