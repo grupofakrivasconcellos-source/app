@@ -599,15 +599,27 @@
                 var noPrint = clone.querySelectorAll('.no-print');
                 noPrint.forEach(function(el) { el.style.setProperty('display', 'none', 'important'); });
                 
-                // Ajuste automático de fonte para caber no PDF
-                var allLines = clone.querySelectorAll('.day-line-preview');
-                allLines.forEach(function(line) {
-                    var textLength = line.innerText.length;
-                    var fontSize = 10; // Base 10pt
-                    if (textLength > 100) fontSize = 8;
-                    if (textLength > 200) fontSize = 7;
-                    if (textLength > 300) fontSize = 6;
-                    line.style.setProperty('font-size', fontSize + 'pt', 'important');
+                // Ajuste automático de fonte agressivo para caber no PDF
+                var allCards = clone.querySelectorAll('.day-card-grid');
+                allCards.forEach(function(card) {
+                    var content = card.querySelector('.day-card-content');
+                    if (content) {
+                        content.style.maxHeight = 'none'; // Remover limite de altura no PDF
+                        var lines = content.querySelectorAll('.day-line-preview');
+                        lines.forEach(function(line) {
+                            var text = line.innerText.trim();
+                            if (text.length > 0) {
+                                var fontSize = 10; // Padrão
+                                if (text.length > 50) fontSize = 9;
+                                if (text.length > 100) fontSize = 8;
+                                if (text.length > 200) fontSize = 7;
+                                if (text.length > 400) fontSize = 6;
+                                if (text.length > 600) fontSize = 5;
+                                line.style.setProperty('font-size', fontSize + 'pt', 'important');
+                                line.style.setProperty('line-height', '1.1', 'important');
+                            }
+                        });
+                    }
                 });
 
                 // Garantir que o grid de 7 colunas seja aplicado no clone

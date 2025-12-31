@@ -654,6 +654,8 @@ body {
     .day-card-content {
         display: block !important;
         overflow: visible !important;
+        max-height: none !important; /* Garantir que nada seja cortado no PDF */
+        height: auto !important;
     }
 
     .day-line-wrapper {
@@ -696,13 +698,13 @@ body {
     .day-line-preview {
         font-size: 10pt !important;
         font-weight: bold !important;
-        line-height: 1.2 !important;
+        line-height: 1.1 !important;
         word-break: break-word !important;
-        color: #000 !important;
+        color: inherit !important; /* Manter cores originais */
         overflow: visible !important;
         white-space: normal !important;
         display: block !important;
-        min-height: 0 !important; /* Permitir encolher se necessário */
+        min-height: 0 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
