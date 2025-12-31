@@ -23,11 +23,7 @@
                 <button id="viewWeekly" class="view-btn active">📅 Semanal</button>
                 <button id="viewMonthly" class="view-btn">📆 Mensal</button>
                 <div class="print-group">
-                    <select id="paperSize" class="view-btn" style="width: auto; padding-right: 25px;">
-                        <option value="A4">Papel A4</option>
-                        <option value="A1">Papel A1 (Gigante)</option>
-                        <option value="A0">Papel A0 (Poster)</option>
-                    </select>
+
                     <button id="printMonthBtn" class="btn btn-print">🖨️ Imprimir Mês</button>
                     <button id="printWeekBtn" class="btn btn-print">🖨️ Imprimir Semana</button>
                 </div>
@@ -657,7 +653,7 @@
             document.getElementById('printWeekBtn').onclick = function() {
                 appState.view = 'week';
                 renderWeekView();
-                var size = document.getElementById('paperSize').value;
+                var size = 'A4';
                 document.body.className = document.body.className.replace(/print-size-\w+/g, '');
                 document.body.classList.add('print-size-' + size);
                 document.body.classList.add('print-weekly-landscape');
@@ -670,7 +666,7 @@
             document.getElementById('printMonthBtn').onclick = function() {
                 appState.view = 'month';
                 renderMonthView();
-                var size = document.getElementById('paperSize').value;
+                var size = 'A4';
                 document.body.className = document.body.className.replace(/print-size-\w+/g, '');
                 document.body.classList.add('print-size-' + size);
                 document.body.classList.add('print-monthly-landscape');
