@@ -650,9 +650,11 @@
                                 if (text.length > 400) fontSize = 6;
                                 if (text.length > 600) fontSize = 5;
                                 line.style.setProperty('font-size', fontSize + 'pt', 'important');
-	                                line.style.setProperty('line-height', '1.2', 'important');
-	                                line.style.setProperty('margin-bottom', '1px', 'important');
-	                                line.style.setProperty('border-bottom', '0.5px dotted #eee', 'important');
+		                                line.style.setProperty('line-height', '1.2', 'important');
+		                                line.style.setProperty('margin-bottom', '1px', 'important');
+		                                line.style.setProperty('border-bottom', '0.5px dotted #eee', 'important');
+		                                line.style.setProperty('word-break', 'break-all', 'important');
+		                                line.style.setProperty('overflow-wrap', 'anywhere', 'important');
                             }
                         });
                     }
