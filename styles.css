@@ -966,13 +966,20 @@ body {
     }
 
     body.print-monthly-landscape .month-view {
+        display: flex !important;
         padding: 0 !important;
         width: 297mm !important;
         height: 210mm !important;
     }
     
+    body.print-monthly-landscape .month-print-header {
+        display: block !important;
+    }
+    
     body.print-monthly-landscape .header,
-    body.print-monthly-landscape .view-controls {
+    body.print-monthly-landscape .view-controls,
+    body.print-monthly-landscape .week-view-container,
+    body.print-monthly-landscape #weekView {
         display: none !important;
     }
 

@@ -352,7 +352,7 @@
         function renderMonthView() {
             var monthCalendar = document.getElementById('monthCalendar');
             monthCalendar.innerHTML = '';
-            var monthTitle = appState.currentDate.toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' });
+            var monthTitle = (appState.currentDate.getMonth() + 1).toString().padStart(2, '0') + '/' + appState.currentDate.getFullYear();
             document.getElementById('headerTitle').textContent = monthTitle;
             document.getElementById('monthPrintTitle').textContent = monthTitle;
 
