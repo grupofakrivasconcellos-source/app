@@ -281,18 +281,23 @@
                     return acc + (curr.data.text || curr.data.html || "").length; 
                 }, 0);
 
-                var fontSize = 6;
-                if (totalChars > 800 || contentLines.length > 25) fontSize = 3.5;
-                else if (totalChars > 500 || contentLines.length > 20) fontSize = 4.5;
-                else if (totalChars > 300 || contentLines.length > 15) fontSize = 5.5;
-
+                // Fonte dinâmica: inicia em 5 e aumenta se houver pouco conteúdo
+                var fontSize = 5;
+                if (totalChars < 200 && contentLines.length < 10) fontSize = 8;
+                else if (totalChars < 400 && contentLines.length < 15) fontSize = 7;
+                else if (totalChars < 600 && contentLines.length < 20) fontSize = 6;
+                
                 contentLines.forEach(function(item, idx) {
                     var pWrap = document.createElement('div');
                     pWrap.className = 'day-line-wrapper has-content';
                     pWrap.style.marginBottom = '1px';
                     pWrap.style.borderBottom = '0.5px dotted #ddd';
+                    
+                    // Limpar apenas o tamanho da fonte do HTML original para aplicar o tamanho dinâmico, mantendo cores e outros estilos
+                    var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
+                    
                     pWrap.innerHTML = '<span class="line-number-preview" style="color:#bbb; font-size:' + (fontSize-1) + 'px; width: 10px;">' + item.index + '.</span>' +
-                                     '<div class="day-line-preview" style="font-size:' + fontSize + 'px; word-break: break-all; line-height: 1.1;">' + (item.data.html || item.data.text) + '</div>';
+                                     '<div class="day-line-preview" style="font-size:' + fontSize + 'px; word-break: break-all; line-height: 1.1;">' + cleanHtml + '</div>';
                     
                     if (idx < 10) pCol1.appendChild(pWrap);
                     else if (idx < 20) pCol2.appendChild(pWrap);
@@ -410,12 +415,13 @@
                     return acc + (curr.data.text || curr.data.html || "").length; 
                 }, 0);
                 
-                var fontSize = 6.5;
-                if (totalChars > 500 || contentLines.length > 25) fontSize = 3.5;
-                else if (totalChars > 300 || contentLines.length > 20) fontSize = 4.5;
-                else if (totalChars > 150 || contentLines.length > 10) fontSize = 5.5;
-
+                // Fonte dinâmica mensal: inicia em 4.5 e aumenta se houver pouco conteúdo
+                var fontSize = 4.5;
+                if (totalChars < 150 && contentLines.length < 10) fontSize = 6.5;
+                else if (totalChars < 300 && contentLines.length < 15) fontSize = 5.5;
+                
                 contentLines.forEach(function(item, idx) {
+                    // Limpar apenas o tamanho da fonte do HTML original para aplicar o tamanho dinâmico, mantendo cores e outros estilos
                     var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
                     var lineHtml = '<div class="month-line-rich" style="font-size:' + fontSize + 'px; border-bottom: 0.5px dotted #ddd; margin-bottom: 1px; word-break: break-all; overflow: visible; white-space: normal; line-height: 1.1;">' +
                                    '<span style="color:#bbb; font-size: ' + (fontSize * 0.9) + 'px;">' + item.index + '.</span> ' + cleanHtml + '</div>';
