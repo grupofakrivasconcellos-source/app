@@ -22,9 +22,16 @@
             <div class="view-controls no-print">
                 <button id="viewWeekly" class="view-btn active">📅 Semanal</button>
                 <button id="viewMonthly" class="view-btn">📆 Mensal</button>
-                <button id="printMonthBtn" class="btn btn-print">🖨️ Imprimir Mês</button>
+                <div class="print-group">
+                    <select id="paperSize" class="view-btn" style="width: auto; padding-right: 25px;">
+                        <option value="A4">Papel A4</option>
+                        <option value="A1">Papel A1 (Gigante)</option>
+                        <option value="A0">Papel A0 (Poster)</option>
+                    </select>
+                    <button id="printMonthBtn" class="btn btn-print">🖨️ Imprimir Mês</button>
+                    <button id="printWeekBtn" class="btn btn-print">🖨️ Imprimir Semana</button>
+                </div>
                 <button id="exportPdfBtn" class="btn btn-pdf" style="display:none;">📄 Exportar PDF</button>
-                <button id="printWeekBtn" class="btn btn-print">🖨️ Imprimir Semana</button>
                 <button id="exportDataBtn" class="btn btn-backup">📤 Exportar Backup</button>
                 <button id="importDataBtn" class="btn btn-backup">📥 Importar Backup</button>
                 <input type="file" id="importFile" style="display:none" accept=".json">
@@ -35,7 +42,7 @@
             </div>
 
             <div id="monthView" class="month-view" style="display: none;">
-                <div id="monthPrintHeader" class="month-print-header print-only">
+                <div id="monthPrintHeader" class="month-print-header" style="display: none;">
                     <h1 id="monthPrintTitle"></h1>
                 </div>
                 <div id="monthCalendar" class="month-calendar"></div>
@@ -179,8 +186,8 @@
 
             document.getElementById('headerTitle').textContent = startDate.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).toUpperCase();
 
-            var leftCol = document.createElement('div'); leftCol.className = 'week-column';
-            var rightCol = document.createElement('div'); rightCol.className = 'week-column';
+            var leftCol = document.createElement('div'); leftCol.className = 'week-column no-print';
+            var rightCol = document.createElement('div'); rightCol.className = 'week-column no-print';
 
             for (var i = 0; i < 7; i++) {
                 var date = new Date(startDate);
@@ -188,12 +195,19 @@
                 
                 // Criar o card uma única vez
                 var card = createDayCard(date);
-                card.onclick = (function(d) {
+                
+                // Adicionar ao container de tela (que será oculto na impressão)
+                var screenClone = card.cloneNode(true);
+                screenClone.classList.add('no-print');
+                screenClone.onclick = (function(d) {
                     return function() { openDayEdit(new Date(d)); };
                 })(date);
+                if (i < 4) leftCol.appendChild(screenClone); else rightCol.appendChild(screenClone);
                 
-                // Adicionar ao grid de tela (2 colunas)
-                if (i < 4) leftCol.appendChild(card); else rightCol.appendChild(card);
+                // Adicionar ao container de impressão (que será oculto na tela)
+                var printClone = card.cloneNode(true);
+                printClone.classList.add('print-only');
+                weekGrid.appendChild(printClone);
             }
 
             weekGrid.appendChild(leftCol);
@@ -221,9 +235,9 @@
             var dayNameShort = getDayName(date.getDay()).split('-')[0].toUpperCase();
             header.innerHTML = '<span class="day-name-label">' + dayNameShort + ' ' + date.getDate() + '</span>';
             
-            // Cabeçalho para impressão
+            // Cabeçalho para impressão (conforme modelo)
             var printHeader = document.createElement('div');
-            printHeader.className = 'day-print-header print-only';
+            printHeader.className = 'print-only day-print-header';
             var day = String(date.getDate()).padStart(2, '0');
             var month = String(date.getMonth() + 1).padStart(2, '0');
             var year = date.getFullYear();
@@ -242,16 +256,6 @@
             var dayData = appState.days[dateStr] || { lines: [] };
             var hasAnyContent = false;
             
-            // Container para colunas de impressão
-            var printCols = document.createElement('div');
-            printCols.className = 'print-only day-print-columns';
-            var pCol1 = document.createElement('div'); pCol1.className = 'print-col';
-            var pCol2 = document.createElement('div'); pCol2.className = 'print-col';
-            var pCol3 = document.createElement('div'); pCol3.className = 'print-col';
-            printCols.appendChild(pCol1);
-            printCols.appendChild(pCol2);
-            printCols.appendChild(pCol3);
-
             var contentLines = [];
             for (var i = 0; i < 30; i++) {
                 var line = dayData.lines[i] || { text: '' };
@@ -268,35 +272,62 @@
                 content.appendChild(lineWrap);
             }
 
-            // Distribuir em 3 colunas para impressão (Regra: 10 linhas por coluna)
+            // Distribuir em colunas para impressão de forma inteligente
             if (hasAnyContent) {
+                var printCols = document.createElement('div');
+                printCols.className = 'print-only day-print-columns';
+                
+                // Calcular volume de conteúdo para decidir número de colunas e tamanho da fonte
                 var totalChars = contentLines.reduce(function(acc, curr) { 
                     return acc + (curr.data.text || curr.data.html || "").length; 
                 }, 0);
-
-                // Fonte dinâmica ultra-agressiva: ajusta baseado na quantidade de conteúdo
-                var fontSize = 6.5; // Tamanho padrão reduzido
-                if (totalChars > 1500 || contentLines.length > 25) fontSize = 3.5;
-                else if (totalChars > 1000 || contentLines.length > 20) fontSize = 4;
-                else if (totalChars > 700 || contentLines.length > 15) fontSize = 4.5;
-                else if (totalChars > 400 || contentLines.length > 10) fontSize = 5;
-                else if (totalChars < 200 && contentLines.length < 8) fontSize = 7.5;
+                var numLines = contentLines.length;
                 
+                // Lógica de colunas e escala de papel
+                var paperSize = document.getElementById('paperSize').value;
+                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 4 : 1;
+                
+                var numCols = 1;
+                var fontSize = 8 * scale;
+                
+                if (numLines > 10 || totalChars > 300) {
+                    numCols = (scale > 1) ? 1 : 2; // Em A1/A0, manter 1 coluna para máxima largura
+                    fontSize = 7 * scale;
+                }
+                if (numLines > 20 || totalChars > 600) {
+                    numCols = (scale > 1) ? 2 : 3;
+                    fontSize = 6 * scale;
+                }
+
+                var cols = [];
+                for (var c = 0; c < numCols; c++) {
+                    var col = document.createElement('div');
+                    col.className = 'print-col';
+                    col.style.border = '1px solid #000';
+                    col.style.padding = '4px';
+                    col.style.flex = '1';
+                    printCols.appendChild(col);
+                    cols.push(col);
+                }
+                
+                // Distribuir linhas entre as colunas
+                var linesPerCol = Math.ceil(numLines / numCols);
                 contentLines.forEach(function(item, idx) {
-                    var pWrap = document.createElement('div');
-                    pWrap.className = 'day-line-wrapper has-content print-only'; // Adicionado print-only explicitamente
-                    pWrap.style.marginBottom = '1px';
-                    pWrap.style.borderBottom = '0.5px dotted #ddd';
+                    var colIdx = Math.floor(idx / linesPerCol);
+                    var targetCol = cols[colIdx] || cols[cols.length - 1];
                     
-                    // Limpar apenas o tamanho da fonte do HTML original para aplicar o tamanho dinâmico, mantendo cores e outros estilos
+                    var pWrap = document.createElement('div');
+                    pWrap.className = 'day-line-wrapper has-content print-only';
+                    pWrap.style.marginBottom = '2px';
+                    pWrap.style.display = 'flex';
+                    pWrap.style.alignItems = 'flex-start';
+                    
                     var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
                     
-                    pWrap.innerHTML = '<span class="line-number-preview" style="color:#bbb; font-size:' + (fontSize-1) + 'px; width: 10px;">' + item.index + '.</span>' +
-                                     '<div class="day-line-preview" style="font-size:' + fontSize + 'px; word-break: break-all; line-height: 1.1;">' + cleanHtml + '</div>';
+                    pWrap.innerHTML = '<span class="line-number-preview" style="color:#000; font-size:' + (fontSize-1) + 'px; width: 12px; font-weight: bold; flex-shrink: 0;">' + item.index + '.</span>' +
+                                     '<div class="day-line-preview" style="font-size:' + fontSize + 'px; word-break: break-word; line-height: 1.2; flex: 1;">' + cleanHtml + '</div>';
                     
-                    if (idx < 10) pCol1.appendChild(pWrap);
-                    else if (idx < 20) pCol2.appendChild(pWrap);
-                    else pCol3.appendChild(pWrap);
+                    targetCol.appendChild(pWrap);
                 });
                 content.appendChild(printCols);
             }
@@ -398,38 +429,27 @@
 	                });
 	                html += '</div>';
 	
-	                // Lógica para Impressão/PDF (3 Colunas)
-	                html += '<div class="month-cell-content print-only month-print-columns" style="display: flex; gap: 2px; width: 100%;">';
-                var pCol1 = '<div style="flex: 1; min-width: 0;">';
-                var pCol2 = '<div style="flex: 1; min-width: 0;">';
-                var pCol3 = '<div style="flex: 1; min-width: 0;">';
+                // Lógica para Impressão/PDF (Grid Limpo com Anotações)
+                html += '<div class="month-cell-content print-only" style="display: block; width: 100%;">';
                 
-                // Calcular fonte baseada no volume total de texto para garantir que caiba
                 var totalChars = contentLines.reduce(function(acc, curr) { 
                     return acc + (curr.data.text || curr.data.html || "").length; 
                 }, 0);
                 
-                // Fonte dinâmica mensal ultra-agressiva: ajusta baseado na quantidade de conteúdo
-                var fontSize = 5.5; // Tamanho padrão reduzido
-                if (totalChars > 1200 || contentLines.length > 25) fontSize = 3;
-                else if (totalChars > 800 || contentLines.length > 20) fontSize = 3.5;
-                else if (totalChars > 500 || contentLines.length > 15) fontSize = 4;
-                else if (totalChars > 300 || contentLines.length > 10) fontSize = 4.5;
-                else if (totalChars < 150 && contentLines.length < 8) fontSize = 6.5;
+                // Fonte dinâmica mensal otimizada para grid e escala de papel
+                var paperSize = document.getElementById('paperSize').value;
+                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 3 : 1;
                 
-                contentLines.forEach(function(item, idx) {
-                    // Limpar apenas o tamanho da fonte do HTML original para aplicar o tamanho dinâmico, mantendo cores e outros estilos
+                var fontSize = 5 * scale;
+                if (totalChars < 100 && contentLines.length < 5) fontSize = 7 * scale;
+                else if (totalChars < 200 && contentLines.length < 10) fontSize = 6 * scale;
+                
+                contentLines.forEach(function(item) {
                     var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
-                    var lineHtml = '<div class="month-line-rich print-only" style="font-size:' + fontSize + 'px; border-bottom: 0.5px dotted #ddd; margin-bottom: 1px; word-break: break-all; overflow: visible; white-space: normal; line-height: 1.1;">' +
-                                   '<span style="color:#bbb; font-size: ' + (fontSize * 0.9) + 'px;">' + item.index + '.</span> ' + cleanHtml + '</div>';
-                    
-                    if (idx < 10) pCol1 += lineHtml;
-                    else if (idx < 20) pCol2 += lineHtml;
-                    else pCol3 += lineHtml;
+                    html += '<div class="month-line-rich" style="font-size:' + fontSize + 'px; border-bottom: none; margin-bottom: 1px; word-break: break-word; line-height: 1.2;">' +
+                                   '<span style="font-weight: bold; color: #000;">' + item.index + '.</span> ' + cleanHtml + '</div>';
                 });
-                
-                pCol1 += '</div>'; pCol2 += '</div>'; pCol3 += '</div>';
-                html += pCol1 + pCol2 + pCol3 + '</div>';
+                html += '</div>';
             }
             html += '</div>';
             
@@ -518,7 +538,7 @@
 
                 contentLines.forEach(function(item, idx) {
                     var lineWrap = document.createElement('div');
-                    lineWrap.className = 'notebook-line-wrapper has-content print-only'; // Adicionado print-only explicitamente
+                    lineWrap.className = 'notebook-line-wrapper has-content';
                     lineWrap.innerHTML = '<div class="line-number">' + item.index + '.</div><div class="notebook-line">' + (item.data.html || item.data.text) + '</div>';
                     
                     var colIdx = idx % numCols;
@@ -600,11 +620,10 @@
             if (isWeek) {
                 clone.style.width = '1122px'; // Largura A4 Paisagem em pixels (96dpi)
                 clone.style.background = 'white';
-                clone.classList.add('print-weekly-landscape');
                 
                 // Forçar visibilidade dos elementos de impressão no clone
                 var printOnly = clone.querySelectorAll('.print-only');
-                printOnly.forEach(function(el) { el.style.setProperty('display', 'flex', 'important'); });
+                printOnly.forEach(function(el) { el.style.setProperty('display', 'block', 'important'); });
                 var noPrint = clone.querySelectorAll('.no-print');
                 noPrint.forEach(function(el) { el.style.setProperty('display', 'none', 'important'); });
                 
@@ -636,19 +655,11 @@
                 // Garantir que o grid de 7 colunas seja aplicado no clone
                 var grid = clone.querySelector('#weekGrid');
                 if (grid) {
-                    // Remover as colunas de tela (leftCol/rightCol) e colocar os cards direto no grid
-                    var columns = grid.querySelectorAll('.week-column');
-                    columns.forEach(function(col) {
-                        while (col.firstChild) {
-                            grid.appendChild(col.firstChild);
-                        }
-                        col.remove();
-                    });
-                    
-                    grid.style.display = 'grid';
-                    grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+                    grid.style.display = 'flex';
+                    grid.style.flexDirection = 'row';
+                    grid.style.flexWrap = 'nowrap';
                     grid.style.width = '100%';
-                    grid.style.height = '100%';
+                    grid.style.alignItems = 'stretch';
                 }
             }
 
@@ -700,6 +711,9 @@
             document.getElementById('printWeekBtn').onclick = function() {
                 appState.view = 'week';
                 renderWeekView();
+                var size = document.getElementById('paperSize').value;
+                document.body.className = document.body.className.replace(/print-size-\w+/g, '');
+                document.body.classList.add('print-size-' + size);
                 document.body.classList.add('print-weekly-landscape');
                 setTimeout(function() { 
                     window.print(); 
@@ -710,6 +724,9 @@
             document.getElementById('printMonthBtn').onclick = function() {
                 appState.view = 'month';
                 renderMonthView();
+                var size = document.getElementById('paperSize').value;
+                document.body.className = document.body.className.replace(/print-size-\w+/g, '');
+                document.body.classList.add('print-size-' + size);
                 document.body.classList.add('print-monthly-landscape');
                 setTimeout(function() { 
                     window.print(); 
