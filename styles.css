@@ -177,17 +177,21 @@ body {
 
 .day-card-content {
     flex: 1;
-    padding: 4px;
+    padding: 6px;
     overflow-y: auto;
-    max-height: calc(7 * 1.6em);
+    -webkit-overflow-scrolling: touch;
+    /* Altura calculada para mostrar exatamente 7 linhas (1.4em da linha + 4px de margem) */
+    max-height: calc(7 * (1.4em + 4px) + 12px); 
+    background: #fff;
 }
 
 .day-line-wrapper {
     display: flex;
-    font-size: 10px;
+    font-size: 14px; /* Fonte aumentada para melhor visibilidade */
     line-height: 1.4;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     border-bottom: 1px solid #f0f0f0;
+    align-items: flex-start;
 }
 
 .line-number-preview {
@@ -200,9 +204,9 @@ body {
 .day-line-preview {
     flex: 1;
     word-break: break-word;
-    min-height: 1.2em;
-    font-size: 12px; /* Aumentado para melhor visibilidade na tela */
-    font-weight: 500;
+    min-height: 1.4em;
+    font-size: 14px; /* Fonte aumentada para melhor visibilidade na tela */
+    font-weight: 600; /* Um pouco mais de peso para destacar */
 }
 
 /* ========== VISÃO MENSAL ========== */
