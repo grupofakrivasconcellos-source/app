@@ -387,25 +387,24 @@
             var dayData = appState.days[dateStr];
             var html = '<div class="month-day-num-container"><div class="month-day-num">' + date.getDate() + '</div></div>';
             
-            html += '<div class="month-cell-content">';
             if (dayData && dayData.lines) {
-                var contentLines = [];
-                dayData.lines.forEach(function(l, idx) {
-                    if (l && (l.text || l.html)) {
-                        contentLines.push({ index: idx + 1, data: l });
-                    }
-                });
-
-                // Lógica para tela (comportamento original)
-                html += '<div class="no-print">';
-                contentLines.forEach(function(item) {
-                    var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
-                    html += '<div class="month-line-rich"><span class="line-num">' + item.index + '.</span> ' + cleanHtml + '</div>';
-                });
-                html += '</div>';
-
-                // Lógica para Impressão/PDF (3 Colunas)
-                html += '<div class="print-only month-print-columns" style="display: flex; gap: 2px; width: 100%;">';
+	                var contentLines = [];
+	                dayData.lines.forEach(function(l, idx) {
+	                    if (l && (l.text || l.html)) {
+	                        contentLines.push({ index: idx + 1, data: l });
+	                    }
+	                });
+	
+	                // Lógica para tela (comportamento original)
+	                html += '<div class="month-cell-content no-print">';
+	                contentLines.forEach(function(item) {
+	                    var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
+	                    html += '<div class="month-line-rich"><span class="line-num">' + item.index + '.</span> ' + cleanHtml + '</div>';
+	                });
+	                html += '</div>';
+	
+	                // Lógica para Impressão/PDF (3 Colunas)
+	                html += '<div class="month-cell-content print-only month-print-columns" style="display: flex; gap: 2px; width: 100%;">';
                 var pCol1 = '<div style="flex: 1; min-width: 0;">';
                 var pCol2 = '<div style="flex: 1; min-width: 0;">';
                 var pCol3 = '<div style="flex: 1; min-width: 0;">';

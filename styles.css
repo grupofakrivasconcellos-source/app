@@ -243,29 +243,30 @@ body {
 }
 
 .month-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    border-top: 1px solid #000;
-    border-left: 1px solid #000;
-    border-right: 1px solid #000;
-    border-bottom: 1px solid #000;
-    flex: 1;
-    width: 100%;
-    height: 100%;
-}
+	    display: grid;
+	    grid-template-columns: repeat(7, 1fr);
+	    border-top: 1px solid #000;
+	    border-left: 1px solid #000;
+	    flex: 1;
+	    width: 100%;
+	    height: 100%;
+	    box-sizing: border-box;
+	}
 
 .month-day-header {
-    padding: 5px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 900;
-    border-right: 1px solid #000;
-    border-bottom: 1px solid #000;
-    background: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+	    padding: 2px;
+	    text-align: center;
+	    font-size: 10px; /* Reduzido para caber em retrato */
+	    font-weight: 900;
+	    border-right: 1px solid #000;
+	    border-bottom: 1px solid #000;
+	    background: #f8f9fa;
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    overflow: hidden;
+	    white-space: nowrap;
+	}
 
 .month-day-header.special-day {
     color: #c41e3a;
@@ -752,7 +753,10 @@ body {
 	    .line-number {
 	        font-size: 12px !important;
 	        width: 30px !important;
-	        color: #bbb !important;
+	        color: #000 !important; /* Cor preta para garantir visibilidade na impressão */
+	        font-weight: bold !important;
+	        display: block !important;
+	        visibility: visible !important;
 	    }
 
 	    .notebook-line {
