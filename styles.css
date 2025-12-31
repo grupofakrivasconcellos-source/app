@@ -365,14 +365,17 @@ body {
 .pdf-export-mode .month-grid, .print-mode .month-grid {
     flex: 1 !important;
     display: grid !important;
-    height: calc(100% - 15mm) !important; /* Ajustado para dar espaço ao título sem sobrar no final */
-    border-bottom: 1px solid #000 !important; /* Borda inferior para fechar o grid */
-    border-right: 1px solid #000 !important; /* Borda direita para fechar o grid */
+    height: auto !important; /* Permitir que o grid cresça conforme o conteúdo */
+    min-height: calc(100% - 20mm) !important;
+    border-bottom: 1px solid #000 !important;
+    border-right: 1px solid #000 !important;
 }
 
 .pdf-export-mode .month-day-cell, .print-mode .month-day-cell {
     height: auto !important;
+    min-height: 150px !important; /* Garantir um tamanho mínimo */
     flex: 1 !important;
+    overflow: visible !important; /* Não cortar conteúdo */
 }
 
 .pdf-export-mode .month-day-header, .print-mode .month-day-header {
