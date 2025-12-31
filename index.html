@@ -584,13 +584,13 @@
                 // Ajuste para o layout de grid semanal no PDF (conforme imagem)
                 var grid = clone.querySelector('#weekGrid');
                 if (grid) {
-                    grid.style.display = 'grid';
-                    grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
-                    grid.style.gridAutoRows = 'auto';
-                    grid.style.gap = '0';
+                    grid.style.display = 'flex'; // Usar flex para melhor compatibilidade com Safari
+                    grid.style.flexDirection = 'row';
+                    grid.style.alignItems = 'stretch';
                     grid.style.width = '100%';
                     grid.style.borderTop = '1px solid #000';
                     grid.style.borderLeft = '1px solid #000';
+                    grid.style.borderBottom = '1px solid #000'; // Borda inferior do grid todo
                 }
 
                 var allCards = clone.querySelectorAll('.day-card-grid');
@@ -598,10 +598,11 @@
                     card.style.display = 'block';
                     card.style.width = '100%';
                     card.style.height = 'auto';
-                    card.style.minHeight = card.classList.contains('has-content') ? '40px' : '20px';
+                    card.style.minHeight = '100%';
                     card.style.borderRight = '1px solid #000';
-                    card.style.borderBottom = '1px solid #000';
+                    card.style.borderBottom = 'none'; // Removido borda inferior
                     card.style.padding = '2px';
+                    card.style.flex = '1'; // Garantir que as colunas se distribuam igualmente
                     
                     var content = card.querySelector('.day-card-content');
                     if (content) {
@@ -622,9 +623,9 @@
                                 if (line.classList.contains('has-content')) {
                                     line.style.setProperty('display', 'block', 'important');
                                     line.style.setProperty('height', 'auto', 'important');
-                                    line.style.setProperty('min-height', '12px', 'important');
+                                    line.style.setProperty('min-height', '0', 'important');
                                     line.style.setProperty('border-bottom', 'none', 'important');
-                                    line.style.setProperty('padding', '1px 0', 'important');
+                                    line.style.setProperty('padding', '2px 0', 'important');
                                     line.style.setProperty('visibility', 'visible', 'important');
                                     line.style.setProperty('overflow', 'visible', 'important');
                                     
