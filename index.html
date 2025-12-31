@@ -352,7 +352,7 @@
         function renderMonthView() {
             var monthCalendar = document.getElementById('monthCalendar');
             monthCalendar.innerHTML = '';
-            var monthTitle = appState.currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
+            var monthTitle = appState.currentDate.toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' });
             document.getElementById('headerTitle').textContent = monthTitle;
             document.getElementById('monthPrintTitle').textContent = monthTitle;
 
@@ -430,31 +430,9 @@
 	                });
 	                html += '</div>';
 	
-                // Lógica para Impressão/PDF (Grid Limpo com Anotações)
-                html += '<div class="month-cell-content print-only" style="display: block; width: 100%;">';
-                
-                var totalChars = contentLines.reduce(function(acc, curr) { 
-                    return acc + (curr.data.text || curr.data.html || "").length; 
-                }, 0);
-                
-                // Fonte dinâmica mensal otimizada para grid e escala de papel
-                var paperSize = document.getElementById('paperSize').value;
-                // Invertendo escala: se for papel gigante, diminuímos a fonte para caber mais conteúdo
-                var scale = (paperSize === 'A1' || paperSize === 'A0') ? 0.5 : 1;
-                
-                // Reduzir fonte se houver muito conteúdo para garantir que tudo apareça
-                var fontSize = 5 * scale;
-                if (totalChars > 500 || contentLines.length > 15) fontSize = 3.5 * scale;
-                else if (totalChars > 300 || contentLines.length > 10) fontSize = 4 * scale;
-                else if (totalChars < 100 && contentLines.length < 5) fontSize = 7 * scale;
-                else if (totalChars < 200 && contentLines.length < 10) fontSize = 6 * scale;
-                
-                contentLines.forEach(function(item) {
-                    var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
-                    html += '<div class="month-line-rich" style="font-size:' + fontSize + 'px; border-bottom: none; margin-bottom: 1px; word-break: break-word; line-height: 1.1; overflow: visible;">' +
-                                   '<span style="font-weight: bold; color: #000;">' + item.index + '.</span> ' + cleanHtml + '</div>';
-                });
-                html += '</div>';
+                // Lógica para Impressão/PDF (Grid Limpo SEM Anotações Semanais)
+                // Removido conforme solicitação do usuário: "anotações semanais que saem em cima na impressão mensal não saiam mais"
+                html += '<div class="month-cell-content print-only" style="display: none;"></div>';
             }
             html += '</div>';
             
