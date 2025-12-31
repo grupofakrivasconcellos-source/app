@@ -274,13 +274,13 @@ body {
 .month-day-cell {
     border-right: 1px solid #000;
     border-bottom: 1px solid #000;
-    padding: 4px;
+    padding: 6px;
     cursor: pointer;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-height: 120px; /* Aumentado levemente para caber mais conteúdo */
+    min-height: 120px;
     background-color: #fff;
 }
 
@@ -311,25 +311,27 @@ body {
     color: #c41e3a;
 }
 
-.month-cell-content {
-    flex: 1;
-    overflow-y: auto;
-    font-size: 7.5px; /* Fonte ainda menor para garantir que caiba tudo */
-    line-height: 1.1;
-    max-height: 85px; /* Limite para não estourar o quadro */
-}
-
-.month-line-rich {
-    margin-bottom: 1px;
-    border-bottom: 1px dotted #eee;
-    word-break: break-word;
-    white-space: normal; /* Garante que o texto quebre linha */
-}
-
 .month-line-rich {
     margin-bottom: 2px;
     border-bottom: 1px dotted #eee;
     word-break: break-word;
+    white-space: normal;
+    line-height: 1.4;
+}
+
+.month-day-content {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 9.5px;
+    line-height: 1.4;
+    padding: 2px 0;
+}
+
+.month-line-preview {
+    margin-bottom: 2px;
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.4;
 }
 
 /* Estilo para o PDF e Impressão */
