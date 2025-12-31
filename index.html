@@ -560,7 +560,7 @@
                         // Manter containers principais
                     } else {
                         // Remover o resto para garantir que nada do semanal apareça
-                        el.style.setProperty('display', 'none', 'important');
+                        el.remove(); // Remover fisicamente do DOM do clone para evitar resquícios
                     }
                 });
 

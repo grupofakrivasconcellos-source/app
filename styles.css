@@ -997,16 +997,28 @@ body {
     }
 
     body.print-monthly-landscape .month-grid {
-	        display: grid !important;
-	        grid-template-columns: repeat(7, 1fr) !important;
-	        grid-template-rows: 30px repeat(5, 1fr) !important;
-	        height: 100% !important;
-	        width: 100% !important;
-	        gap: 0 !important; /* Remover gap para maximizar espaço */
-	        background: #fff !important;
-	        border-top: 1px solid #000 !important;
-	        border-left: 1px solid #000 !important;
-	    }
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        grid-auto-rows: minmax(40px, auto) !important; /* Altura flexível para economizar espaço */
+        height: auto !important;
+        width: 100% !important;
+        gap: 0 !important;
+        background: #fff !important;
+        border-top: 1px solid #000 !important;
+        border-left: 1px solid #000 !important;
+    }
+
+    /* Dias sem conteúdo ficam menores */
+    body.print-monthly-landscape .month-day-cell:not(.has-content) {
+        min-height: 40px !important;
+        height: 40px !important;
+    }
+
+    /* Dias com conteúdo podem crescer */
+    body.print-monthly-landscape .month-day-cell.has-content {
+        min-height: 60px !important;
+        height: auto !important;
+    }
 
     body.print-monthly-landscape .month-day-header {
         font-size: 9px !important;
@@ -1043,8 +1055,14 @@ body {
     /* Garantir que elementos da visão semanal não apareçam na impressão mensal */
     body.print-monthly-landscape .week-grid,
     body.print-monthly-landscape .day-card-grid,
-    body.print-monthly-landscape .day-print-header {
+    body.print-monthly-landscape .day-print-header,
+    body.print-monthly-landscape .day-print-container,
+    body.print-monthly-landscape .week-column {
         display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        visibility: hidden !important;
     }
 }
 

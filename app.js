@@ -289,15 +289,18 @@ function createMonthDayCell(date) {
     
     var dateStr = getDateString(date);
     var dayData = appState.days[dateStr];
+    var hasContent = false;
     var html = '<div class="month-day-num">' + date.getDate() + '</div>';
     html += '<div class="month-day-content">';
     if (dayData && dayData.lines) {
         dayData.lines.forEach(function(line) {
             if (line && (line.text || line.html) && (line.text || "").trim() !== '') {
                 html += '<div class="month-line-preview">' + renderLineWithColors(line) + '</div>';
+                hasContent = true;
             }
         });
     }
+    if (hasContent) cell.classList.add('has-content');
     html += '</div>';
     cell.innerHTML = html;
     cell.addEventListener('click', function() {
