@@ -363,10 +363,17 @@ body {
     width: 100%;
     height: 100%;
     background: white;
-    z-index: 100;
-    display: flex;
+    z-index: 1000; /* Aumentado para garantir que fique por cima */
+    display: none; /* Inicialmente escondido */
     flex-direction: column;
-    overflow-y: auto; /* Permitir rolagem da tela inteira se necessário */
+}
+
+body.editing-day .day-edit-view {
+    display: flex !important;
+}
+
+body.editing-day {
+    overflow: hidden !important; /* Impedir rolagem do fundo ao editar */
 }
 
 .edit-header {
@@ -796,12 +803,14 @@ body {
         width: 100% !important;
     }
     
-    /* Garantir que ABSOLUTAMENTE NADA além do mês apareça */
+    /* Garantir que ABSOLUTAMENTE NADA além do mês apareça na IMPRESSÃO MENSAL */
     body.print-monthly-landscape .week-view-container,
     body.print-monthly-landscape .week-column,
     body.print-monthly-landscape .day-card-grid,
     body.print-monthly-landscape .day-edit-view,
-    body.print-monthly-landscape #dayEditView {
+    body.print-monthly-landscape #dayEditView,
+    body.print-monthly-landscape .edit-header,
+    body.print-monthly-landscape .edit-toolbar {
         display: none !important;
     }
     
