@@ -1029,15 +1029,23 @@ body {
     }
 
      body.print-monthly-landscape .month-cell-content {
-        font-size: 4.5px !important; /* Reduzido para garantir que caiba */
-        line-height: 1.1 !important;
+        font-size: 6px !important;
+        line-height: 1.2 !important;
         max-height: none !important;
         overflow: visible !important;
         display: block !important;
         width: 100% !important;
         word-wrap: break-word !important;
         overflow-wrap: break-word !important;
-    }}
+    }
+    
+    /* Garantir que elementos da visão semanal não apareçam na impressão mensal */
+    body.print-monthly-landscape .week-grid,
+    body.print-monthly-landscape .day-card-grid,
+    body.print-monthly-landscape .day-print-header {
+        display: none !important;
+    }
+}
 
     .month-print-columns {
         display: flex !important;
