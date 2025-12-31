@@ -92,7 +92,7 @@ function initializeEventListeners() {
     });
 
     document.getElementById('printWeekBtn').addEventListener('click', function() {
-        window.print();
+        printWeeklyView();
     });
 
     document.getElementById('printDay').addEventListener('click', function() {
@@ -445,8 +445,24 @@ function renderLineWithColors(lineData) {
     return '';
 }
 
+function printWeeklyView() {
+    if (appState.view !== 'week') {
+        appState.view = 'week';
+        renderWeekView();
+    }
+    
+    // Adicionar classe para impressão semanal paisagem
+    document.body.classList.add('print-weekly-landscape');
+    
+    // Pequeno delay para garantir a renderização e o estilo
+    setTimeout(function() {
+        window.print();
+        // Remover a classe após a impressão (ou cancelamento)
+        document.body.classList.remove('print-weekly-landscape');
+    }, 500);
+}
+
 function printMonthlyView() {
-    // Garantir que estamos na visão mensal
     if (appState.view !== 'month') {
         appState.view = 'month';
         renderMonthView();

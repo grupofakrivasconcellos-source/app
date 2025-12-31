@@ -35,7 +35,7 @@
             </div>
 
             <div id="monthView" class="month-view" style="display: none;">
-                <div id="monthPrintHeader" class="month-print-header" style="display: none;">
+                <div id="monthPrintHeader" class="month-print-header print-only">
                     <h1 id="monthPrintTitle"></h1>
                 </div>
                 <div id="monthCalendar" class="month-calendar"></div>
@@ -188,19 +188,12 @@
                 
                 // Criar o card uma única vez
                 var card = createDayCard(date);
-                
-                // Adicionar ao container de tela (que será oculto na impressão)
-                var screenClone = card.cloneNode(true);
-                screenClone.classList.add('no-print');
-                screenClone.onclick = (function(d) {
+                card.onclick = (function(d) {
                     return function() { openDayEdit(new Date(d)); };
                 })(date);
-                if (i < 4) leftCol.appendChild(screenClone); else rightCol.appendChild(screenClone);
                 
-                // Adicionar ao container de impressão (que será oculto na tela)
-                var printClone = card.cloneNode(true);
-                printClone.classList.add('print-only');
-                weekGrid.appendChild(printClone);
+                // Adicionar ao grid (será usado tanto para tela quanto impressão)
+                if (i < 4) leftCol.appendChild(card); else rightCol.appendChild(card);
             }
 
             weekGrid.appendChild(leftCol);
@@ -228,9 +221,9 @@
             var dayNameShort = getDayName(date.getDay()).split('-')[0].toUpperCase();
             header.innerHTML = '<span class="day-name-label">' + dayNameShort + ' ' + date.getDate() + '</span>';
             
-            // Cabeçalho para impressão (conforme modelo)
+            // Cabeçalho para impressão
             var printHeader = document.createElement('div');
-            printHeader.className = 'print-only day-print-header';
+            printHeader.className = 'day-print-header print-only';
             var day = String(date.getDate()).padStart(2, '0');
             var month = String(date.getMonth() + 1).padStart(2, '0');
             var year = date.getFullYear();
@@ -281,15 +274,17 @@
                     return acc + (curr.data.text || curr.data.html || "").length; 
                 }, 0);
 
-                // Fonte dinâmica: inicia em 5 e aumenta se houver pouco conteúdo
-                var fontSize = 5;
-                if (totalChars < 200 && contentLines.length < 10) fontSize = 8;
-                else if (totalChars < 400 && contentLines.length < 15) fontSize = 7;
-                else if (totalChars < 600 && contentLines.length < 20) fontSize = 6;
+                // Fonte dinâmica: ajusta baseado na quantidade de conteúdo
+                var fontSize = 7; // Tamanho padrão
+                if (totalChars > 1500 || contentLines.length > 25) fontSize = 4.5;
+                else if (totalChars > 1000 || contentLines.length > 20) fontSize = 5;
+                else if (totalChars > 700 || contentLines.length > 15) fontSize = 5.5;
+                else if (totalChars > 400 || contentLines.length > 10) fontSize = 6;
+                else if (totalChars < 200 && contentLines.length < 8) fontSize = 8;
                 
                 contentLines.forEach(function(item, idx) {
                     var pWrap = document.createElement('div');
-                    pWrap.className = 'day-line-wrapper has-content';
+                    pWrap.className = 'day-line-wrapper has-content print-only'; // Adicionado print-only explicitamente
                     pWrap.style.marginBottom = '1px';
                     pWrap.style.borderBottom = '0.5px dotted #ddd';
                     
@@ -414,15 +409,18 @@
                     return acc + (curr.data.text || curr.data.html || "").length; 
                 }, 0);
                 
-                // Fonte dinâmica mensal: inicia em 4.5 e aumenta se houver pouco conteúdo
-                var fontSize = 4.5;
-                if (totalChars < 150 && contentLines.length < 10) fontSize = 6.5;
-                else if (totalChars < 300 && contentLines.length < 15) fontSize = 5.5;
+                // Fonte dinâmica mensal: ajusta baseado na quantidade de conteúdo
+                var fontSize = 6; // Tamanho padrão aumentado
+                if (totalChars > 1200 || contentLines.length > 25) fontSize = 4;
+                else if (totalChars > 800 || contentLines.length > 20) fontSize = 4.5;
+                else if (totalChars > 500 || contentLines.length > 15) fontSize = 5;
+                else if (totalChars > 300 || contentLines.length > 10) fontSize = 5.5;
+                else if (totalChars < 150 && contentLines.length < 8) fontSize = 7;
                 
                 contentLines.forEach(function(item, idx) {
                     // Limpar apenas o tamanho da fonte do HTML original para aplicar o tamanho dinâmico, mantendo cores e outros estilos
                     var cleanHtml = (item.data.html || item.data.text).replace(/font-size:[^;"]+;?/g, '');
-                    var lineHtml = '<div class="month-line-rich" style="font-size:' + fontSize + 'px; border-bottom: 0.5px dotted #ddd; margin-bottom: 1px; word-break: break-all; overflow: visible; white-space: normal; line-height: 1.1;">' +
+                    var lineHtml = '<div class="month-line-rich print-only" style="font-size:' + fontSize + 'px; border-bottom: 0.5px dotted #ddd; margin-bottom: 1px; word-break: break-all; overflow: visible; white-space: normal; line-height: 1.1;">' +
                                    '<span style="color:#bbb; font-size: ' + (fontSize * 0.9) + 'px;">' + item.index + '.</span> ' + cleanHtml + '</div>';
                     
                     if (idx < 10) pCol1 += lineHtml;
@@ -520,7 +518,7 @@
 
                 contentLines.forEach(function(item, idx) {
                     var lineWrap = document.createElement('div');
-                    lineWrap.className = 'notebook-line-wrapper has-content';
+                    lineWrap.className = 'notebook-line-wrapper has-content print-only'; // Adicionado print-only explicitamente
                     lineWrap.innerHTML = '<div class="line-number">' + item.index + '.</div><div class="notebook-line">' + (item.data.html || item.data.text) + '</div>';
                     
                     var colIdx = idx % numCols;

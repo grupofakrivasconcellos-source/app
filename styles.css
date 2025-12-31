@@ -506,8 +506,14 @@ body {
 }
 
 /* ========== IMPRESSÃO ========== */
-.print-only {
-    display: none;
+/* Esconder elementos de impressão na tela */
+.print-only, 
+.day-print-header, 
+.day-print-columns, 
+.month-print-header, 
+.month-print-columns,
+.month-line-rich.print-only {
+    display: none !important;
 }
 
 @media print {
@@ -532,8 +538,17 @@ body {
         display: none !important;
     }
 
-    .print-only, .print-mode .print-only {
+    .print-only, 
+    .print-mode .print-only,
+    .day-print-header, 
+    .day-print-columns, 
+    .month-print-header, 
+    .month-print-columns {
         display: block !important;
+    }
+    
+    .day-print-columns, .month-print-columns {
+        display: flex !important;
     }
     
     .print-mode .no-print {
@@ -590,24 +605,26 @@ body {
     .week-grid .print-only {
 	        display: flex !important;
 	        flex-direction: column !important;
-	        flex: 1 1 0 !important;
+	        flex: 1 1 auto !important;
 	        min-width: 0 !important;
+	        max-width: none !important;
 	        border: 1px solid #000 !important;
-	        border-right: 1px solid #000 !important; /* Linha vertical à direita */
-	        border-left: 1px solid #000 !important;  /* Linha vertical à esquerda */
-	        margin-left: -1px !important; /* Sobrepor bordas para evitar linhas duplas */
+	        border-right: 1px solid #000 !important;
+	        border-left: 1px solid #000 !important;
+	        margin-left: -1px !important;
 	        background: #fff !important;
 	        overflow: visible !important;
+	        width: auto !important;
 	    }
 
     body.print-weekly-landscape .day-card-grid {
         background: white !important;
         border: 0.5px solid #000 !important;
-        padding: 2px !important;
+        padding: 5px !important;
         display: flex !important;
         flex-direction: column !important;
-        min-height: 0 !important;
-        height: 100% !important;
+        min-height: 190mm !important;
+        height: auto !important;
     }
 
     body.print-weekly-landscape .special-day .day-name-label,
@@ -669,9 +686,11 @@ body {
 
     .day-line-wrapper {
         display: flex !important;
-        padding: 2px 0 !important;
-        border-bottom: none !important; /* Remover linha de baixo */
+        padding: 1px 0 !important;
+        border-bottom: none !important;
         align-items: flex-start !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
     }
 
     .day-print-columns {
@@ -686,10 +705,13 @@ body {
         min-width: 0 !important;
         display: flex !important;
         flex-direction: column !important;
-        border-right: 1px solid #000 !important; /* Linha lateral mais visível */
-        border-left: 1px solid #000 !important;  /* Linha lateral esquerda */
-        padding: 0 4px !important;
-        margin-left: -1px !important; /* Sobrepor bordas para não duplicar espessura */
+        border-right: 1px solid #000 !important;
+        border-left: 1px solid #000 !important;
+        padding: 0 3px !important;
+        margin-left: -1px !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        overflow: visible !important;
     }
 
     .print-col:last-child {
@@ -707,13 +729,15 @@ body {
     .day-line-preview {
         font-size: 7pt !important;
         font-weight: bold !important;
-        line-height: 1.2 !important;
+        line-height: 1.3 !important;
         word-break: break-word !important;
-        color: inherit !important; /* Manter cores originais */
+        overflow-wrap: break-word !important;
+        color: inherit !important;
         overflow: visible !important;
         white-space: normal !important;
         display: block !important;
         min-height: 0 !important;
+        max-width: 100% !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
@@ -779,9 +803,26 @@ body {
     }
 
     body.print-monthly-landscape .month-view {
-        padding: 0 !important;
+        padding: 10mm !important;
         width: 297mm !important;
         height: 210mm !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    body.print-monthly-landscape .month-print-header {
+        display: block !important;
+        text-align: center !important;
+        margin-bottom: 10px !important;
+        border-bottom: 2px solid #000 !important;
+        padding-bottom: 5px !important;
+    }
+
+    body.print-monthly-landscape .month-print-header h1 {
+        font-size: 24px !important;
+        margin: 0 !important;
+        color: #000 !important;
+        text-transform: uppercase !important;
     }
     
     body.print-monthly-landscape .header,
@@ -790,16 +831,16 @@ body {
     }
 
     body.print-monthly-landscape .month-grid {
-	        display: grid !important;
-	        grid-template-columns: repeat(7, 1fr) !important;
-	        grid-template-rows: 30px repeat(5, 1fr) !important;
-	        height: 100% !important;
-	        width: 100% !important;
-	        gap: 0 !important; /* Remover gap para maximizar espaço */
-	        background: #fff !important;
-	        border-top: 1px solid #000 !important;
-	        border-left: 1px solid #000 !important;
-	    }
+		        display: grid !important;
+		        grid-template-columns: repeat(7, 1fr) !important;
+		        grid-template-rows: 30px repeat(5, 1fr) !important;
+		        flex: 1 !important;
+		        width: 100% !important;
+		        gap: 0 !important;
+		        background: #fff !important;
+		        border-top: 1px solid #000 !important;
+		        border-left: 1px solid #000 !important;
+		    }
 
     body.print-monthly-landscape .month-day-header {
         font-size: 11px !important;
@@ -810,8 +851,9 @@ body {
 	        padding: 4px !important;
 	        border-right: 1px solid #000 !important;
 	        border-bottom: 1px solid #000 !important;
-	        min-height: 0 !important;
-	        height: 100% !important;
+	        min-height: 50px !important;
+	        height: auto !important;
+	        overflow: visible !important;
 	    }
 
     body.print-monthly-landscape .month-day-num {
@@ -823,14 +865,15 @@ body {
     }
 
      body.print-monthly-landscape .month-cell-content {
-        font-size: 4.5px !important; /* Reduzido para garantir que caiba */
-        line-height: 1.1 !important;
+        font-size: 5px !important;
+        line-height: 1.2 !important;
         max-height: none !important;
         overflow: visible !important;
         display: block !important;
         width: 100% !important;
         word-wrap: break-word !important;
         overflow-wrap: break-word !important;
+        word-break: break-word !important;
     }}
 
     .month-print-columns {
@@ -843,11 +886,13 @@ body {
     body.print-monthly-landscape .month-line-rich {
 	        border-bottom: 0.5px dotted #eee !important;
 	        color: #000 !important;
-	        font-size: 6.5px !important; /* Aumentado para melhor visibilidade */
-	        line-height: 1.3 !important; /* Melhor espaçamento */
+	        font-size: 6px !important;
+	        line-height: 1.3 !important;
 	        word-break: break-word !important;
+	        overflow-wrap: break-word !important;
 	        overflow: visible !important;
 	        white-space: normal !important;
+	        max-width: 100% !important;
 	        display: block !important;
 	        width: 100% !important;
 	        margin-bottom: 2px !important;
