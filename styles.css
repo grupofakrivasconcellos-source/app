@@ -847,11 +847,11 @@ body {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        border: 1px solid #000 !important;
-        border-bottom: none !important;
-        padding: 6px 2px !important;
+        border-bottom: 1px solid #000 !important;
+        padding: 4px 2px !important;
         background: #fff !important;
-        gap: 4px !important;
+        gap: 2px !important;
+        margin-bottom: 4px !important;
     }
 
     .print-day-name-label {
@@ -923,11 +923,11 @@ body {
     }
 
     .day-line-preview-agenda {
-        font-size: 7px !important;
-        line-height: 1 !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
+        font-size: 8px !important;
+        line-height: 1.1 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
         width: 100% !important;
     }
 

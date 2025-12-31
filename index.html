@@ -252,7 +252,7 @@
             var contentLines = [];
             for (var i = 0; i < 30; i++) {
                 var line = dayData.lines[i] || { text: '' };
-                var hasContent = !!(line.text || line.html);
+                var hasContent = !!(line.text || line.html) && (line.text || "").trim() !== "";
                 if (hasContent) {
                     hasAnyContent = true;
                     contentLines.push({ index: i + 1, data: line });
@@ -289,6 +289,7 @@
             card.appendChild(header);
             card.appendChild(printHeader);
             card.appendChild(content);
+            if (hasAnyContent) card.classList.add('has-content');
             card.onclick = (function(d) {
                 return function() { openDayEdit(new Date(d)); };
             })(date);
@@ -580,30 +581,67 @@
                 var noPrint = clone.querySelectorAll('.no-print');
                 noPrint.forEach(function(el) { el.style.setProperty('display', 'none', 'important'); });
                 
-                // Ajuste para o layout de agenda no PDF
-                var allCards = clone.querySelectorAll('.day-card-grid');
-                allCards.forEach(function(card) {
-                    var content = card.querySelector('.day-card-content');
-                    if (content) {
-                        content.style.height = 'auto';
-                        var lines = content.querySelectorAll('.day-line-wrapper-agenda');
-                        lines.forEach(function(line) {
-                            line.style.setProperty('height', '18px', 'important');
-                            line.style.setProperty('display', 'flex', 'important');
-                            line.style.setProperty('visibility', 'visible', 'important');
-                        });
-                    }
-                });
-
-                // Garantir que o grid de 7 colunas seja aplicado no clone
+                // Ajuste para o layout de grid semanal no PDF (conforme imagem)
                 var grid = clone.querySelector('#weekGrid');
                 if (grid) {
                     grid.style.display = 'grid';
                     grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
-                    grid.style.gap = '2px';
+                    grid.style.gridAutoRows = 'auto';
+                    grid.style.gap = '0';
                     grid.style.width = '100%';
-                    grid.style.alignItems = 'stretch';
+                    grid.style.borderTop = '1px solid #000';
+                    grid.style.borderLeft = '1px solid #000';
                 }
+
+                var allCards = clone.querySelectorAll('.day-card-grid');
+                allCards.forEach(function(card) {
+                    card.style.display = 'block';
+                    card.style.width = '100%';
+                    card.style.height = 'auto';
+                    card.style.minHeight = card.classList.contains('has-content') ? '40px' : '20px';
+                    card.style.borderRight = '1px solid #000';
+                    card.style.borderBottom = '1px solid #000';
+                    card.style.padding = '2px';
+                    
+                    var content = card.querySelector('.day-card-content');
+                    if (content) {
+                        content.style.height = 'auto';
+                        // Ocultar o container de tela e mostrar o de impressão
+                        var screenLines = content.querySelectorAll('.day-line-wrapper.no-print');
+                        screenLines.forEach(function(l) { l.style.display = 'none'; });
+                        
+                        var printContainer = content.querySelector('.day-print-container-agenda');
+                        if (printContainer) {
+                            printContainer.style.display = 'block';
+                            printContainer.style.border = 'none';
+                            
+                            var lines = printContainer.querySelectorAll('.day-line-wrapper-agenda');
+                            lines.forEach(function(line) {
+                                // No semanal, mostramos apenas as linhas que têm conteúdo para economizar espaço
+                                // mas garantimos que TODAS as que têm conteúdo apareçam sem cortes
+                                if (line.classList.contains('has-content')) {
+                                    line.style.setProperty('display', 'block', 'important');
+                                    line.style.setProperty('height', 'auto', 'important');
+                                    line.style.setProperty('min-height', '12px', 'important');
+                                    line.style.setProperty('border-bottom', 'none', 'important');
+                                    line.style.setProperty('padding', '1px 0', 'important');
+                                    line.style.setProperty('visibility', 'visible', 'important');
+                                    line.style.setProperty('overflow', 'visible', 'important');
+                                    
+                                    var preview = line.querySelector('.day-line-preview-agenda');
+                                    if (preview) {
+                                        preview.style.setProperty('white-space', 'normal', 'important');
+                                        preview.style.setProperty('word-break', 'break-word', 'important');
+                                        preview.style.setProperty('height', 'auto', 'important');
+                                        preview.style.setProperty('overflow', 'visible', 'important');
+                                    }
+                                } else {
+                                    line.style.setProperty('display', 'none', 'important');
+                                }
+                            });
+                        }
+                    }
+                });
             } else {
                 // Ajustes específicos para o clone mensal no PDF
                 var grid = clone.querySelector('.month-grid');
