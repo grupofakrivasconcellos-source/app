@@ -367,22 +367,24 @@ body {
 
 /* ========== EDIÇÃO DIÁRIA ========== */
 .day-edit-view {
-    position: absolute; /* Mudar para absolute para permitir rolagem da página */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    min-height: 100vh;
+    height: 100%;
     background: white;
     z-index: 100;
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Permitir rolagem da tela inteira */
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
 }
 
 .edit-content {
     flex: 1;
-    padding-bottom: calc(40px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 15px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
 
 .edit-header {

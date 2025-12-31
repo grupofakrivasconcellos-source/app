@@ -532,12 +532,12 @@
         }
 
         function adjustFontSize(element, maxHeight) {
-            var fontSize = 18; // Aumentado para melhor visibilidade
-            if (element.classList.contains('day-line-preview')) fontSize = 12; // Aumentado para semanal
+            var fontSize = 16; // Tamanho original
+            if (element.classList.contains('day-line-preview')) fontSize = 10; // Tamanho original semanal
             
             element.style.fontSize = fontSize + 'px';
-            element.style.fontWeight = 'bold'; // Forçar negrito para visibilidade
-            while (element.scrollHeight > maxHeight && fontSize > 8) {
+            element.style.fontWeight = 'normal'; // Peso original
+            while (element.scrollHeight > maxHeight && fontSize > 6) {
                 fontSize -= 0.5;
                 element.style.fontSize = fontSize + 'px';
             }
