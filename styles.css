@@ -1141,51 +1141,7 @@ body {
     body.print-size-A1 .month-line-rich span, body.print-size-A0 .month-line-rich span { font-size: 16px !important; }
 }
 
-/* ========== EFEITO DE ESPIRAL (ESTILO CADERNO) ========== */
-.week-spiral-divider {
-    width: 20px; /* Largura aumentada para comportar o desenho da espiral */
-    background-image: linear-gradient(90deg, 
-        transparent 40%, 
-        #ddd 40%, #ddd 60%, 
-        transparent 60%
-    );
-    background-size: 100% 20px;
-    position: relative;
-    z-index: 5;
-    flex-shrink: 0;
-    margin: 0 -10px; 
-}
 
-.week-spiral-divider::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 12px;
-    transform: translateX(-50%);
-    /* Desenho dos anéis da espiral */
-    background-image: radial-gradient(ellipse at center, 
-        #888 20%, 
-        #bbb 30%, 
-        #eee 40%, 
-        transparent 50%
-    );
-    background-size: 100% 20px;
-    opacity: 0.8;
-}
-
-.week-spiral-divider::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 2px;
-    background: rgba(0,0,0,0.05);
-    transform: translateX(-50%);
-    box-shadow: 0 0 5px rgba(0,0,0,0.1);
-}
 
 /* Bordas arredondadas para os cards */
 .day-card-grid {
@@ -1208,5 +1164,46 @@ body {
     }
     .day-card-grid {
         border-radius: 10px;
+    }
+}
+
+/* ========== ESTILO FOLHA DE CADERNO PARA IMPRESSÃO DIÁRIA ========== */
+@media print {
+    .notebook-print-view {
+        display: block !important;
+        width: 100%;
+        margin-top: 20px;
+        border-left: 2px solid #ff9999; /* Margem vermelha de caderno */
+        padding-left: 15px;
+    }
+
+    .notebook-print-line {
+        display: flex !important;
+        align-items: flex-start;
+        border-bottom: 1px solid #e0e0e0 !important; /* Linhas azuis/cinzas de caderno */
+        padding: 8px 0;
+        page-break-inside: avoid;
+    }
+
+    .print-line-num {
+        width: 30px;
+        font-size: 12px;
+        color: #888;
+        flex-shrink: 0;
+        font-family: sans-serif;
+    }
+
+    .print-line-content {
+        flex: 1;
+        font-size: 16px;
+        line-height: 1.5;
+        color: #000;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    /* Ocultar elementos desnecessários na impressão diária */
+    body.editing-day .day-print-columns {
+        display: none !important;
     }
 }
