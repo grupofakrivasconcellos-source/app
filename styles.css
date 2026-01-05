@@ -288,12 +288,28 @@ body {
     border-bottom: 1px solid #000;
     padding: 6px;
     cursor: pointer;
-    overflow: hidden;
+    overflow: hidden; /* O container principal esconde o que sai */
     display: flex;
     flex-direction: column;
     height: 100%;
     min-height: 120px;
     background-color: #fff;
+}
+
+.month-cell-content {
+    flex: 1;
+    overflow-y: auto; /* Habilitar scroll vertical interno */
+    -webkit-overflow-scrolling: touch;
+    padding-right: 2px;
+}
+
+/* Estilizar a barra de rolagem para ser discreta */
+.month-cell-content::-webkit-scrollbar {
+    width: 3px;
+}
+.month-cell-content::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 3px;
 }
 
 .month-day-cell.other-month {
