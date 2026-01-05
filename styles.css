@@ -1098,3 +1098,50 @@ body {
     body.print-size-A1 .month-line-rich, body.print-size-A0 .month-line-rich { font-size: 18px !important; margin-bottom: 5px !important; }
     body.print-size-A1 .month-line-rich span, body.print-size-A0 .month-line-rich span { font-size: 16px !important; }
 }
+
+/* ========== EFEITO DE ESPIRAL (ESTILO CADERNO) ========== */
+.week-spiral-divider {
+    width: 1.6mm; /* Aproximadamente 1/16 de polegada */
+    background-image: radial-gradient(circle, #888 1px, transparent 1px);
+    background-size: 100% 12px;
+    background-position: center;
+    position: relative;
+    z-index: 5;
+    flex-shrink: 0;
+    margin: 0 -4px; /* Sobrepor levemente as colunas */
+}
+
+.week-spiral-divider::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: rgba(0,0,0,0.1);
+    transform: translateX(-50%);
+}
+
+/* Bordas arredondadas para os cards */
+.day-card-grid {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+.day-card-header {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+/* Ajuste para mobile para não ficar muito apertado com a espiral */
+@media screen and (max-width: 768px) {
+    .week-spiral-divider {
+        width: 1.2mm;
+        margin: 0 -2px;
+    }
+    .day-card-grid {
+        border-radius: 10px;
+    }
+}

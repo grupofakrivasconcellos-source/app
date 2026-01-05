@@ -207,6 +207,12 @@
             }
 
             weekGrid.appendChild(leftCol);
+            
+            // Adicionar espiral entre as colunas
+            var spiral = document.createElement('div');
+            spiral.className = 'week-spiral-divider no-print';
+            weekGrid.appendChild(spiral);
+            
             weekGrid.appendChild(rightCol);
             
             document.getElementById('weekView').style.display = 'flex';
