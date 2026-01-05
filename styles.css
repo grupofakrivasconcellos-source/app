@@ -513,8 +513,10 @@ body {
     
     .day-card-content {
         padding: 10px;
-        max-height: calc(7 * (1.4em + 8px) + 20px); /* 7 linhas + padding */
+        height: calc(7 * (1.4em + 8px) + 12px); /* Altura fixa para 7 linhas */
+        max-height: calc(7 * (1.4em + 8px) + 12px);
         overflow-y: auto;
+        display: block;
         -webkit-overflow-scrolling: touch;
     }
     
@@ -600,8 +602,10 @@ body {
     
     .day-card-content {
         padding: 8px;
-        max-height: calc(7 * (1.4em + 6px) + 16px); /* 7 linhas + padding */
+        height: calc(7 * (1.4em + 6px) + 10px); /* Altura fixa para 7 linhas */
+        max-height: calc(7 * (1.4em + 6px) + 10px);
         overflow-y: auto;
+        display: block;
         -webkit-overflow-scrolling: touch;
     }
     
