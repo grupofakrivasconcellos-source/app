@@ -481,6 +481,12 @@ body {
 @media screen and (max-width: 768px) {
     /* LAYOUT SEMANAL: MANTER 2 COLUNAS EM DISPOSITIVOS MÓVEIS */
     .week-grid {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-orient: horizontal;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: row;
         flex-direction: row;
         gap: 8px;
         padding: 8px;
@@ -488,6 +494,8 @@ body {
     }
     
     .week-column {
+        -webkit-box-flex: 1;
+        -ms-flex: 1;
         flex: 1;
         width: 50%;
         gap: 8px;
@@ -570,6 +578,12 @@ body {
     
     /* LAYOUT SEMANAL: MANTER 2 COLUNAS EM IPHONE */
     .week-grid {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-orient: horizontal;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: row;
         flex-direction: row;
         gap: 6px;
         padding: 8px;
@@ -577,6 +591,8 @@ body {
     }
     
     .week-column {
+        -webkit-box-flex: 1;
+        -ms-flex: 1;
         flex: 1;
         width: 50%;
         gap: 6px;
@@ -1102,11 +1118,13 @@ body {
 /* ========== EFEITO DE ESPIRAL (ESTILO CADERNO) ========== */
 .week-spiral-divider {
     width: 1.6mm; /* Aproximadamente 1/16 de polegada */
+    background-image: -webkit-radial-gradient(circle, #888 1px, transparent 1px);
     background-image: radial-gradient(circle, #888 1px, transparent 1px);
     background-size: 100% 12px;
     background-position: center;
     position: relative;
     z-index: 5;
+    -ms-flex-negative: 0;
     flex-shrink: 0;
     margin: 0 -4px; /* Sobrepor levemente as colunas */
 }
