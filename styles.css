@@ -479,21 +479,24 @@ body {
 
 /* ========== OTIMIZAÇÕES PARA TABLET E MOBILE ========== */
 @media screen and (max-width: 768px) {
-    /* LAYOUT SEMANAL: MUDAR PARA 1 COLUNA EM TELAS MENORES */
+    /* LAYOUT SEMANAL: MANTER 2 COLUNAS EM DISPOSITIVOS MÓVEIS */
     .week-grid {
-        flex-direction: column;
-        gap: 10px;
-        padding: 10px;
+        flex-direction: row;
+        gap: 8px;
+        padding: 8px;
+        height: auto;
     }
     
     .week-column {
-        width: 100%;
-        gap: 10px;
+        flex: 1;
+        width: 50%;
+        gap: 8px;
     }
     
     .day-card-grid {
-        min-height: 220px;
+        min-height: 180px;
         max-width: 100%;
+        height: auto;
     }
     
     .day-card-header {
@@ -560,21 +563,24 @@ body {
         min-height: 40px;
     }
     
-    /* LAYOUT SEMANAL: MUDAR PARA 1 COLUNA */
+    /* LAYOUT SEMANAL: MANTER 2 COLUNAS EM IPHONE */
     .week-grid {
-        flex-direction: column;
-        gap: 8px;
-        padding: 10px;
+        flex-direction: row;
+        gap: 6px;
+        padding: 8px;
+        height: auto;
     }
     
     .week-column {
-        width: 100%;
-        gap: 8px;
+        flex: 1;
+        width: 50%;
+        gap: 6px;
     }
     
     .day-card-grid {
-        min-height: 200px;
+        min-height: 160px;
         max-width: 100%;
+        height: auto;
     }
     
     .day-card-header {
