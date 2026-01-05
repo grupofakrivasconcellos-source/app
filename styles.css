@@ -133,9 +133,9 @@ body {
 .week-grid {
     flex: 1;
     display: flex;
-    gap: 12px;
+    gap: 24px; /* Dobrado de 12px para 24px */
     width: 100%;
-    padding: 0 6px;
+    padding: 0 12px;
 }
 
 .week-column {
@@ -488,7 +488,7 @@ body {
         -webkit-box-direction: normal;
         -ms-flex-direction: row;
         flex-direction: row;
-        gap: 8px;
+        gap: 16px; /* Dobrado para mobile também */
         padding: 8px;
         height: auto;
     }
@@ -585,7 +585,7 @@ body {
         -webkit-box-direction: normal;
         -ms-flex-direction: row;
         flex-direction: row;
-        gap: 6px;
+        gap: 12px; /* Dobrado para iPhone também */
         padding: 8px;
         height: auto;
     }
@@ -1127,16 +1127,17 @@ body {
 
 /* ========== EFEITO DE ESPIRAL (ESTILO CADERNO) ========== */
 .week-spiral-divider {
-    width: 1.6mm; /* Aproximadamente 1/16 de polegada */
-    background-image: -webkit-radial-gradient(circle, #888 1px, transparent 1px);
-    background-image: radial-gradient(circle, #888 1px, transparent 1px);
-    background-size: 100% 12px;
-    background-position: center;
+    width: 20px; /* Largura aumentada para comportar o desenho da espiral */
+    background-image: linear-gradient(90deg, 
+        transparent 40%, 
+        #ddd 40%, #ddd 60%, 
+        transparent 60%
+    );
+    background-size: 100% 20px;
     position: relative;
     z-index: 5;
-    -ms-flex-negative: 0;
     flex-shrink: 0;
-    margin: 0 -4px; /* Sobrepor levemente as colunas */
+    margin: 0 -10px; 
 }
 
 .week-spiral-divider::before {
@@ -1145,9 +1146,29 @@ body {
     top: 0;
     bottom: 0;
     left: 50%;
-    width: 1px;
-    background: rgba(0,0,0,0.1);
+    width: 12px;
     transform: translateX(-50%);
+    /* Desenho dos anéis da espiral */
+    background-image: radial-gradient(ellipse at center, 
+        #888 20%, 
+        #bbb 30%, 
+        #eee 40%, 
+        transparent 50%
+    );
+    background-size: 100% 20px;
+    opacity: 0.8;
+}
+
+.week-spiral-divider::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    background: rgba(0,0,0,0.05);
+    transform: translateX(-50%);
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
 
 /* Bordas arredondadas para os cards */
