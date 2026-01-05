@@ -759,6 +759,14 @@ body {
     * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+        -webkit-filter: none !important;
+        filter: none !important;
+    }
+    
+    html, body {
+        width: 100%;
+        height: auto !important;
+        overflow: visible !important;
         box-sizing: border-box !important;
     }
 
@@ -831,12 +839,13 @@ body {
 
     body.print-weekly-landscape .day-card-grid {
         background: white !important;
-        border: 0.5px solid #000 !important;
-        padding: 2px !important;
+        border: 1px solid #000 !important;
+        padding: 4px !important;
         display: flex !important;
         flex-direction: column !important;
-        min-height: 0 !important;
-        height: 100% !important;
+        min-height: 150px !important;
+        height: auto !important; /* Altura dinâmica para comportar conteúdo */
+        page-break-inside: avoid !important;
     }
 
     body.print-weekly-landscape .special-day .day-name-label,
@@ -1070,8 +1079,8 @@ body {
 	        padding: 4px !important;
 	        border-right: 1px solid #000 !important;
 	        border-bottom: 1px solid #000 !important;
-	        min-height: 0 !important;
-	        height: 100% !important;
+	        min-height: 100px !important; /* Aumentado para garantir visibilidade */
+	        height: auto !important; /* Dinâmico para o PDF */
 	    }
 
     body.print-monthly-landscape .month-day-num {

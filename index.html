@@ -616,23 +616,28 @@
                             
                             var lines = printContainer.querySelectorAll('.day-line-wrapper-agenda');
                             lines.forEach(function(line) {
-                                // No semanal, mostramos apenas as linhas que têm conteúdo para economizar espaço
-                                // mas garantimos que TODAS as que têm conteúdo apareçam sem cortes
+                                // Estilo Folha de Caderno para Semanal (Apenas Conteúdo)
                                 if (line.classList.contains('has-content')) {
-                                    line.style.setProperty('display', 'block', 'important');
+                                    line.style.setProperty('display', 'flex', 'important');
                                     line.style.setProperty('height', 'auto', 'important');
-                                    line.style.setProperty('min-height', '0', 'important');
-                                    line.style.setProperty('border-bottom', 'none', 'important');
-                                    line.style.setProperty('padding', '2px 0', 'important');
-                                    line.style.setProperty('visibility', 'visible', 'important');
-                                    line.style.setProperty('overflow', 'visible', 'important');
+                                    line.style.setProperty('border-bottom', '1px solid #e0e0e0', 'important');
+                                    line.style.setProperty('padding', '6px 0', 'important');
+                                    line.style.setProperty('align-items', 'flex-start', 'important');
                                     
+                                    var num = line.querySelector('.line-number-preview-agenda');
+                                    if (num) {
+                                        num.style.setProperty('width', '25px', 'important');
+                                        num.style.setProperty('font-size', '10px', 'important');
+                                        num.style.setProperty('color', '#888', 'important');
+                                    }
+
                                     var preview = line.querySelector('.day-line-preview-agenda');
                                     if (preview) {
+                                        preview.style.setProperty('flex', '1', 'important');
                                         preview.style.setProperty('white-space', 'normal', 'important');
                                         preview.style.setProperty('word-break', 'break-word', 'important');
-                                        preview.style.setProperty('height', 'auto', 'important');
-                                        preview.style.setProperty('overflow', 'visible', 'important');
+                                        preview.style.setProperty('font-size', '12px', 'important');
+                                        preview.style.setProperty('line-height', '1.4', 'important');
                                     }
                                 } else {
                                     line.style.setProperty('display', 'none', 'important');
@@ -669,6 +674,13 @@
             var filename = (isWeek ? 'semana-' : 'calendario-') + 
                            appState.currentDate.getFullYear() + '-' + (appState.currentDate.getMonth()+1) + '.pdf';
 
+            // Calcular dimensões dinâmicas se for mensal para comportar tudo
+            var pdfFormat = 'a2';
+            if (!isWeek) {
+                // Para o mensal, usamos um formato customizado ou A1 se houver muito conteúdo
+                pdfFormat = 'a1'; 
+            }
+
             var opt = {
                 margin: 5,
                 filename: filename,
@@ -677,9 +689,10 @@
                     scale: 2, 
                     useCORS: true, 
                     logging: false,
-                    letterRendering: true
+                    letterRendering: true,
+                    windowWidth: isWeek ? 1600 : 2400 // Garantir largura suficiente para renderizar sem achatar
                 },
-                jsPDF: { unit: 'mm', format: 'a2', orientation: 'landscape' }
+                jsPDF: { unit: 'mm', format: pdfFormat, orientation: 'landscape', compress: true }
             };
             
             // Adicionar classe temporária ao body para estilos globais de impressão
