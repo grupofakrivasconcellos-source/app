@@ -854,12 +854,31 @@ body {
 	        color: #000 !important;
 	    }
 
-    /* Conteúdo das Linhas na Semana - Redução para caber TUDO */
+    /* Conteúdo das Linhas na Semana - Garantir visibilidade total */
     .day-card-content {
         display: block !important;
         overflow: visible !important;
-        max-height: none !important; /* Garantir que nada seja cortado no PDF */
+        max-height: none !important; 
         height: auto !important;
+        min-height: 100% !important;
+    }
+    
+    .week-grid {
+        height: auto !important;
+        min-height: 100% !important;
+        align-items: stretch !important;
+    }
+    
+    .week-column {
+        height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .day-card-grid {
+        height: auto !important;
+        min-height: 150px !important;
+        flex: 1 !important;
     }
 
     .day-line-wrapper {
