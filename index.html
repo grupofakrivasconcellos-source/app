@@ -471,17 +471,23 @@
                 notebook.appendChild(wrap);
             }
 
-            // Renderizar para impressão diária (colunas se > 10 linhas)
+            // Renderizar para impressão diária (apenas conteúdo anotado)
             if (contentLines.length > 0) {
+                // Se tiver muito conteúdo, usamos colunas para aproveitar o espaço
                 var numCols = 1;
                 if (contentLines.length > 20) numCols = 3;
                 else if (contentLines.length > 10) numCols = 2;
 
                 contentLines.forEach(function(item, idx) {
                     var lineWrap = document.createElement('div');
-                    lineWrap.className = 'notebook-line-wrapper has-content';
+                    lineWrap.className = 'notebook-line-wrapper has-content print-only';
                     var cleanHtml = (item.data.html || item.data.text);
                     lineWrap.innerHTML = '<div class="line-number">' + item.index + '.</div><div class="notebook-line">' + cleanHtml + '</div>';
+                    
+                    // Estilos inline para garantir que a impressão diária use o espaço sem cortes
+                    lineWrap.style.display = 'flex';
+                    lineWrap.style.marginBottom = '5px';
+                    lineWrap.style.pageBreakInside = 'avoid';
                     
                     var colIdx = idx % numCols;
                     if (colIdx === 0) col1.appendChild(lineWrap);

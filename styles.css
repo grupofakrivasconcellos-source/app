@@ -881,6 +881,14 @@ body {
         max-height: none !important; 
         height: auto !important;
         min-height: 100% !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+    
+    .day-line-preview-agenda {
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.4 !important;
     }
     
     .week-grid {
@@ -899,13 +907,15 @@ body {
         height: auto !important;
         min-height: 150px !important;
         flex: 1 !important;
+        page-break-inside: avoid !important;
     }
 
     .day-line-wrapper {
         display: flex !important;
-        padding: 2px 0 !important;
-        border-bottom: none !important; /* Remover linha de baixo */
+        padding: 4px 0 !important;
+        border-bottom: none !important; 
         align-items: flex-start !important;
+        page-break-inside: avoid !important;
     }
 
     .day-print-columns {
