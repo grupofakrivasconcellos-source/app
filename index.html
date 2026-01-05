@@ -650,45 +650,55 @@
                 // Ajustes específicos para o clone mensal no PDF
                 var monthView = clone.querySelector('#monthView');
                 if (monthView) {
-                    monthView.style.display = 'flex';
-                    monthView.style.flexDirection = 'column';
-                    monthView.style.width = '2400px'; // Largura fixa grande para o clone
-                    monthView.style.height = 'auto';
-                    monthView.style.background = 'white';
+                    monthView.style.setProperty('display', 'block', 'important');
+                    monthView.style.setProperty('width', '100%', 'important');
+                    monthView.style.setProperty('height', 'auto', 'important');
+                    monthView.style.setProperty('background', 'white', 'important');
                 }
 
                 var grid = clone.querySelector('.month-grid');
                 if (grid) {
-                    grid.style.display = 'grid';
-                    grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
-                    grid.style.gridAutoRows = 'minmax(150px, auto)';
-                    grid.style.width = '100%';
-                    grid.style.gap = '0';
-                    grid.style.borderTop = '2px solid black';
-                    grid.style.borderLeft = '2px solid black';
+                    grid.style.setProperty('display', 'grid', 'important');
+                    grid.style.setProperty('grid-template-columns', 'repeat(7, 1fr)', 'important');
+                    grid.style.setProperty('grid-auto-rows', 'minmax(100px, auto)', 'important');
+                    grid.style.setProperty('width', '100%', 'important');
+                    grid.style.setProperty('gap', '0', 'important');
+                    grid.style.setProperty('border-top', '2px solid black', 'important');
+                    grid.style.setProperty('border-left', '2px solid black', 'important');
                 }
                 
                 var cells = clone.querySelectorAll('.month-day-cell');
                 cells.forEach(function(cell) {
-                    cell.style.display = 'flex';
-                    cell.style.flexDirection = 'column';
-                    cell.style.height = 'auto';
-                    cell.style.minHeight = '150px';
-                    cell.style.borderRight = '2px solid black';
-                    cell.style.borderBottom = '2px solid black';
-                    cell.style.padding = '10px';
-                    cell.style.overflow = 'visible';
+                    cell.style.setProperty('display', 'flex', 'important');
+                    cell.style.setProperty('flex-direction', 'column', 'important');
+                    cell.style.setProperty('height', 'auto', 'important');
+                    cell.style.setProperty('min-height', '100px', 'important');
+                    cell.style.setProperty('border-right', '2px solid black', 'important');
+                    cell.style.setProperty('border-bottom', '2px solid black', 'important');
+                    cell.style.setProperty('padding', '8px', 'important');
+                    cell.style.setProperty('overflow', 'visible', 'important');
+                    cell.style.setProperty('background', 'white', 'important');
                     
-                    // Garantir que o conteúdo de impressão esteja visível e o de tela oculto
-                    var screenContent = cell.querySelector('.month-cell-content.no-print');
-                    if (screenContent) screenContent.style.display = 'none';
-                    
+                    // Forçar visibilidade das anotações
                     var printContent = cell.querySelector('.month-cell-content.print-only');
                     if (printContent) {
-                        printContent.style.display = 'block';
-                        printContent.style.fontSize = '12px'; // Fonte legível no formato grande
-                        printContent.style.lineHeight = '1.4';
+                        printContent.style.setProperty('display', 'block', 'important');
+                        printContent.style.setProperty('visibility', 'visible', 'important');
+                        printContent.style.setProperty('opacity', '1', 'important');
+                        printContent.style.setProperty('font-size', '10px', 'important');
+                        printContent.style.setProperty('color', 'black', 'important');
+                        
+                        // Garantir que as linhas internas também apareçam
+                        var lines = printContent.querySelectorAll('.month-line-rich');
+                        lines.forEach(function(l) {
+                            l.style.setProperty('display', 'block', 'important');
+                            l.style.setProperty('visibility', 'visible', 'important');
+                            l.style.setProperty('margin-bottom', '2px', 'important');
+                        });
                     }
+                    
+                    var screenContent = cell.querySelector('.month-cell-content.no-print');
+                    if (screenContent) screenContent.style.setProperty('display', 'none', 'important');
                 });
             }
 
