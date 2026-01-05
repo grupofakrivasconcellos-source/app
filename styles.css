@@ -735,7 +735,7 @@ body {
 
 @media print {
     @page {
-        size: A4 portrait;
+        size: A4 landscape;
         margin: 0; /* Remover margens padrão para ganhar espaço total */
     }
 
