@@ -772,9 +772,8 @@
             document.getElementById('printWeekBtn').onclick = function() {
                 appState.view = 'week';
                 renderWeekView();
-                var size = 'A4';
-                document.body.className = document.body.className.replace(/print-size-\w+/g, '');
-                document.body.classList.add('print-size-' + size);
+                // Limpar classes de impressão anteriores
+                document.body.classList.remove('print-monthly-landscape', 'print-weekly-landscape');
                 document.body.classList.add('print-weekly-landscape');
                 setTimeout(function() { 
                     window.print(); 
@@ -785,9 +784,8 @@
             document.getElementById('printMonthBtn').onclick = function() {
                 appState.view = 'month';
                 renderMonthView();
-                var size = 'A4';
-                document.body.className = document.body.className.replace(/print-size-\w+/g, '');
-                document.body.classList.add('print-size-' + size);
+                // Limpar classes de impressão anteriores
+                document.body.classList.remove('print-monthly-landscape', 'print-weekly-landscape');
                 document.body.classList.add('print-monthly-landscape');
                 setTimeout(function() { 
                     window.print(); 
