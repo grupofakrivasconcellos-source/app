@@ -1059,7 +1059,7 @@ body {
     body.print-monthly-landscape .month-view {
         display: flex !important;
         flex-direction: column !important;
-        padding: 3mm !important;
+        padding: 2mm !important;
         width: 297mm !important;
         height: 210mm !important;
         position: fixed !important;
@@ -1068,6 +1068,7 @@ body {
         margin: 0 !important;
         background: white !important;
         z-index: 9999 !important;
+        overflow: hidden !important;
     }
     
     body.print-monthly-landscape .week-view-container,
@@ -1099,19 +1100,19 @@ body {
 	    display: block !important;
         text-align: center !important;
         margin-bottom: 1mm !important;
-        height: 8mm !important;
+        height: 6mm !important;
 	}
     body.print-monthly-landscape .month-print-header h1 {
-        font-size: 14pt !important;
+        font-size: 12pt !important;
         margin: 0 !important;
     }
 
     body.print-monthly-landscape .month-grid {
         display: grid !important;
         grid-template-columns: repeat(7, 1fr) !important;
-        grid-auto-rows: minmax(0, 1fr) !important;
+        grid-auto-rows: 1fr !important;
         flex: 1 !important;
-        height: calc(100% - 20mm) !important;
+        height: calc(100% - 12mm) !important;
         width: 100% !important;
         gap: 0 !important;
         background: #fff !important;
@@ -1120,9 +1121,9 @@ body {
     }
 
     body.print-monthly-landscape .month-day-header {
-        font-size: 9px !important;
-        height: 20px !important;
-        padding: 2px !important;
+        font-size: 8px !important;
+        height: 15px !important;
+        padding: 1px !important;
     }
 
     body.print-monthly-landscape .month-day-cell {
@@ -1135,50 +1136,53 @@ body {
 		    }
 
     body.print-monthly-landscape .month-day-num {
-        font-size: 9px !important;
-        width: 18px !important;
-        height: 18px !important;
-        line-height: 18px !important;
+        font-size: 8px !important;
+        width: 15px !important;
+        height: 15px !important;
+        line-height: 15px !important;
         margin-bottom: 1px !important;
     }
     
     body.print-monthly-landscape .month-cell-content {
-		        font-size: 8px !important; /* Aumentado para melhor visibilidade */
-		        line-height: 1.3 !important;
-		        max-height: none !important;
-		        overflow: visible !important;
-		        display: block !important;
-		        width: 100% !important;
-                word-wrap: break-word !important;
-                overflow-wrap: break-word !important;
-		    }
+        font-size: 6px !important;
+        line-height: 1.1 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        display: block !important;
+        width: 100% !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+
+    body.print-monthly-landscape .month-line-rich {
+        border-bottom: none !important;
+        color: #000 !important;
+        font-size: 5px !important;
+        line-height: 1.0 !important;
+        word-break: break-word !important;
+        overflow: visible !important;
+        white-space: normal !important;
+        display: block !important;
+        width: 100% !important;
+        margin-bottom: 0.2px !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+
+    body.print-monthly-landscape .month-line-rich span {
+        font-weight: bold !important;
+        color: #000 !important;
+    }
 }
 
-    .month-print-columns {
+.month-print-columns {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         width: 100% !important;
     }
 
-    body.print-monthly-landscape .month-line-rich {
-		        border-bottom: none !important;
-		        color: #000 !important;
-		        font-size: 6px !important;
-		        line-height: 1.1 !important;
-		        word-break: break-word !important;
-		        overflow: visible !important;
-		        white-space: normal !important;
-		        display: block !important;
-		        width: 100% !important;
-		        margin-bottom: 0.5px !important;
-		        word-wrap: break-word !important;
-		        overflow-wrap: break-word !important;
-		    }
-    body.print-monthly-landscape .month-line-rich span {
-        font-weight: bold !important;
-        color: #000 !important; /* Numeração em preto conforme solicitado */
-    }
+    /* Regras duplicadas removidas */
 
     /* FORMATOS GIGANTES (A1 e A0) */
     body.print-size-A1 @page { size: A1 landscape !important; margin: 0 !important; }
