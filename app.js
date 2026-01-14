@@ -455,6 +455,11 @@ function printMonthlyView() {
         renderMonthView();
     }
     
+    // Configurar o título de impressão (Mês e Ano)
+    var monthName = appState.currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
+    document.getElementById('monthPrintTitle').textContent = monthName;
+    document.getElementById('monthPrintHeader').style.display = 'block';
+    
     // Garantir que os elementos corretos estão visíveis/ocultos antes de imprimir
     document.getElementById('weekView').style.display = 'none';
     document.getElementById('monthView').style.display = 'flex';
@@ -467,8 +472,9 @@ function printMonthlyView() {
         window.print();
         // Remover a classe após a impressão (ou cancelamento)
         document.body.classList.remove('print-monthly-landscape');
+        document.getElementById('monthPrintHeader').style.display = 'none';
         
-        // Restaurar estado se necessário (opcional, já que o renderMonthView cuida disso)
+        // Restaurar estado se necessário
         if (appState.view === 'month') {
             document.getElementById('monthView').style.display = 'flex';
             document.getElementById('weekView').style.display = 'none';
