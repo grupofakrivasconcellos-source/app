@@ -321,20 +321,35 @@
             var firstDay = new Date(appState.currentDate.getFullYear(), appState.currentDate.getMonth(), 1);
             var startDayOfWeek = firstDay.getDay();
             var diff = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
-            var start = new Date(firstDay); 
-            start.setDate(firstDay.getDate() - diff);
-
-            // Calcular o número de semanas necessárias (5 ou 6)
             var lastDayOfMonth = new Date(appState.currentDate.getFullYear(), appState.currentDate.getMonth() + 1, 0);
-            var totalDaysNeeded = diff + lastDayOfMonth.getDate();
-            var totalCells = Math.ceil(totalDaysNeeded / 7) * 7;
-            var numRows = totalCells / 7;
+            var totalDaysInMonth = lastDayOfMonth.getDate();
+            
+            // Calcular número mínimo de linhas necessárias
+            var totalCells = diff + totalDaysInMonth;
+            var numRows = Math.ceil(totalCells / 7);
             grid.style.gridTemplateRows = '35px repeat(' + numRows + ', 1fr)';
 
-            for (var i = 0; i < totalCells; i++) {
-                var date = new Date(start); 
-                date.setDate(start.getDate() + i);
+            // Adicionar células vazias antes do primeiro dia
+            for (var i = 0; i < diff; i++) {
+                var emptyCell = document.createElement('div');
+                emptyCell.className = 'month-day-cell other-month';
+                emptyCell.innerHTML = '&nbsp;';
+                grid.appendChild(emptyCell);
+            }
+            
+            // Adicionar apenas os dias do mês atual
+            for (var day = 1; day <= totalDaysInMonth; day++) {
+                var date = new Date(appState.currentDate.getFullYear(), appState.currentDate.getMonth(), day);
                 grid.appendChild(createMonthCell(date));
+            }
+            
+            // Adicionar células vazias após o último dia para completar a última linha
+            var remainingCells = (numRows * 7) - totalCells;
+            for (var i = 0; i < remainingCells; i++) {
+                var emptyCell = document.createElement('div');
+                emptyCell.className = 'month-day-cell other-month';
+                emptyCell.innerHTML = '&nbsp;';
+                grid.appendChild(emptyCell);
             }
 
             monthCalendar.appendChild(grid);
