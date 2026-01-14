@@ -791,6 +791,15 @@ body {
         visibility: visible !important;
     }
 
+    /* Garantir que elementos ocultos não ocupem espaço */
+    .no-print, [style*="display: none"] {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
     body, html {
         background: white !important;
         width: 100% !important;
@@ -1051,7 +1060,12 @@ body {
         display: block !important;
         padding: 0 !important;
         width: 100% !important;
-        height: auto !important;
+        height: 100% !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        margin: 0 !important;
+        page-break-after: avoid !important;
     }
     
     body.print-monthly-landscape .week-view-container,
@@ -1065,19 +1079,20 @@ body {
     body.print-monthly-landscape .day-print-header-agenda,
     body.print-monthly-landscape .day-print-container-agenda,
     body.print-monthly-landscape .day-print-columns,
-    body.print-monthly-landscape .week-print-element {
+    body.print-monthly-landscape .week-print-element,
+    body.print-monthly-landscape .header,
+    body.print-monthly-landscape .view-controls {
         display: none !important;
         visibility: hidden !important;
         height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
         border: none !important;
+        position: absolute !important;
+        top: -9999px !important;
     }
     
-    body.print-monthly-landscape .header,
-    body.print-monthly-landscape .view-controls {
-        display: none !important;
-    }
+
 
     body.print-monthly-landscape .month-grid {
 		        display: grid !important;
