@@ -34,7 +34,7 @@
             </div>
 
             <div id="weekView" class="week-view-container no-print">
-                <div id="weekGrid" class="week-grid"></div>
+                <div id="weekGrid" class="week-grid no-print"></div>
             </div>
 
             <div id="monthView" class="month-view" style="display: none;">
@@ -203,6 +203,7 @@
                 // Adicionar ao container de impressão (que será oculto na tela)
                 var printClone = card.cloneNode(true);
                 printClone.classList.add('print-only');
+                printClone.classList.add('week-print-element'); // Classe específica para controle
                 weekGrid.appendChild(printClone);
             }
 

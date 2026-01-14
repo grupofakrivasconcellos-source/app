@@ -1058,8 +1058,20 @@ body {
     body.print-monthly-landscape .week-grid,
     body.print-monthly-landscape .week-column,
     body.print-monthly-landscape #weekView,
-    body.print-monthly-landscape #weekGrid {
+    body.print-monthly-landscape #weekGrid,
+    body.print-monthly-landscape .day-card-grid,
+    body.print-monthly-landscape .day-card-header,
+    body.print-monthly-landscape .day-print-header,
+    body.print-monthly-landscape .day-print-header-agenda,
+    body.print-monthly-landscape .day-print-container-agenda,
+    body.print-monthly-landscape .day-print-columns,
+    body.print-monthly-landscape .week-print-element {
         display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
     }
     
     body.print-monthly-landscape .header,
