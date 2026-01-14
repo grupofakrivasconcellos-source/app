@@ -1056,7 +1056,9 @@ body {
     
     body.print-monthly-landscape .week-view-container,
     body.print-monthly-landscape .week-grid,
-    body.print-monthly-landscape .week-column {
+    body.print-monthly-landscape .week-column,
+    body.print-monthly-landscape #weekView,
+    body.print-monthly-landscape #weekGrid {
         display: none !important;
     }
     

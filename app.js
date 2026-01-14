@@ -455,6 +455,10 @@ function printMonthlyView() {
         renderMonthView();
     }
     
+    // Garantir que os elementos corretos estão visíveis/ocultos antes de imprimir
+    document.getElementById('weekView').style.display = 'none';
+    document.getElementById('monthView').style.display = 'flex';
+    
     // Adicionar classe para impressão mensal paisagem
     document.body.classList.add('print-monthly-landscape');
     
@@ -463,5 +467,11 @@ function printMonthlyView() {
         window.print();
         // Remover a classe após a impressão (ou cancelamento)
         document.body.classList.remove('print-monthly-landscape');
+        
+        // Restaurar estado se necessário (opcional, já que o renderMonthView cuida disso)
+        if (appState.view === 'month') {
+            document.getElementById('monthView').style.display = 'flex';
+            document.getElementById('weekView').style.display = 'none';
+        }
     }, 500);
 }
